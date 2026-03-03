@@ -1,0 +1,9 @@
+{
+  "name": "mon-premier-projet",
+  "version": "1.0.0",
+  "description": "Un projet Node.js simple",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
