@@ -7,7 +7,8 @@ const router = Router();
 // All admin routes require admin
 router.use(requireAdmin);
 
-const VALID_PLANS = { free: 5, pro: 50, business: 200 };
+const VALID_PLANS = { free: 5, pro: 100, enterprise: 500 };
+const PLAN_PRICES = { free: 0, pro: 29, enterprise: 79 };
 
 // GET /api/admin/users — list all users
 router.get('/users', (req, res) => {
@@ -77,6 +78,50 @@ router.get('/searches', (req, res) => {
     ORDER BY s.created_at DESC LIMIT 100
   `).all();
   res.json(searches);
+});
+
+// GET /api/admin/stats/revenue — MRR
+router.get('/stats/revenue', (req, res) => {
+  const planCounts = db.prepare('SELECT plan, COUNT(*) as c FROM users GROUP BY plan').all();
+  let mrr = 0;
+  for (const p of planCounts) {
+    mrr += (PLAN_PRICES[p.plan] || 0) * p.c;
+  }
+  res.json({ mrr, planCounts });
+});
+
+// GET /api/admin/stats/daily — registrations + searches per day (30 days)
+router.get('/stats/daily', (req, res) => {
+  const registrations = db.prepare(`
+    SELECT DATE(created_at) as day, COUNT(*) as count
+    FROM users WHERE created_at >= DATE('now', '-30 days')
+    GROUP BY DATE(created_at) ORDER BY day
+  `).all();
+
+  const searches = db.prepare(`
+    SELECT DATE(created_at) as day, COUNT(*) as count
+    FROM searches WHERE created_at >= DATE('now', '-30 days')
+    GROUP BY DATE(created_at) ORDER BY day
+  `).all();
+
+  res.json({ registrations, searches });
+});
+
+// GET /api/admin/stats/top-users — top 10 by searches and prospects
+router.get('/stats/top-users', (req, res) => {
+  const bySearches = db.prepare(`
+    SELECT u.id, u.email, u.plan, COUNT(s.id) as total
+    FROM users u LEFT JOIN searches s ON s.user_id = u.id
+    GROUP BY u.id ORDER BY total DESC LIMIT 10
+  `).all();
+
+  const byProspects = db.prepare(`
+    SELECT u.id, u.email, u.plan, COUNT(p.id) as total
+    FROM users u LEFT JOIN prospects p ON p.user_id = u.id
+    GROUP BY u.id ORDER BY total DESC LIMIT 10
+  `).all();
+
+  res.json({ bySearches, byProspects });
 });
 
 // GET /api/admin/stats

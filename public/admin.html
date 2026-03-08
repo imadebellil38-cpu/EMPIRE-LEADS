@@ -33,7 +33,7 @@
 
     main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
 
-    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 2rem; }
     .stat {
       background: var(--card); border: 1px solid var(--border); border-radius: 14px;
       padding: 1.25rem; position: relative; overflow: hidden;
@@ -43,11 +43,13 @@
     .stat:nth-child(2)::after { background: var(--emerald); }
     .stat:nth-child(3)::after { background: var(--purple); }
     .stat:nth-child(4)::after { background: var(--amber); }
+    .stat:nth-child(5)::after { background: var(--emerald); }
     .stat-n { font-size: 2rem; font-weight: 900; line-height: 1; margin-bottom: .3rem; }
     .stat:nth-child(1) .stat-n { color: var(--cyan); }
     .stat:nth-child(2) .stat-n { color: var(--emerald); }
     .stat:nth-child(3) .stat-n { color: var(--purple); }
     .stat:nth-child(4) .stat-n { color: var(--amber); }
+    .stat:nth-child(5) .stat-n { color: var(--emerald); }
     .stat-l { font-size: .75rem; color: var(--muted); font-weight: 600; text-transform: uppercase; }
 
     .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 2rem; }
@@ -62,7 +64,7 @@
     .plan-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: .7rem; font-weight: 700; text-transform: uppercase; }
     .plan-free { background: rgba(74,106,136,.12); color: var(--dim); }
     .plan-pro { background: var(--cyan-glow); color: var(--cyan); }
-    .plan-business { background: var(--purple2); color: var(--purple); }
+    .plan-enterprise { background: var(--purple2); color: var(--purple); }
 
     .btn-sm {
       padding: 5px 12px; border-radius: 7px; font-size: .75rem; font-weight: 700;
@@ -79,6 +81,31 @@
     .credits-input:focus { border-color: var(--cyan); }
 
     select.plan-select { background: var(--surface); border: 1px solid var(--border2); border-radius: 6px; padding: 4px 8px; color: var(--text); font-size: .8rem; outline: none; cursor: pointer; }
+
+    /* ── Charts ── */
+    .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+    .chart-box {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 1.25rem 1.5rem; overflow: hidden;
+    }
+    .chart-label { font-size: .8rem; font-weight: 700; color: var(--cyan); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 1rem; }
+    .bar-chart { display: flex; align-items: flex-end; gap: 3px; height: 120px; }
+    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
+    .bar {
+      width: 100%; border-radius: 3px 3px 0 0; min-height: 2px;
+      transition: height .4s ease;
+    }
+    .bar-cyan { background: var(--cyan); }
+    .bar-emerald { background: var(--emerald); }
+    .bar-date { font-size: .55rem; color: var(--muted); writing-mode: vertical-rl; transform: rotate(180deg); max-height: 40px; overflow: hidden; }
+
+    /* ── Top users ── */
+    .top-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+
+    @media (max-width: 800px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .charts-row, .top-row { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -91,13 +118,46 @@
   </header>
 
   <main>
+    <!-- KPIs -->
     <div class="stats" id="stats">
       <div class="stat"><div class="stat-n" id="s-users">-</div><div class="stat-l">Utilisateurs</div></div>
       <div class="stat"><div class="stat-n" id="s-searches">-</div><div class="stat-l">Recherches</div></div>
       <div class="stat"><div class="stat-n" id="s-prospects">-</div><div class="stat-l">Prospects</div></div>
       <div class="stat"><div class="stat-n" id="s-pro">-</div><div class="stat-l">Abonnés Pro+</div></div>
+      <div class="stat"><div class="stat-n" id="s-mrr" style="color:var(--emerald)">-</div><div class="stat-l">MRR (EUR)</div></div>
     </div>
 
+    <!-- Charts -->
+    <div class="charts-row">
+      <div class="chart-box">
+        <div class="chart-label">Inscriptions / jour (30j)</div>
+        <div class="bar-chart" id="chart-registrations"></div>
+      </div>
+      <div class="chart-box">
+        <div class="chart-label">Recherches / jour (30j)</div>
+        <div class="bar-chart" id="chart-searches"></div>
+      </div>
+    </div>
+
+    <!-- Top users -->
+    <div class="top-row">
+      <div class="card">
+        <div class="card-title">Top 10 — Par recherches</div>
+        <table>
+          <thead><tr><th>Email</th><th>Plan</th><th>Recherches</th></tr></thead>
+          <tbody id="top-searches"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title">Top 10 — Par prospects</div>
+        <table>
+          <thead><tr><th>Email</th><th>Plan</th><th>Prospects</th></tr></thead>
+          <tbody id="top-prospects"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Users table -->
     <div class="card">
       <div class="card-title">Utilisateurs</div>
       <table>
@@ -108,6 +168,7 @@
       </table>
     </div>
 
+    <!-- Recent searches -->
     <div class="card">
       <div class="card-title">Recherches recentes</div>
       <table>
@@ -127,10 +188,13 @@ const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer '
 
 async function loadAll() {
   try {
-    const [statsRes, usersRes, searchesRes] = await Promise.all([
+    const [statsRes, usersRes, searchesRes, revenueRes, dailyRes, topRes] = await Promise.all([
       fetch('/api/admin/stats', { headers }),
       fetch('/api/admin/users', { headers }),
       fetch('/api/admin/searches', { headers }),
+      fetch('/api/admin/stats/revenue', { headers }),
+      fetch('/api/admin/stats/daily', { headers }),
+      fetch('/api/admin/stats/top-users', { headers }),
     ]);
 
     if (statsRes.status === 403 || usersRes.status === 403) {
@@ -142,13 +206,25 @@ async function loadAll() {
     const stats = await statsRes.json();
     const users = await usersRes.json();
     const searches = await searchesRes.json();
+    const revenue = await revenueRes.json();
+    const daily = await dailyRes.json();
+    const top = await topRes.json();
 
-    // Stats
+    // KPIs
     document.getElementById('s-users').textContent = stats.totalUsers;
     document.getElementById('s-searches').textContent = stats.totalSearches;
     document.getElementById('s-prospects').textContent = stats.totalProspects;
     const proPlus = (stats.planCounts || []).filter(p => p.plan !== 'free').reduce((a, b) => a + b.c, 0);
     document.getElementById('s-pro').textContent = proPlus;
+    document.getElementById('s-mrr').textContent = revenue.mrr + ' €';
+
+    // Charts
+    renderChart('chart-registrations', daily.registrations, 'bar-cyan');
+    renderChart('chart-searches', daily.searches, 'bar-emerald');
+
+    // Top users
+    renderTopTable('top-searches', top.bySearches);
+    renderTopTable('top-prospects', top.byProspects);
 
     // Users table
     document.getElementById('users-body').innerHTML = users.map(u => `
@@ -159,7 +235,7 @@ async function loadAll() {
           <select class="plan-select" onchange="changePlan(${u.id}, this.value)">
             <option value="free" ${u.plan==='free'?'selected':''}>Free</option>
             <option value="pro" ${u.plan==='pro'?'selected':''}>Pro</option>
-            <option value="business" ${u.plan==='business'?'selected':''}>Business</option>
+            <option value="enterprise" ${u.plan==='enterprise'?'selected':''}>Enterprise</option>
           </select>
         </td>
         <td>
@@ -192,6 +268,38 @@ async function loadAll() {
     console.error(err);
     alert('Erreur lors du chargement.');
   }
+}
+
+function renderChart(containerId, data, barClass) {
+  const container = document.getElementById(containerId);
+  if (!data || data.length === 0) {
+    container.innerHTML = '<span style="color:var(--muted);font-size:.8rem">Pas de données</span>';
+    return;
+  }
+  const max = Math.max(...data.map(d => d.count), 1);
+  container.innerHTML = data.map(d => {
+    const pct = (d.count / max) * 100;
+    const day = d.day.slice(5); // MM-DD
+    return `<div class="bar-col">
+      <div class="bar ${barClass}" style="height:${Math.max(pct, 2)}%" title="${d.day}: ${d.count}"></div>
+      <span class="bar-date">${day}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderTopTable(containerId, data) {
+  const container = document.getElementById(containerId);
+  if (!data || data.length === 0) {
+    container.innerHTML = '<tr><td colspan="3" style="color:var(--muted);text-align:center">Aucune donnée</td></tr>';
+    return;
+  }
+  container.innerHTML = data.map(u => `
+    <tr>
+      <td style="font-weight:600">${u.email}</td>
+      <td><span class="plan-badge plan-${u.plan}">${u.plan}</span></td>
+      <td style="font-weight:700">${u.total}</td>
+    </tr>
+  `).join('');
 }
 
 async function setCredits(userId) {

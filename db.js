@@ -54,4 +54,27 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_searches_user ON searches(user_id);
 `);
 
+// ── Migrations ──
+const crypto = require('crypto');
+
+const migrations = [
+  `ALTER TABLE users ADD COLUMN referral_code TEXT`,
+  `ALTER TABLE users ADD COLUMN referred_by INTEGER`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS idx_users_referral_code ON users(referral_code)`,
+  `CREATE INDEX IF NOT EXISTS idx_users_referral ON users(referred_by)`,
+  `UPDATE users SET plan = 'enterprise' WHERE plan = 'business'`,
+];
+
+for (const sql of migrations) {
+  try { db.exec(sql); } catch (e) { /* column/index already exists */ }
+}
+
+// Backfill referral codes for existing users
+const usersWithoutCode = db.prepare('SELECT id FROM users WHERE referral_code IS NULL').all();
+const updateCode = db.prepare('UPDATE users SET referral_code = ? WHERE id = ?');
+for (const u of usersWithoutCode) {
+  const code = crypto.randomBytes(4).toString('hex');
+  try { updateCode.run(code, u.id); } catch (e) { /* collision — skip */ }
+}
+
 module.exports = db;

@@ -108,7 +108,7 @@
     }
     .plan-free { background: rgba(74,106,136,.12); color: var(--dim); border: 1px solid rgba(74,106,136,.3); }
     .plan-pro { background: var(--cyan-glow); color: var(--cyan); border: 1px solid rgba(0,200,248,.2); }
-    .plan-business { background: var(--purple2); color: var(--purple); border: 1px solid var(--purple3); }
+    .plan-business, .plan-enterprise { background: var(--purple2); color: var(--purple); border: 1px solid var(--purple3); }
 
     .hdr-btn {
       background: var(--surface); border: 1px solid var(--border2);
@@ -213,6 +213,34 @@
     .eye:hover { color: var(--cyan); }
 
     /* Country buttons */
+    /* Niche categories */
+    .niche-cats { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: .75rem; }
+    .niche-cat {
+      padding: .55rem .9rem; background: var(--surface);
+      border: 1px solid var(--border2); border-radius: 10px;
+      color: var(--muted); font-size: .78rem; font-weight: 700;
+      cursor: pointer; transition: all .15s; font-family: inherit;
+      display: flex; align-items: center; gap: .35rem;
+    }
+    .niche-cat:hover { border-color: var(--cyan); color: var(--text2); }
+    .niche-cat.on {
+      background: var(--cyan-glow); border-color: var(--cyan);
+      color: var(--cyan); box-shadow: 0 0 12px var(--cyan-glow);
+    }
+    .niche-select {
+      width: 100%; padding: .75rem 1rem; background: var(--surface);
+      border: 1px solid var(--border2); border-radius: 10px;
+      color: var(--text); font-size: .88rem; font-weight: 600;
+      font-family: inherit; outline: none; cursor: pointer;
+      appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%234a6a88' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 1rem center;
+    }
+    .niche-select:focus { border-color: var(--cyan); }
+    .niche-select option { background: var(--card); color: var(--text); padding: .5rem; }
+    .niche-custom { display: none; margin-top: .5rem; }
+    .niche-custom.show { display: block; }
+
     .ctry-row { display: flex; gap: .6rem; }
     .ctry {
       flex: 1; padding: .7rem .5rem;
@@ -695,6 +723,49 @@
     .settings-msg { font-size: .8rem; color: var(--emerald); text-align: center; margin-top: .75rem; opacity: 0; transition: opacity .3s; }
     .settings-msg.show { opacity: 1; }
 
+    /* ── Referral section ── */
+    .referral-card {
+      background: var(--card); border: 1px solid var(--border2);
+      border-radius: 16px; padding: 1.5rem; margin-top: 1.5rem;
+      position: relative; overflow: hidden;
+    }
+    .referral-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,229,160,.3), transparent);
+    }
+    .referral-title {
+      font-size: 1rem; font-weight: 800; margin-bottom: .75rem;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .referral-title svg { color: var(--emerald); }
+    .referral-link-row {
+      display: flex; gap: .5rem; margin-bottom: 1rem;
+    }
+    .referral-link-row input {
+      flex: 1; background: var(--surface); border: 1px solid var(--border2);
+      border-radius: 8px; padding: .6rem .8rem; color: var(--cyan);
+      font-size: .8rem; font-family: 'Courier New', monospace; outline: none;
+    }
+    .referral-link-row button {
+      padding: .6rem 1rem; background: var(--emerald2); border: 1px solid rgba(0,229,160,.25);
+      border-radius: 8px; color: var(--emerald); font-size: .78rem; font-weight: 700;
+      cursor: pointer; font-family: inherit; transition: all .15s; white-space: nowrap;
+    }
+    .referral-link-row button:hover { background: rgba(0,229,160,.18); }
+    .referral-stats {
+      display: flex; gap: 1.5rem;
+    }
+    .referral-stat {
+      display: flex; flex-direction: column; gap: .15rem;
+    }
+    .referral-stat-n {
+      font-size: 1.4rem; font-weight: 900; color: var(--emerald);
+    }
+    .referral-stat-l {
+      font-size: .72rem; font-weight: 600; color: var(--muted); text-transform: uppercase;
+      letter-spacing: .06em;
+    }
+
     @media (max-width: 680px) {
       .row2          { grid-template-columns: 1fr; }
       main           { padding: 1.5rem 1rem; }
@@ -724,6 +795,8 @@
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M6 12h12"/></svg>
       <span id="hdr-credits">-</span> crédits
     </div>
+    <a class="hdr-btn" href="/pricing" id="upgrade-link" style="background:var(--cyan-glow);color:var(--cyan);border-color:rgba(0,200,248,.2)">Upgrade</a>
+    <a class="hdr-btn" href="/pricing" id="plan-link" style="display:none">Mon abonnement</a>
     <a class="hdr-btn" href="/admin" id="admin-link" style="display:none">Admin</a>
     <button class="hdr-btn" onclick="logout()" style="color:var(--red-tx)">Déconnexion</button>
   </div>
@@ -744,7 +817,14 @@
 
     <div class="field" style="margin-bottom:1.25rem">
       <label>Niche / Secteur d'activité</label>
-      <input class="inp" id="niche" type="text" placeholder="plombier, coiffeur, électricien…" autocomplete="off" />
+      <div class="niche-cats" id="niche-cats"></div>
+      <select class="niche-select" id="niche-dropdown" onchange="onNicheSelect(this.value)">
+        <option value="" disabled selected>← Choisis une catégorie d'abord</option>
+      </select>
+      <div class="niche-custom" id="niche-custom">
+        <input class="inp" id="niche-custom-input" type="text" placeholder="Tape ta niche ici…" />
+      </div>
+      <input type="hidden" id="niche" />
     </div>
 
     <div class="field" style="margin-bottom:1.5rem">
@@ -993,6 +1073,33 @@
   </div>
 </div>
 
+<!-- ── REFERRAL SECTION ── -->
+<div style="max-width:900px;margin:0 auto;padding:0 1.5rem 2rem">
+  <div class="referral-card" id="referral-section" style="display:none">
+    <div class="referral-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+      Parrainage — Gagnez des crédits
+    </div>
+    <p style="font-size:.82rem;color:var(--text2);margin-bottom:1rem">
+      Partagez votre lien. Quand un ami s'inscrit, vous recevez <strong style="color:var(--emerald)">5 crédits</strong> chacun.
+    </p>
+    <div class="referral-link-row">
+      <input type="text" id="ref-link" readonly />
+      <button onclick="copyRefLink()">Copier le lien</button>
+    </div>
+    <div class="referral-stats">
+      <div class="referral-stat">
+        <span class="referral-stat-n" id="ref-count">0</span>
+        <span class="referral-stat-l">Filleuls</span>
+      </div>
+      <div class="referral-stat">
+        <span class="referral-stat-n" id="ref-credits">0</span>
+        <span class="referral-stat-l">Crédits gagnés</span>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── SETTINGS MODAL ── -->
 <div class="settings-bd" id="settings-bd" onclick="if(event.target===this)closeSettings()">
   <div class="settings-box">
@@ -1090,6 +1197,18 @@ async function loadUser() {
     if (user.is_admin) {
       document.getElementById('admin-link').style.display = '';
     }
+
+    // Show upgrade or "Mon abonnement" link
+    if (user.plan === 'enterprise') {
+      document.getElementById('upgrade-link').style.display = 'none';
+      document.getElementById('plan-link').style.display = '';
+    } else {
+      document.getElementById('upgrade-link').style.display = '';
+      document.getElementById('plan-link').style.display = 'none';
+    }
+
+    // Load referral info
+    loadReferral();
 
     // Init cities slider based on credits
     updateProspectsSlider();
@@ -1236,6 +1355,56 @@ function updateProspectsSlider() {
   document.getElementById('credits-cost').textContent = val;
   document.getElementById('prospects-max-label').textContent = maxAllowed + ' prospects (max)';
 }
+
+/* ── Niche categories ── */
+const NICHE_DATA = {
+  '🔧 BTP': ['Plombier','Électricien','Peintre en bâtiment','Maçon','Couvreur','Carreleur','Serrurier','Menuisier','Chauffagiste','Climatisation'],
+  '💇 Beauté': ['Coiffeur','Barbier','Institut de beauté','Onglerie','Salon de massage','Tatoueur','Esthéticienne'],
+  '🍽️ Restauration': ['Restaurant','Boulangerie','Pâtisserie','Pizzeria','Traiteur','Food truck','Bar','Kebab','Sushi'],
+  '🏥 Santé': ['Dentiste','Ostéopathe','Kinésithérapeute','Opticien','Vétérinaire','Podologue','Psychologue'],
+  '🚗 Auto': ['Garage automobile','Carrossier','Lavage auto','Auto-école','Contrôle technique','Vitrage auto'],
+  '🏠 Services': ['Agent immobilier','Déménageur','Photographe','Coach sportif','Jardinier','Paysagiste','Nettoyage'],
+  '🛍️ Commerce': ['Fleuriste','Bijouterie','Pressing','Cordonnerie','Animalerie','Caviste','Épicerie fine'],
+  '✏️ Autre': ['__custom__']
+};
+
+let selectedCat = null;
+
+function initNicheCategories() {
+  const container = document.getElementById('niche-cats');
+  container.innerHTML = Object.keys(NICHE_DATA).map(cat =>
+    `<button class="niche-cat" onclick="selectNicheCategory('${cat}')">${cat}</button>`
+  ).join('');
+}
+
+function selectNicheCategory(cat) {
+  selectedCat = cat;
+  document.querySelectorAll('.niche-cat').forEach(b => b.classList.toggle('on', b.textContent === cat));
+  const dropdown = document.getElementById('niche-dropdown');
+  const customDiv = document.getElementById('niche-custom');
+
+  if (cat === '✏️ Autre') {
+    dropdown.style.display = 'none';
+    customDiv.classList.add('show');
+    const inp = document.getElementById('niche-custom-input');
+    inp.value = '';
+    inp.focus();
+    inp.oninput = () => { document.getElementById('niche').value = inp.value; };
+    document.getElementById('niche').value = '';
+  } else {
+    dropdown.style.display = '';
+    customDiv.classList.remove('show');
+    const niches = NICHE_DATA[cat];
+    dropdown.innerHTML = '<option value="" disabled selected>Choisis une niche…</option>' +
+      niches.map(n => `<option value="${n}">${n}</option>`).join('');
+  }
+}
+
+function onNicheSelect(val) {
+  document.getElementById('niche').value = val;
+}
+
+initNicheCategories();
 
 /* ── Country / Geolocation ── */
 function setCountry(c) {
@@ -1810,8 +1979,32 @@ function exportCSV() {
   URL.revokeObjectURL(a.href);
 }
 
+/* ── Referral ── */
+async function loadReferral() {
+  try {
+    const res = await fetch('/api/referral', { headers: AUTH_HEADERS });
+    if (!res.ok) return;
+    const data = await res.json();
+    const section = document.getElementById('referral-section');
+    section.style.display = '';
+    document.getElementById('ref-link').value = location.origin + '/login?ref=' + data.referral_code;
+    document.getElementById('ref-count').textContent = data.total_referrals || 0;
+    document.getElementById('ref-credits').textContent = data.credits_earned || 0;
+  } catch { /* silent */ }
+}
+
+function copyRefLink() {
+  const inp = document.getElementById('ref-link');
+  inp.select();
+  navigator.clipboard.writeText(inp.value).then(() => {
+    const btn = inp.nextElementSibling;
+    btn.textContent = 'Copié !';
+    setTimeout(() => btn.textContent = 'Copier le lien', 2000);
+  });
+}
+
 /* ── Enter key ── */
-document.getElementById('niche').addEventListener('keydown', e => { if (e.key==='Enter') runSearch(); });
+document.getElementById('niche-custom-input').addEventListener('keydown', e => { if (e.key==='Enter') runSearch(); });
 
 /* ── Init ── */
 loadUser();

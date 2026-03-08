@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ProspectHunter — Tarifs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #020b18; --surface: #061222; --card: #081830; --card2: #0a1e38;
+      --border: #0f2d50; --border2: #163558;
+      --cyan: #00c8f8; --cyan2: #38d9fa; --cyan-glow: rgba(0,200,248,.12);
+      --emerald: #00e5a0; --emerald2: rgba(0,229,160,.1);
+      --purple: #9d6eff; --purple2: rgba(157,110,255,.12);
+      --amber: #ffb800; --amber2: rgba(255,184,0,.12);
+      --text: #ddeeff; --text2: #a8c4e0; --muted: #4a6a88; --dim: #7a9ab8;
+      --red-tx: #ff8585;
+    }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Inter', -apple-system, sans-serif;
+      min-height: 100vh; line-height: 1.5;
+      background-image: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0,100,200,.15) 0%, transparent 70%);
+    }
+    header {
+      height: 64px; background: rgba(2,11,24,.85); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border); padding: 0 2rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .logo-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--cyan), #0080c8);
+      border-radius: 9px; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 18px rgba(0,200,248,.3);
+    }
+    .logo-text { font-size: 1.15rem; font-weight: 800; letter-spacing: -.4px; }
+    .logo-text span { color: var(--cyan); }
+    .hdr-btn {
+      margin-left: auto; padding: 6px 18px; border-radius: 8px;
+      background: var(--surface); border: 1px solid var(--border2);
+      color: var(--text2); font-size: .8rem; font-weight: 600;
+      text-decoration: none; cursor: pointer; font-family: inherit;
+      transition: all .15s;
+    }
+    .hdr-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+
+    .page { max-width: 1000px; margin: 0 auto; padding: 3rem 1.5rem; }
+
+    .page-title {
+      text-align: center; font-size: 2rem; font-weight: 900;
+      margin-bottom: .5rem;
+    }
+    .page-sub {
+      text-align: center; color: var(--text2); font-size: .95rem;
+      margin-bottom: 3rem;
+    }
+
+    .plans {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .plan-card {
+      background: var(--card); border: 1px solid var(--border2);
+      border-radius: 18px; padding: 2rem 1.5rem;
+      display: flex; flex-direction: column;
+      transition: all .2s;
+    }
+    .plan-card:hover { border-color: var(--cyan); transform: translateY(-4px); }
+    .plan-card.popular {
+      border-color: var(--cyan);
+      box-shadow: 0 0 40px rgba(0,200,248,.12);
+      position: relative;
+    }
+    .popular-tag {
+      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+      background: var(--cyan); color: #000; font-size: .7rem; font-weight: 800;
+      padding: 3px 16px; border-radius: 999px; text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .plan-name { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: .5rem; }
+    .plan-name.pro { color: var(--cyan); }
+    .plan-name.enterprise { color: var(--purple); }
+
+    .plan-price { font-size: 2.5rem; font-weight: 900; margin-bottom: .25rem; }
+    .plan-price small { font-size: .9rem; font-weight: 500; color: var(--muted); }
+
+    .plan-credits {
+      font-size: .85rem; color: var(--emerald); font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+
+    .plan-features {
+      list-style: none; flex: 1; margin-bottom: 1.5rem;
+    }
+    .plan-features li {
+      padding: .45rem 0; font-size: .82rem; color: var(--text2);
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .plan-features li::before {
+      content: '';
+      width: 16px; height: 16px; flex-shrink: 0;
+      border-radius: 50%;
+      background: var(--emerald2);
+      display: flex; align-items: center; justify-content: center;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2300e5a0' stroke-width='3' stroke-linecap='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: center;
+    }
+
+    .btn-plan {
+      width: 100%; padding: 12px; border-radius: 10px;
+      font-size: .88rem; font-weight: 700; cursor: pointer;
+      border: none; font-family: inherit; transition: all .15s;
+    }
+    .btn-plan.free {
+      background: var(--surface); border: 1px solid var(--border2);
+      color: var(--text2);
+    }
+    .btn-plan.free:hover { border-color: var(--cyan); color: var(--cyan); }
+    .btn-plan.pro {
+      background: linear-gradient(135deg, var(--cyan), #0090d0);
+      color: #000; box-shadow: 0 4px 20px rgba(0,200,248,.25);
+    }
+    .btn-plan.pro:hover { box-shadow: 0 4px 30px rgba(0,200,248,.4); }
+    .btn-plan.enterprise {
+      background: linear-gradient(135deg, var(--purple), #7040cc);
+      color: #fff; box-shadow: 0 4px 20px rgba(157,110,255,.25);
+    }
+    .btn-plan.enterprise:hover { box-shadow: 0 4px 30px rgba(157,110,255,.4); }
+    .btn-plan:disabled {
+      opacity: .4; cursor: not-allowed;
+      box-shadow: none;
+    }
+    .btn-plan:disabled:hover { box-shadow: none; }
+
+    .current-tag {
+      text-align: center; font-size: .7rem; color: var(--emerald);
+      font-weight: 700; margin-top: .5rem; display: none;
+    }
+
+    @media (max-width: 700px) {
+      .plans { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+    <span class="logo-text"><span>Prospect</span>Hunter</span>
+    <a class="hdr-btn" href="/">Retour</a>
+  </header>
+
+  <div class="page">
+    <div class="page-title">Choisissez votre plan</div>
+    <div class="page-sub">Boostez votre prospection avec plus de credits</div>
+
+    <div class="plans">
+      <!-- FREE -->
+      <div class="plan-card" id="card-free">
+        <div class="plan-name">Free</div>
+        <div class="plan-price">0<small> EUR</small></div>
+        <div class="plan-credits">5 credits inclus</div>
+        <ul class="plan-features">
+          <li>Recherche Google Places</li>
+          <li>CRM basique</li>
+          <li>Export CSV</li>
+          <li>5 credits / inscription</li>
+        </ul>
+        <button class="btn-plan free" onclick="upgrade('free')" id="btn-free">Plan actuel</button>
+        <div class="current-tag" id="tag-free">Votre plan actuel</div>
+      </div>
+
+      <!-- PRO -->
+      <div class="plan-card popular" id="card-pro">
+        <div class="popular-tag">Populaire</div>
+        <div class="plan-name pro">Pro</div>
+        <div class="plan-price">29<small> EUR / mois</small></div>
+        <div class="plan-credits">100 credits inclus</div>
+        <ul class="plan-features">
+          <li>Tout du plan Free</li>
+          <li>Pitch IA personnalise</li>
+          <li>Generation de mots-cles</li>
+          <li>Filtre intelligent IA</li>
+          <li>100 credits / mois</li>
+        </ul>
+        <button class="btn-plan pro" onclick="upgrade('pro')" id="btn-pro">Choisir Pro</button>
+        <div class="current-tag" id="tag-pro">Votre plan actuel</div>
+      </div>
+
+      <!-- ENTERPRISE -->
+      <div class="plan-card" id="card-enterprise">
+        <div class="plan-name enterprise">Enterprise</div>
+        <div class="plan-price">79<small> EUR / mois</small></div>
+        <div class="plan-credits">500 credits inclus</div>
+        <ul class="plan-features">
+          <li>Tout du plan Pro</li>
+          <li>Support prioritaire</li>
+          <li>API perso (cles propres)</li>
+          <li>Multi-ville en une recherche</li>
+          <li>500 credits / mois</li>
+        </ul>
+        <button class="btn-plan enterprise" onclick="upgrade('enterprise')" id="btn-enterprise">Choisir Enterprise</button>
+        <div class="current-tag" id="tag-enterprise">Votre plan actuel</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const token = localStorage.getItem('ph_token');
+if (!token) window.location.href = '/login';
+
+const headers = { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token };
+let currentPlan = 'free';
+
+async function init() {
+  try {
+    const res = await fetch('/api/me', { headers });
+    if (!res.ok) { window.location.href = '/login'; return; }
+    const { user } = await res.json();
+    currentPlan = user.plan || 'free';
+    updateUI();
+  } catch { window.location.href = '/login'; }
+}
+
+function updateUI() {
+  ['free', 'pro', 'enterprise'].forEach(p => {
+    const btn = document.getElementById('btn-' + p);
+    const tag = document.getElementById('tag-' + p);
+    if (p === currentPlan) {
+      btn.disabled = true;
+      btn.textContent = 'Plan actuel';
+      tag.style.display = 'block';
+    } else {
+      btn.disabled = false;
+      btn.textContent = p === 'free' ? 'Downgrade' : 'Choisir ' + p.charAt(0).toUpperCase() + p.slice(1);
+      tag.style.display = 'none';
+    }
+  });
+}
+
+async function upgrade(plan) {
+  if (plan === currentPlan) return;
+  try {
+    const res = await fetch('/api/subscription/upgrade', {
+      method: 'PUT', headers,
+      body: JSON.stringify({ plan }),
+    });
+    const data = await res.json();
+    if (!res.ok) { alert(data.error || 'Erreur'); return; }
+    currentPlan = plan;
+    updateUI();
+    setTimeout(() => { window.location.href = '/'; }, 500);
+  } catch (e) { alert('Erreur de connexion.'); }
+}
+
+init();
+</script>
+</body>
+</html>

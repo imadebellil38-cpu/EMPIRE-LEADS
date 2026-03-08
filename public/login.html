@@ -145,6 +145,16 @@ if (localStorage.getItem('ph_token')) {
   window.location.href = '/';
 }
 
+// Referral code from URL
+const urlParams = new URLSearchParams(window.location.search);
+const refCode = urlParams.get('ref');
+if (refCode) {
+  setTimeout(() => {
+    showTab('register');
+    showSuccess('Vous avez ete invite ! Inscrivez-vous pour recevoir 5 credits bonus.');
+  }, 100);
+}
+
 function showTab(tab) {
   document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('on', i === (tab === 'login' ? 0 : 1)));
   document.getElementById('form-login').classList.toggle('on', tab === 'login');
@@ -208,7 +218,7 @@ async function doRegister() {
     const res = await fetch('/api/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, referral_code: refCode || undefined }),
     });
     const data = await res.json();
     if (!res.ok) return showError(data.error || 'Erreur lors de l\'inscription.');

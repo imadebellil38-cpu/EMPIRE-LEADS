@@ -1,14 +1,25 @@
 const { Router } = require('express');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const validator = require('validator');
+const rateLimit = require('express-rate-limit');
 const db = require('../db');
 const { createToken, requireAuth } = require('../auth');
 
 const router = Router();
 
-// POST /api/register (public)
-router.post('/register', (req, res) => {
-  const { email, password } = req.body;
+// Rate limiter for login/register only
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Trop de tentatives. Réessayez dans 15 minutes.' },
+});
+
+// POST /api/register (public, rate-limited)
+router.post('/register', authLimiter, (req, res) => {
+  const { email, password, referral_code } = req.body;
 
   // ── Validate inputs ──
   if (!email || typeof email !== 'string') {
@@ -32,15 +43,26 @@ router.post('/register', (req, res) => {
   const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(cleanEmail);
   if (existing) return res.status(409).json({ error: 'Cet email est déjà utilisé.' });
 
-  const hash = bcrypt.hashSync(password, 12); // 12 rounds (stronger than 10)
+  const hash = bcrypt.hashSync(password, 12);
+  const newReferralCode = crypto.randomBytes(4).toString('hex');
   const result = db.prepare(
-    'INSERT INTO users (email, password) VALUES (?, ?)'
-  ).run(cleanEmail, hash);
+    'INSERT INTO users (email, password, referral_code) VALUES (?, ?, ?)'
+  ).run(cleanEmail, hash, newReferralCode);
+
+  // Handle referral bonus (+5 parrain, +5 filleul)
+  if (referral_code && typeof referral_code === 'string') {
+    const referrer = db.prepare('SELECT id FROM users WHERE referral_code = ?').get(referral_code.trim());
+    if (referrer && referrer.id !== result.lastInsertRowid) {
+      db.prepare('UPDATE users SET referred_by = ? WHERE id = ?').run(referrer.id, result.lastInsertRowid);
+      db.prepare('UPDATE users SET credits = credits + 5 WHERE id = ?').run(referrer.id);
+      db.prepare('UPDATE users SET credits = credits + 5 WHERE id = ?').run(result.lastInsertRowid);
+    }
+  }
 
   const user = db.prepare('SELECT * FROM users WHERE id = ?').get(result.lastInsertRowid);
   const token = createToken(user);
 
-  console.log(`[AUTH] New user registered: ${cleanEmail}`);
+  console.log(`[AUTH] New user registered: ${cleanEmail}${referral_code ? ' (referral: ' + referral_code + ')' : ''}`);
 
   res.json({
     token,
@@ -48,8 +70,8 @@ router.post('/register', (req, res) => {
   });
 });
 
-// POST /api/login (public)
-router.post('/login', (req, res) => {
+// POST /api/login (public, rate-limited)
+router.post('/login', authLimiter, (req, res) => {
   const { email, password } = req.body;
 
   if (!email || typeof email !== 'string' || !password || typeof password !== 'string') {

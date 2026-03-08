@@ -68,32 +68,26 @@ const searchLimiter = rateLimit({
   message: { error: 'Trop de recherches. Réessayez dans quelques minutes.' },
 });
 
-// ── Auth rate limiter (20 login attempts / 15 min) ──
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 20,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Trop de tentatives de connexion. Réessayez dans 15 minutes.' },
-});
-
 // ── Static files ──
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: isProd ? '1d' : 0,
 }));
 
-// === Public auth routes (rate-limited) ===
-app.use('/api', authLimiter, require('./routes/auth'));
+// === Public auth routes (rate-limited on login/register only) ===
+app.use('/api', require('./routes/auth'));
 
 // === Protected routes (require JWT) ===
 app.use('/api/search', requireAuth, searchLimiter, require('./routes/search'));
 app.use('/api/prospects', requireAuth, require('./routes/prospects'));
 app.use('/api/pitch', requireAuth, require('./routes/pitch'));
 app.use('/api/admin', requireAuth, require('./routes/admin'));
+app.use('/api/subscription', requireAuth, require('./routes/subscription'));
+app.use('/api/referral', requireAuth, require('./routes/referral'));
 
 // === Pages ===
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
+app.get('/pricing', (req, res) => res.sendFile(path.join(__dirname, 'public', 'pricing.html')));
 
 // ── 404 handler for API routes ──
 app.use('/api', (req, res) => {
