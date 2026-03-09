@@ -1374,10 +1374,13 @@ async function loadSearchHistory() {
       const date = new Date(s.created_at);
       const ago = timeAgo(date);
       const active = filterSearchId === s.id ? 'background:var(--cyan-glow2);border-color:var(--cyan);' : '';
+      const modeLabels = { site: '🔍 Sans site', social: '📱 Sans réseaux', both: '🔥 Complet' };
+      const modeTag = modeLabels[s.search_mode] || '🔍 Sans site';
       return `<div onclick="filterBySearch(${s.id},'${esc(s.niche)}')" style="display:flex;justify-content:space-between;align-items:center;padding:.55rem .8rem;border-radius:8px;border:1px solid var(--border2);cursor:pointer;transition:all .15s;${active}" onmouseover="this.style.borderColor='var(--cyan)'" onmouseout="this.style.borderColor='${filterSearchId === s.id ? 'var(--cyan)' : 'var(--border2)'}'">`
         + `<div style="display:flex;align-items:center;gap:.6rem;">`
         + `<span style="font-size:1.1rem;">${flag}</span>`
         + `<span style="font-weight:700;color:var(--text);font-size:.85rem;">${esc(s.niche)}</span>`
+        + `<span style="font-size:.6rem;padding:.15rem .4rem;border-radius:4px;background:var(--surface2);color:var(--dim);white-space:nowrap;">${modeTag}</span>`
         + `</div>`
         + `<div style="display:flex;align-items:center;gap:.8rem;">`
         + `<span style="font-size:.75rem;color:var(--cyan);font-weight:700;">${s.results_count || 0} prospects</span>`
@@ -1486,8 +1489,8 @@ function setSearchMode(mode) {
   document.querySelectorAll('.search-mode').forEach(b => b.classList.toggle('on', b.dataset.mode === mode));
   const hints = {
     site: 'Trouve les entreprises qui n\'ont pas de site internet.',
-    social: 'Vérifie Facebook, Instagram & TikTok pour chaque entreprise.',
-    both: 'Double vérification : ni site web, ni réseaux sociaux. Coût ×2.',
+    social: 'Trouve les entreprises qui n\'ont pas de réseaux sociaux (Facebook, Instagram, TikTok).',
+    both: 'Trouve les entreprises sans site web ET sans réseaux sociaux. Coût ×2.',
   };
   document.getElementById('mode-hint').textContent = hints[mode] || '';
   updateProspectsSlider();

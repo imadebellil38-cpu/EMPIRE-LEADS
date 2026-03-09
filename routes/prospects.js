@@ -9,7 +9,7 @@ const VALID_STATUSES = ['todo', 'called', 'nope', 'client'];
 // GET /api/prospects/searches — search history for current user
 router.get('/searches', (req, res) => {
   const searches = db.prepare(
-    'SELECT id, niche, country, results_count, created_at FROM searches WHERE user_id = ? ORDER BY created_at DESC'
+    'SELECT id, niche, country, results_count, search_mode, created_at FROM searches WHERE user_id = ? ORDER BY created_at DESC'
   ).all(req.user.id);
   res.json(searches);
 });
