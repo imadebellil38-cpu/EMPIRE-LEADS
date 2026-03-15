@@ -632,6 +632,31 @@ main {
 .sig-notk   { background: rgba(20,184,166,.1);  border: 1px solid rgba(20,184,166,.25);  color: #2dd4bf; }
 
 /* ─────────────────────────────────────────
+   HEAT BADGES
+───────────────────────────────────────── */
+.heat-badge {
+  display: inline-flex; align-items: center; gap: .2rem;
+  padding: .2rem .55rem; border-radius: 6px;
+  font-size: .7rem; font-weight: 700; white-space: nowrap;
+}
+.heat-burning {
+  background: rgba(239,68,68,.18); border: 1.5px solid rgba(239,68,68,.5);
+  color: #f87171;
+}
+.heat-hot {
+  background: rgba(249,115,22,.15); border: 1.5px solid rgba(249,115,22,.4);
+  color: #fb923c;
+}
+.heat-warm {
+  background: rgba(234,179,8,.13); border: 1.5px solid rgba(234,179,8,.35);
+  color: #facc15;
+}
+.heat-cold {
+  background: rgba(99,102,241,.1); border: 1.5px solid rgba(99,102,241,.25);
+  color: #818cf8;
+}
+
+/* ─────────────────────────────────────────
    ACTION BUTTONS
 ───────────────────────────────────────── */
 .act-btn {

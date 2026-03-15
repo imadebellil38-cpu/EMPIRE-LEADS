@@ -287,6 +287,30 @@ function renderList() {
 }
 
 /* ─────────────────────────────────────────
+   HEAT SCORE
+───────────────────────────────────────── */
+function calcHeat(p) {
+  let score = 0;
+  if (!p.website_url || p.website_url === '') score += 3;
+  if (p.has_facebook  === 0) score += 1;
+  if (p.has_instagram === 0) score += 1;
+  if (p.has_tiktok    === 0) score += 1;
+  const rev = p.reviews ?? 0;
+  if (rev < 10) score += 2;
+  if (rev < 5)  score += 1;
+  if (p.rating && p.rating < 3.5) score += 1;
+  return score;
+}
+
+function buildHeatBadge(p) {
+  const score = calcHeat(p);
+  if (score >= 7) return `<span class="heat-badge heat-burning" title="Score ${score}/9">🔥🔥 Brûlant</span>`;
+  if (score >= 5) return `<span class="heat-badge heat-hot"     title="Score ${score}/9">🔥 Chaud</span>`;
+  if (score >= 3) return `<span class="heat-badge heat-warm"    title="Score ${score}/9">🌡️ Tiède</span>`;
+  return             `<span class="heat-badge heat-cold"        title="Score ${score}/9">❄️ Froid</span>`;
+}
+
+/* ─────────────────────────────────────────
    SIGNAL BADGES
 ───────────────────────────────────────── */
 function buildSignals(p) {
@@ -384,7 +408,12 @@ function renderTable(prospects) {
           ${phoneCopy}
         </div>
       </td>
-      <td><div class="signals-cell">${signals}</div></td>
+      <td>
+        <div class="signals-cell">
+          ${buildHeatBadge(p)}
+          ${signals}
+        </div>
+      </td>
       <td><div class="actions-cell">${actions}</div></td>
       <td>
         <div class="actions-cell">
@@ -427,7 +456,7 @@ function renderCards(prospects) {
         </div>
         ${callBtn}
       </div>
-      ${signals ? `<div class="card-signals">${signals}</div>` : ''}
+      <div class="card-signals">${buildHeatBadge(p)}${signals ? ' ' + signals : ''}</div>
       <div class="card-actions">${actions}</div>
     `;
     wrap.appendChild(card);
