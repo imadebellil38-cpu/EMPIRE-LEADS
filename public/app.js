@@ -377,7 +377,10 @@ function renderTable(prospects) {
       </td>
       <td>
         <div class="phone-cell">
-          <span class="phone-text">${esc(phoneDisplay)}</span>
+          ${p.phone
+            ? `<a class="phone-call-link" href="tel:${escAttr(p.phone)}" title="Appuyer pour appeler">📞 ${esc(p.phone)}</a>`
+            : `<span class="phone-text">—</span>`
+          }
           ${phoneCopy}
         </div>
       </td>

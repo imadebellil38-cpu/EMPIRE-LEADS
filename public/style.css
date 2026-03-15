@@ -694,6 +694,21 @@ main {
 }
 .act-btn-call:hover { background: var(--stage-cold); color: #fff; }
 
+/* Phone as tap-to-call button */
+.phone-call-link {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .3rem .65rem; border-radius: 6px;
+  background: var(--cold-bg); border: 1.5px solid var(--cold-bd);
+  color: var(--stage-cold); font-size: .82rem; font-weight: 600;
+  text-decoration: none; white-space: nowrap;
+  transition: background .15s, color .15s, transform .1s;
+  cursor: pointer;
+}
+.phone-call-link:hover {
+  background: var(--stage-cold); color: #fff;
+  transform: translateY(-1px);
+}
+
 .act-btn-delete {
   background: none; border-color: transparent;
   color: var(--muted); font-size: .7rem; padding: .35rem .5rem;
