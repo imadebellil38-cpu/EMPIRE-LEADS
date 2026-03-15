@@ -6,7 +6,7 @@
   <title>ProspectHunter — Pipeline CRM</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=23">
+  <link rel="stylesheet" href="/style.css?v=24">
 </head>
 <body>
 
@@ -95,6 +95,15 @@
           <button class="mode-btn"        data-mode="fewreviews" onclick="selectMode(this)" title="Moins de 10 avis Google — besoin de visibilité">⭐ &lt;10 avis</button>
           <button class="mode-btn"        data-mode="owners"     onclick="selectMode(this)" title="Extraction du nom du gérant par IA">🧑 Gérants IA</button>
           <button class="mode-btn"        data-mode="new"        onclick="selectMode(this)" title="Entreprises récemment ouvertes">🆕 Récents</button>
+        </div>
+
+        <!-- Quantity selector -->
+        <div class="scan-qty-group">
+          <span class="scan-qty-label">Combien ?</span>
+          <button class="qty-btn active" data-qty="10"  onclick="selectQty(this)">10</button>
+          <button class="qty-btn"        data-qty="20"  onclick="selectQty(this)">20</button>
+          <button class="qty-btn"        data-qty="50"  onclick="selectQty(this)">50</button>
+          <button class="qty-btn"        data-qty="100" onclick="selectQty(this)">100</button>
         </div>
 
         <!-- Launch -->
@@ -378,6 +387,6 @@
 <div class="toast-container" id="toast-container"></div>
 
 <!-- ── APP JS ── -->
-<script src="/app.js?v=23"></script>
+<script src="/app.js?v=24"></script>
 </body>
 </html>

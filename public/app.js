@@ -25,6 +25,7 @@ let saveTimer      = null;
 /* Scan selections (driven by buttons, not dropdowns) */
 let scanCountry = 'fr';
 let scanMode    = 'site';
+let scanQty     = 10;
 
 /* ─────────────────────────────────────────
    STAGE CONFIG
@@ -882,6 +883,11 @@ function selectMode(btn) {
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b === btn));
 }
 
+function selectQty(btn) {
+  scanQty = parseInt(btn.dataset.qty, 10);
+  document.querySelectorAll('.qty-btn').forEach(b => b.classList.toggle('active', b === btn));
+}
+
 function toggleScanPanel() {
   const body = document.getElementById('scan-body');
   const toggleBtn = document.getElementById('scan-toggle-btn');
@@ -926,7 +932,7 @@ async function launchScan() {
     const res = await fetch('/api/search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-      body: JSON.stringify({ niche, country: scanCountry, mode: scanMode }),
+      body: JSON.stringify({ niche, country: scanCountry, mode: scanMode, numProspects: scanQty }),
     });
     const data = await res.json();
 
