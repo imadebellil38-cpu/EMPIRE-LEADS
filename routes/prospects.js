@@ -7,6 +7,19 @@ const router = Router();
 const VALID_STATUSES = ['todo', 'called', 'nope', 'client'];
 const VALID_STAGES = ['cold_call', 'to_recall', 'meeting_to_set', 'meeting_confirmed', 'closed', 'refused'];
 
+// GET /api/prospects/analytics/objections — objection breakdown
+router.get('/analytics/objections', (req, res) => {
+  const userId = req.user.id;
+  const rows = db.prepare(`
+    SELECT objection, COUNT(*) as count
+    FROM prospects
+    WHERE user_id = ? AND pipeline_stage = 'refused' AND objection IS NOT NULL AND objection != ''
+    GROUP BY objection ORDER BY count DESC
+  `).all(userId);
+  const total = db.prepare(`SELECT COUNT(*) as n FROM prospects WHERE user_id = ? AND pipeline_stage = 'refused'`).get(userId).n;
+  res.json({ rows, total });
+});
+
 // GET /api/prospects/analytics — dashboard analytics
 router.get('/analytics', (req, res) => {
   const userId = req.user.id;
@@ -129,7 +142,7 @@ router.put('/bulk/status', (req, res) => {
 
 // PUT /api/prospects/:id/stage — move prospect to a new pipeline stage
 router.put('/:id/stage', (req, res) => {
-  const { stage } = req.body;
+  const { stage, objection, meeting_date, rappel, notes, deal_type, deal_date, deal_recurrence } = req.body;
 
   const id = parseInt(req.params.id, 10);
   if (isNaN(id) || id <= 0) return res.status(400).json({ error: 'ID invalide.' });
@@ -140,9 +153,55 @@ router.put('/:id/stage', (req, res) => {
   const prospect = db.prepare('SELECT id FROM prospects WHERE id = ? AND user_id = ?').get(id, req.user.id);
   if (!prospect) return res.status(404).json({ error: 'Prospect introuvable.' });
 
+  // Base update — always move the stage
   db.prepare('UPDATE prospects SET pipeline_stage = ? WHERE id = ?').run(stage, id);
-  try { db.prepare('INSERT INTO activity_log (user_id, action, details) VALUES (?, ?, ?)').run(req.user.id, 'stage_change', JSON.stringify({ prospectId: id, stage })); } catch {}
+
+  // Optional extras
+  if (stage === 'refused' && objection) {
+    db.prepare('UPDATE prospects SET objection = ? WHERE id = ?').run(String(objection).trim().substring(0, 200), id);
+  }
+  if (stage === 'to_recall' && rappel) {
+    db.prepare('UPDATE prospects SET rappel = ? WHERE id = ?').run(String(rappel).trim().substring(0, 100), id);
+  }
+  if ((stage === 'meeting_to_set' || stage === 'meeting_confirmed') && meeting_date) {
+    db.prepare('UPDATE prospects SET meeting_date = ? WHERE id = ?').run(String(meeting_date).trim().substring(0, 50), id);
+  }
+  if (stage === 'closed') {
+    if (deal_type)       db.prepare('UPDATE prospects SET deal_type = ? WHERE id = ?').run(String(deal_type).trim().substring(0, 100), id);
+    if (deal_date)       db.prepare('UPDATE prospects SET deal_date = ? WHERE id = ?').run(String(deal_date).trim().substring(0, 50), id);
+    if (deal_recurrence) db.prepare('UPDATE prospects SET deal_recurrence = ? WHERE id = ?').run(String(deal_recurrence).trim().substring(0, 50), id);
+  }
+  if (notes) {
+    db.prepare('UPDATE prospects SET notes = ? WHERE id = ?').run(String(notes).trim().substring(0, 2000), id);
+  }
+  try { db.prepare('INSERT INTO activity_log (user_id, action, details) VALUES (?, ?, ?)').run(req.user.id, 'stage_change', JSON.stringify({ prospectId: id, stage, objection: objection || null })); } catch {}
   res.json({ ok: true });
+});
+
+// POST /api/prospects/:id/attempts — log a contact attempt
+router.post('/:id/attempts', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id) || id <= 0) return res.status(400).json({ error: 'ID invalide.' });
+  const prospect = db.prepare('SELECT id FROM prospects WHERE id = ? AND user_id = ?').get(id, req.user.id);
+  if (!prospect) return res.status(404).json({ error: 'Prospect introuvable.' });
+  const VALID_TYPES   = ['call','sms','email','dm'];
+  const VALID_RESULTS = ['no_answer','voicemail','callback','positive','negative'];
+  const { attempt_type, result, note } = req.body;
+  if (!VALID_TYPES.includes(attempt_type))   return res.status(400).json({ error: 'Type invalide.' });
+  if (!VALID_RESULTS.includes(result))       return res.status(400).json({ error: 'Résultat invalide.' });
+  const cleanNote = typeof note === 'string' ? note.trim().substring(0, 500) : '';
+  const r = db.prepare('INSERT INTO call_attempts (prospect_id, user_id, attempt_type, result, note) VALUES (?,?,?,?,?)').run(id, req.user.id, attempt_type, result, cleanNote);
+  res.json({ ok: true, id: r.lastInsertRowid });
+});
+
+// GET /api/prospects/:id/attempts — get contact attempt history
+router.get('/:id/attempts', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id) || id <= 0) return res.status(400).json({ error: 'ID invalide.' });
+  const prospect = db.prepare('SELECT id FROM prospects WHERE id = ? AND user_id = ?').get(id, req.user.id);
+  if (!prospect) return res.status(404).json({ error: 'Prospect introuvable.' });
+  const attempts = db.prepare('SELECT * FROM call_attempts WHERE prospect_id = ? ORDER BY created_at DESC').all(id);
+  res.json(attempts);
 });
 
 // POST /api/prospects/manual — manually add a prospect

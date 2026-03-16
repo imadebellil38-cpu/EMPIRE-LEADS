@@ -8,135 +8,215 @@
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
-      --bg: #03050f;
-      --surface: #060c1e;
-      --card: #0b1128;
-      --border: #1a2040;
-      --border2: #232b4a;
-      --grad: linear-gradient(135deg, #ef4444 0%, #e11d48 60%, #f97316 100%);
-      --blue: #ef4444;
-      --text: #e8eaf6;
-      --text2: #8892b0;
-      --muted: #4a5268;
-      --red-tx: #f87171;
-      --red-bg: rgba(239,68,68,.06);
-      --red-bd: rgba(239,68,68,.2);
-      --green: #22c55e;
-      --green-bg: rgba(34,197,94,.06);
-      --green-bd: rgba(34,197,94,.2);
-    }
-    body {
-      background: var(--bg); color: var(--text);
-      font-family: 'Inter', -apple-system, sans-serif;
-      min-height: 100vh;
-      display: flex; align-items: center; justify-content: center;
-      -webkit-font-smoothing: antialiased;
-      position: relative; overflow: hidden;
+      --bg: #04040f;
+      --grad: linear-gradient(135deg, #7c3aed 0%, #4f46e5 50%, #0ea5e9 100%);
+      --grad2: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+      --glow: rgba(124,58,237,.35);
+      --text: #f0f0ff;
+      --text2: #9090b8;
+      --muted: #50507a;
+      --border: rgba(124,58,237,.2);
+      --border2: rgba(124,58,237,.4);
     }
 
-    /* Background glow */
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; position: relative;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── ANIMATED BACKGROUND ── */
+    .bg-orbs {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    }
+    .orb {
+      position: absolute; border-radius: 50%; filter: blur(80px); opacity: .25;
+      animation: drift 12s ease-in-out infinite alternate;
+    }
+    .orb-1 { width: 600px; height: 600px; background: #7c3aed; top: -200px; left: -150px; animation-delay: 0s; }
+    .orb-2 { width: 500px; height: 500px; background: #0ea5e9; bottom: -150px; right: -100px; animation-delay: -4s; }
+    .orb-3 { width: 300px; height: 300px; background: #f59e0b; top: 50%; left: 50%; transform: translate(-50%,-50%); animation-delay: -8s; }
+
+    @keyframes drift {
+      0%   { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(30px, 20px) scale(1.1); }
+    }
+
+    /* Grid overlay */
     body::before {
       content: '';
-      position: fixed; top: -20%; left: 50%; transform: translateX(-50%);
-      width: 800px; height: 500px;
-      background: radial-gradient(ellipse, rgba(239,68,68,.08) 0%, rgba(225,29,72,.04) 50%, transparent 70%);
-      pointer-events: none;
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(124,58,237,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(124,58,237,.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* ── FLOATING PARTICLES ── */
+    canvas#sparks { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+    /* ── CARD ── */
+    .login-wrap {
+      position: relative; z-index: 10;
+      width: 100%; max-width: 420px; padding: 1rem;
+      animation: slideUp .6s cubic-bezier(.16,1,.3,1) both;
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     .login-box {
-      background: rgba(11,17,40,.85);
+      background: rgba(10, 8, 30, .8);
       border: 1px solid var(--border2);
-      border-radius: 16px;
+      border-radius: 20px;
       padding: 2.5rem;
-      width: 100%; max-width: 420px;
-      position: relative; z-index: 1;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 8px 40px rgba(0,0,0,.5), 0 0 0 1px rgba(239,68,68,.08);
+      backdrop-filter: blur(30px);
+      box-shadow:
+        0 0 0 1px rgba(124,58,237,.1),
+        0 20px 60px rgba(0,0,0,.6),
+        0 0 80px rgba(124,58,237,.12);
     }
 
+    /* ── LOGO ── */
     .logo { text-align: center; margin-bottom: 2rem; }
     .logo-icon {
-      width: 48px; height: 48px; margin: 0 auto .75rem;
-      background: var(--grad); border-radius: 12px;
+      width: 56px; height: 56px; margin: 0 auto .8rem;
+      background: var(--grad); border-radius: 16px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.4rem;
-      box-shadow: 0 4px 20px rgba(239,68,68,.3);
+      font-size: 1.6rem;
+      box-shadow: 0 8px 30px var(--glow);
+      animation: pulse-logo 3s ease-in-out infinite;
+    }
+    @keyframes pulse-logo {
+      0%, 100% { box-shadow: 0 8px 30px var(--glow); }
+      50%       { box-shadow: 0 8px 50px rgba(124,58,237,.6); }
     }
     .logo h1 {
-      font-size: 1.4rem; font-weight: 800; letter-spacing: -.03em;
+      font-size: 1.5rem; font-weight: 900; letter-spacing: -.04em;
       background: var(--grad);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
     }
     .logo p { color: var(--muted); font-size: .82rem; margin-top: .3rem; }
 
-    .tabs { display: flex; margin-bottom: 1.5rem; gap: .4rem; }
-    .tab {
-      flex: 1; padding: .6rem; background: transparent;
-      border: 1px solid var(--border2);
-      border-radius: 9px; color: var(--muted); font-weight: 600; font-size: .82rem;
-      cursor: pointer; transition: all .15s; text-align: center; font-family: inherit;
+    /* ── TABS ── */
+    .tabs {
+      display: flex; gap: .4rem; margin-bottom: 1.5rem;
+      background: rgba(255,255,255,.03); border-radius: 12px; padding: .3rem;
     }
-    .tab:hover { color: var(--text2); border-color: #2e3860; }
+    .tab {
+      flex: 1; padding: .55rem; border: none; border-radius: 9px;
+      background: transparent; color: var(--muted);
+      font-size: .8rem; font-weight: 700; cursor: pointer; font-family: inherit;
+      transition: all .2s; text-align: center;
+    }
+    .tab:hover { color: var(--text2); }
     .tab.on {
-      background: rgba(239,68,68,.12); border-color: rgba(239,68,68,.35);
-      color: var(--text);
+      background: var(--grad); color: #fff;
+      box-shadow: 0 4px 15px var(--glow);
     }
 
+    /* ── FORM ── */
     .form { display: none; }
     .form.on { display: block; }
 
     .field { margin-bottom: 1rem; }
     .field label {
-      display: block; font-size: .7rem; font-weight: 700; color: var(--muted);
-      text-transform: uppercase; letter-spacing: .06em; margin-bottom: .4rem;
+      display: block; font-size: .68rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .07em; margin-bottom: .4rem;
     }
+    .inp-wrap { position: relative; }
     .inp {
-      width: 100%; background: rgba(6,12,30,.8); border: 1px solid var(--border2);
-      border-radius: 9px; padding: .75rem 1rem; color: var(--text); font-size: .88rem;
-      outline: none; font-family: inherit; transition: border-color .15s;
+      width: 100%; background: rgba(255,255,255,.04);
+      border: 1px solid rgba(124,58,237,.2);
+      border-radius: 10px; padding: .75rem 1rem; color: var(--text);
+      font-size: .88rem; outline: none; font-family: inherit;
+      transition: all .2s;
     }
-    .inp:focus { border-color: rgba(239,68,68,.5); box-shadow: 0 0 0 3px rgba(239,68,68,.08); }
+    .inp:focus {
+      border-color: rgba(124,58,237,.6);
+      box-shadow: 0 0 0 3px rgba(124,58,237,.1);
+      background: rgba(124,58,237,.06);
+    }
     .inp::placeholder { color: var(--muted); }
 
+    /* ── BUTTON ── */
     .btn {
-      width: 100%; padding: .85rem; margin-top: .75rem;
-      background: var(--grad); color: #fff;
-      border: none; border-radius: 9px;
-      font-size: .92rem; font-weight: 800; cursor: pointer;
-      font-family: inherit; transition: opacity .15s;
-      box-shadow: 0 4px 20px rgba(239,68,68,.35);
+      width: 100%; padding: .9rem; margin-top: .75rem;
+      background: var(--grad); color: #fff; border: none; border-radius: 10px;
+      font-size: .92rem; font-weight: 800; cursor: pointer; font-family: inherit;
+      transition: all .2s; position: relative; overflow: hidden;
+      box-shadow: 0 6px 25px var(--glow);
     }
-    .btn:hover { opacity: .9; }
-    .btn:disabled { opacity: .35; cursor: not-allowed; }
-
-    .error {
-      background: var(--red-bg); border: 1px solid var(--red-bd); border-radius: 9px;
-      padding: .7rem 1rem; color: var(--red-tx); font-size: .82rem;
-      margin-bottom: 1rem; display: none;
+    .btn::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(rgba(255,255,255,.15), transparent);
+      opacity: 0; transition: opacity .2s;
     }
-    .error.on { display: block; }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 10px 35px var(--glow); }
+    .btn:hover::before { opacity: 1; }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
 
-    .success {
-      background: var(--green-bg); border: 1px solid var(--green-bd); border-radius: 9px;
-      padding: .7rem 1rem; color: var(--green); font-size: .82rem;
-      margin-bottom: 1rem; display: none;
+    /* Shimmer on hover */
+    .btn::after {
+      content: '';
+      position: absolute; top: -50%; left: -60%;
+      width: 40%; height: 200%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent);
+      transform: skewX(-20deg);
+      transition: left .5s ease;
     }
-    .success.on { display: block; }
+    .btn:hover::after { left: 130%; }
 
+    /* ── MESSAGES ── */
+    .error, .success {
+      border-radius: 10px; padding: .7rem 1rem; font-size: .82rem;
+      margin-bottom: 1rem; display: none; animation: fadeIn .3s ease;
+    }
+    .error.on { display: block; background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3); color: #f87171; }
+    .success.on { display: block; background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.3); color: #4ade80; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+    /* ── FOOTER ── */
     .login-footer {
       text-align: center; margin-top: 1.5rem;
       font-size: .75rem; color: var(--muted);
     }
-    .login-footer a { color: var(--blue); }
+    .login-footer a {
+      background: var(--grad); -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent; background-clip: text;
+      font-weight: 600;
+    }
+
+    /* Divider */
+    .divider {
+      display: flex; align-items: center; gap: .8rem;
+      margin: 1rem 0; color: var(--muted); font-size: .7rem;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: var(--border);
+    }
   </style>
 </head>
 <body>
+
+<div class="bg-orbs">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+<canvas id="sparks"></canvas>
+
+<div class="login-wrap">
   <div class="login-box">
     <div class="logo">
       <div class="logo-icon">🎯</div>
       <h1>ProspectHunter</h1>
-      <p>Connecte-toi pour prospecter</p>
+      <p>Ton empire commence ici 👑</p>
     </div>
 
     <div class="tabs">
@@ -147,7 +227,6 @@
     <div id="error" class="error"></div>
     <div id="success" class="success"></div>
 
-    <!-- Login form -->
     <div id="form-login" class="form on">
       <div class="field">
         <label>Email</label>
@@ -155,12 +234,11 @@
       </div>
       <div class="field">
         <label>Mot de passe</label>
-        <input class="inp" type="password" id="login-pass" placeholder="Ton mot de passe secret 🤫" autocomplete="current-password">
+        <input class="inp" type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
       </div>
       <button class="btn" id="btn-login" onclick="doLogin()">Let's go 🚀</button>
     </div>
 
-    <!-- Register form -->
     <div id="form-register" class="form">
       <div class="field">
         <label>Email</label>
@@ -168,11 +246,11 @@
       </div>
       <div class="field">
         <label>Mot de passe</label>
-        <input class="inp" type="password" id="reg-pass" placeholder="Un truc solide (6 car. mini)" autocomplete="new-password">
+        <input class="inp" type="password" id="reg-pass" placeholder="6 caractères minimum" autocomplete="new-password">
       </div>
       <div class="field">
-        <label>Confirmer le mot de passe</label>
-        <input class="inp" type="password" id="reg-pass2" placeholder="Le même, en mieux 😤" autocomplete="new-password">
+        <label>Confirmer</label>
+        <input class="inp" type="password" id="reg-pass2" placeholder="Le même, confirme bb" autocomplete="new-password">
       </div>
       <button class="btn" id="btn-register" onclick="doRegister()">Créer mon empire 👑</button>
     </div>
@@ -181,26 +259,54 @@
       <a href="/">← Retour à l'accueil</a>
     </div>
   </div>
+</div>
 
 <script>
-// If already logged in, redirect
-if (localStorage.getItem('ph_token')) {
-  window.location.href = '/app';
+// ── SPARKS ──
+const canvas = document.getElementById('sparks');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+
+function resize() { W = canvas.width = innerWidth; H = canvas.height = innerHeight; }
+resize(); addEventListener('resize', resize);
+
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random() * W;
+    this.y = Math.random() * H;
+    this.r = Math.random() * 1.5 + .3;
+    this.vx = (Math.random() - .5) * .3;
+    this.vy = -Math.random() * .5 - .1;
+    this.life = 1; this.decay = Math.random() * .003 + .001;
+    this.hue = Math.random() < .5 ? 260 : 200;
+  }
+  update() {
+    this.x += this.vx; this.y += this.vy; this.life -= this.decay;
+    if (this.life <= 0) this.reset();
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${this.hue},80%,70%,${this.life * .6})`;
+    ctx.fill();
+  }
 }
 
-// URL params
-const urlParams = new URLSearchParams(window.location.search);
+for (let i = 0; i < 120; i++) particles.push(new Particle());
+(function loop() {
+  ctx.clearRect(0, 0, W, H);
+  particles.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(loop);
+})();
+
+// ── AUTH ──
+if (localStorage.getItem('ph_token')) window.location.href = '/app';
+
+const urlParams = new URLSearchParams(location.search);
 const refCode = urlParams.get('ref');
-const tabParam = urlParams.get('tab');
-if (tabParam === 'register') {
-  setTimeout(() => showTab('register'), 50);
-}
-if (refCode) {
-  setTimeout(() => {
-    showTab('register');
-    showSuccess('Ton pote t\'a invité ! Inscris-toi et récupère 5 crédits gratuits 🎁');
-  }, 100);
-}
+if (urlParams.get('tab') === 'register') setTimeout(() => showTab('register'), 50);
+if (refCode) setTimeout(() => { showTab('register'); showSuccess('Ton pote t\'a invité ! +5 crédits gratuits 🎁'); }, 100);
 
 function showTab(tab) {
   document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('on', i === (tab === 'login' ? 0 : 1)));
@@ -208,46 +314,27 @@ function showTab(tab) {
   document.getElementById('form-register').classList.toggle('on', tab === 'register');
   hideMessages();
 }
-
-function showError(msg) {
-  const el = document.getElementById('error');
-  el.textContent = msg; el.classList.add('on');
-  document.getElementById('success').classList.remove('on');
-}
-function showSuccess(msg) {
-  const el = document.getElementById('success');
-  el.textContent = msg; el.classList.add('on');
-  document.getElementById('error').classList.remove('on');
-}
-function hideMessages() {
-  document.getElementById('error').classList.remove('on');
-  document.getElementById('success').classList.remove('on');
-}
+function showError(msg) { const e = document.getElementById('error'); e.textContent = msg; e.classList.add('on'); document.getElementById('success').classList.remove('on'); }
+function showSuccess(msg) { const e = document.getElementById('success'); e.textContent = msg; e.classList.add('on'); document.getElementById('error').classList.remove('on'); }
+function hideMessages() { document.getElementById('error').classList.remove('on'); document.getElementById('success').classList.remove('on'); }
 
 async function doLogin() {
   hideMessages();
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-pass').value;
   if (!email || !password) return showError('Remplis tous les champs 🙄');
-
-  document.getElementById('btn-login').disabled = true;
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true; btn.textContent = 'Connexion...';
   try {
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
+    const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
     const data = await res.json();
     if (!res.ok) return showError(data.error || 'Email ou mot de passe incorrect.');
-
     localStorage.setItem('ph_token', data.token);
     localStorage.setItem('ph_user', JSON.stringify(data.user));
-    window.location.href = '/app';
-  } catch (err) {
-    showError('Pas de connexion. Vérifie ton réseau 📡');
-  } finally {
-    document.getElementById('btn-login').disabled = false;
-  }
+    btn.textContent = '✅ Connexion réussie !';
+    setTimeout(() => window.location.href = '/app', 400);
+  } catch { showError('Pas de connexion. Vérifie ton réseau 📡'); }
+  finally { btn.disabled = false; if (btn.textContent === 'Connexion...') btn.textContent = 'Let\'s go 🚀'; }
 }
 
 async function doRegister() {
@@ -255,33 +342,24 @@ async function doRegister() {
   const email = document.getElementById('reg-email').value.trim();
   const password = document.getElementById('reg-pass').value;
   const password2 = document.getElementById('reg-pass2').value;
-
   if (!email || !password || !password2) return showError('Tous les champs sont requis.');
-  if (password !== password2) return showError('Les mots de passe ne correspondent pas.');
-  if (password.length < 6) return showError('Mot de passe trop court (6 caractères minimum).');
-
-  document.getElementById('btn-register').disabled = true;
+  if (password !== password2) return showError('Les mots de passe ne correspondent pas 🙃');
+  if (password.length < 6) return showError('Mot de passe trop court (6 car. mini).');
+  const btn = document.getElementById('btn-register');
+  btn.disabled = true; btn.textContent = 'Création...';
   try {
-    const res = await fetch('/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, referral_code: refCode || undefined }),
-    });
+    const res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password, referral_code: refCode || undefined }) });
     const data = await res.json();
     if (!res.ok) return showError(data.error || 'Erreur lors de l\'inscription.');
-
     localStorage.setItem('ph_token', data.token);
     localStorage.setItem('ph_user', JSON.stringify(data.user));
-    window.location.href = '/app';
-  } catch (err) {
-    showError('Pas de réseau. Vérifie ta connexion 📡');
-  } finally {
-    document.getElementById('btn-register').disabled = false;
-  }
+    btn.textContent = '👑 Bienvenue boss !';
+    setTimeout(() => window.location.href = '/app', 500);
+  } catch { showError('Pas de réseau 📡'); }
+  finally { btn.disabled = false; }
 }
 
-// Enter key support
-document.addEventListener('keydown', (e) => {
+document.addEventListener('keydown', e => {
   if (e.key === 'Enter') {
     if (document.getElementById('form-login').classList.contains('on')) doLogin();
     else doRegister();

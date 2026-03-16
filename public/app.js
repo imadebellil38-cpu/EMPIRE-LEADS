@@ -191,6 +191,12 @@ function updateBadges() {
   document.getElementById('badge-meeting').textContent   = counts.meeting_to_set + counts.meeting_confirmed;
   document.getElementById('badge-closed').textContent    = counts.closed;
   document.getElementById('badge-refused').textContent   = counts.refused;
+
+  // Sub-tab badges
+  const bMts = document.getElementById('badge-meeting_to_set');
+  const bMc  = document.getElementById('badge-meeting_confirmed');
+  if (bMts) { bMts.textContent = counts.meeting_to_set || ''; bMts.style.display = counts.meeting_to_set ? '' : 'none'; }
+  if (bMc)  { bMc.textContent  = counts.meeting_confirmed || ''; bMc.style.display  = counts.meeting_confirmed ? '' : 'none'; }
 }
 
 /* ─────────────────────────────────────────
@@ -256,7 +262,12 @@ function getFilteredProspects() {
    RENDER LIST (desktop + mobile)
 ───────────────────────────────────────── */
 function renderList() {
-  const prospects = getFilteredProspects().sort((a, b) => calcHeat(b) - calcHeat(a));
+  const sortMode = document.getElementById('sort-select')?.value || 'heat';
+  const prospects = getFilteredProspects().sort((a, b) => {
+    if (sortMode === 'recent') return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+    if (sortMode === 'oldest') return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+    return calcHeat(b) - calcHeat(a);
+  });
   const empty     = document.getElementById('empty-state');
   const tblWrap   = document.getElementById('tbl-wrap');
   const cardsWrap = document.getElementById('cards-wrap');
@@ -303,6 +314,30 @@ function calcHeat(p) {
   return score;
 }
 
+function buildDateChip(p) {
+  const now = new Date();
+  let dateStr = null, isUrgent = false, label = '';
+
+  if ((p.pipeline_stage === 'meeting_to_set' || p.pipeline_stage === 'meeting_confirmed') && p.meeting_date) {
+    const d = new Date(p.meeting_date);
+    const hasTime = p.meeting_date.includes(' ');
+    if (hasTime && d < now) isUrgent = true;
+    dateStr = d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+    const timeStr = hasTime ? ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '';
+    label = `📅 RDV ${dateStr}${timeStr}`;
+  } else if (p.pipeline_stage === 'to_recall' && p.rappel) {
+    const d = new Date(p.rappel);
+    const hasTime = p.rappel.includes(' ');
+    if (hasTime && d < now) isUrgent = true;
+    dateStr = d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+    const timeStr = hasTime ? ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }) : '';
+    label = `🔄 Rappel ${dateStr}${timeStr}`;
+  }
+
+  if (!label) return '';
+  return `<div class="row-date-chip${isUrgent ? ' row-date-urgent' : ''}">${label}</div>`;
+}
+
 function buildHeatBadge(p) {
   const score = calcHeat(p);
   if (score >= 6) return `<span class="heat-badge heat-burning" title="Score ${score}/9">🔥🔥 Brûlant</span>`;
@@ -346,18 +381,21 @@ function buildMainAction(p) {
   }
   if (stage === 'to_recall') {
     return `
+      <button class="act-btn act-btn-back" onclick="moveStage(${id},'cold_call')" title="Revenir en Cold Call">◀ Retour</button>
       <button class="act-btn act-btn-meeting act-btn-primary" onclick="moveStage(${id},'meeting_to_set')">📅 Poser RDV</button>
       <button class="act-btn act-btn-refuse" onclick="moveStage(${id},'refused')">❌ Refus</button>
     `;
   }
   if (stage === 'meeting_to_set') {
     return `
+      <button class="act-btn act-btn-back" onclick="moveStage(${id},'to_recall')" title="Revenir À Rappeler">◀ Retour</button>
       <button class="act-btn act-btn-confirm act-btn-primary" onclick="moveStage(${id},'meeting_confirmed')">✅ RDV Confirmé</button>
       <button class="act-btn act-btn-refuse" onclick="moveStage(${id},'refused')">❌ Refus</button>
     `;
   }
   if (stage === 'meeting_confirmed') {
     return `
+      <button class="act-btn act-btn-back" onclick="moveStage(${id},'meeting_to_set')" title="Revenir RDV à poser">◀ Retour</button>
       <button class="act-btn act-btn-close act-btn-primary" onclick="moveStage(${id},'closed')">💰 Closé !</button>
       <button class="act-btn act-btn-refuse" onclick="moveStage(${id},'refused')">❌ Refus</button>
     `;
@@ -392,18 +430,28 @@ function renderTable(prospects) {
       : '';
 
     const callLink = p.phone
-      ? `<a class="act-btn act-btn-call" href="tel:${escAttr(p.phone)}">📞</a>`
-      : '';
+      ? `<a class="btn-call-big" href="tel:${escAttr(p.phone)}">📞 Appeler</a>`
+      : `<span class="btn-call-big btn-call-disabled">Pas de tél.</span>`;
 
+    const dateChip = buildDateChip(p);
+    const objBadge = (p.pipeline_stage === 'refused' && p.objection)
+      ? `<span class="refused-obj-badge">❌ ${esc(p.objection)}</span>` : '';
+    const notesBtn = p.notes
+      ? `<button class="notes-peek-btn" onclick="toggleNotesPreview(${p.id}, this)" title="Voir les notes">📝 Notes</button>
+         <div class="notes-preview" id="notes-preview-${p.id}" style="display:none">${esc(p.notes)}</div>`
+      : '';
     tr.innerHTML = `
       <td>
         <div class="prospect-name" onclick="openDetail(${p.id})">${esc(p.name || '—')}</div>
         ${p.address ? `<div class="prospect-addr">${esc(p.address)}</div>` : ''}
+        ${dateChip}
+        ${objBadge}
+        ${notesBtn}
       </td>
       <td>
         <div class="phone-cell">
           ${p.phone
-            ? `<a class="phone-call-link" href="tel:${escAttr(p.phone)}" title="Appuyer pour appeler">📞 ${esc(p.phone)}</a>`
+            ? `<a class="phone-call-link" href="tel:${escAttr(p.phone)}" title="Appuyer pour appeler"><span>📞 ${esc(p.phone)}</span></a>`
             : `<span class="phone-text">—</span>`
           }
           ${phoneCopy}
@@ -417,9 +465,9 @@ function renderTable(prospects) {
       </td>
       <td><div class="actions-cell">${actions}</div></td>
       <td>
-        <div class="actions-cell">
+        <div class="actions-cell row-quick-actions">
           ${callLink}
-          <button class="btn-more" onclick="openDetail(${p.id})" title="Voir fiche">···</button>
+          <button class="btn-fiche" onclick="openDetail(${p.id})" title="Voir la fiche complète">📋 Fiche</button>
         </div>
       </td>
     `;
@@ -457,7 +505,8 @@ function renderCards(prospects) {
         </div>
         ${callBtn}
       </div>
-      <div class="card-signals">${buildHeatBadge(p)}${signals ? ' ' + signals : ''}</div>
+      <div class="card-signals">${buildHeatBadge(p)}${signals ? ' ' + signals : ''}${buildDateChip(p)}${(p.pipeline_stage === 'refused' && p.objection) ? `<span class="refused-obj-badge">❌ ${esc(p.objection)}</span>` : ''}</div>
+      ${p.notes ? `<div class="card-notes-row"><button class="notes-peek-btn" onclick="toggleNotesPreview('c${p.id}', this)">📝 Notes</button><div class="notes-preview" id="notes-preview-c${p.id}" style="display:none">${esc(p.notes)}</div></div>` : ''}
       <div class="card-actions">${actions}</div>
     `;
     wrap.appendChild(card);
@@ -467,19 +516,136 @@ function renderCards(prospects) {
 /* ─────────────────────────────────────────
    MOVE STAGE (optimistic)
 ───────────────────────────────────────── */
-async function moveStage(id, stage) {
+/* ─────────────────────────────────────────
+   OBJECTION MODAL
+───────────────────────────────────────── */
+let _objectionTargetId = null;
+let _objectionValue    = '';
+let _stageTargetId     = null;
+let _stageTargetStage  = null;
+
+let _dealTargetId = null;
+let _dealType = ''; let _dealRec = '';
+
+function moveStage(id, stage) {
+  if (stage === 'refused') {
+    _objectionTargetId = id;
+    _objectionValue    = '';
+    document.querySelectorAll('.obj-chip').forEach(c => c.classList.remove('obj-chip-selected'));
+    document.getElementById('objection-input').value = '';
+    document.getElementById('objection-overlay').style.display = 'flex';
+    return;
+  }
+  if (stage === 'closed') {
+    _dealTargetId = id; _dealType = ''; _dealRec = '';
+    document.querySelectorAll('.deal-chip').forEach(c => c.classList.remove('deal-chip-selected'));
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('deal-date-input').value = today;
+    document.getElementById('deal-modal-overlay').style.display = 'flex';
+    return;
+  }
+  if (stage === 'to_recall' || stage === 'meeting_to_set' || stage === 'meeting_confirmed') {
+    _stageTargetId    = id;
+    _stageTargetStage = stage;
+    const isRecall = stage === 'to_recall';
+    document.getElementById('stage-modal-title').textContent       = isRecall ? '🔄 À Rappeler — date & heure' : '📅 Rendez-vous — date & heure';
+    document.getElementById('stage-modal-confirm-btn').textContent = isRecall ? 'Enregistrer le rappel' : 'Confirmer le RDV';
+    document.getElementById('stage-time-optional').style.display   = isRecall ? '' : 'none';
+    document.getElementById('stage-date-input').value  = '';
+    document.getElementById('stage-time-input').value  = '';
+    document.getElementById('stage-notes-input').value = '';
+    document.querySelectorAll('.date-shortcut').forEach(b => b.classList.remove('date-shortcut-active'));
+    document.getElementById('stage-modal-overlay').style.display = 'flex';
+    return;
+  }
+  _doMoveStage(id, stage, null, null, null, null);
+}
+
+function setDateShortcut(daysFromNow) {
+  const d = new Date();
+  d.setDate(d.getDate() + daysFromNow);
+  const yyyy = d.getFullYear();
+  const mm   = String(d.getMonth() + 1).padStart(2, '0');
+  const dd   = String(d.getDate()).padStart(2, '0');
+  document.getElementById('stage-date-input').value = `${yyyy}-${mm}-${dd}`;
+  document.querySelectorAll('.date-shortcut').forEach(b => b.classList.remove('date-shortcut-active'));
+  event.target.classList.add('date-shortcut-active');
+}
+
+function closeStageModal() {
+  document.getElementById('stage-modal-overlay').style.display = 'none';
+  _stageTargetId = null; _stageTargetStage = null;
+}
+
+function confirmStageModal() {
+  if (!_stageTargetId) return;
+  // Capture before closeStageModal() nulls them
+  const id       = _stageTargetId;
+  const stage    = _stageTargetStage;
+  const date     = document.getElementById('stage-date-input').value;
+  const time     = document.getElementById('stage-time-input').value;
+  const notes    = document.getElementById('stage-notes-input').value.trim();
+  const isRecall = stage === 'to_recall';
+  const datetime = date ? (time ? `${date} ${time}` : date) : null;
+  closeStageModal();
+  if (isRecall) {
+    _doMoveStage(id, 'to_recall', null, datetime, null, notes || null);
+  } else {
+    _doMoveStage(id, stage, null, null, datetime, notes || null);
+  }
+}
+
+function selectObjChip(btn) {
+  document.querySelectorAll('.obj-chip').forEach(c => c.classList.remove('obj-chip-selected'));
+  btn.classList.add('obj-chip-selected');
+  document.getElementById('objection-input').value = '';
+  _objectionValue = btn.textContent;
+}
+
+function onObjInput(input) {
+  document.querySelectorAll('.obj-chip').forEach(c => c.classList.remove('obj-chip-selected'));
+  _objectionValue = input.value.trim();
+}
+
+function closeObjectionModal() {
+  document.getElementById('objection-overlay').style.display = 'none';
+  _objectionTargetId = null;
+}
+
+function confirmObjection() {
+  if (!_objectionTargetId) return;
+  const id  = _objectionTargetId; // capture AVANT close qui null l'id
+  const obj = _objectionValue || document.getElementById('objection-input').value.trim() || 'Non précisé';
+  closeObjectionModal();
+  _doMoveStage(id, 'refused', obj, null, null, null);
+}
+
+async function _doMoveStage(id, stage, objection, rappel, meeting_date, notes, deal_type, deal_date, deal_recurrence) {
   const prospect = allProspects.find(p => p.id === id);
   if (!prospect) return;
 
   const oldStage = prospect.pipeline_stage;
-  // Optimistic update
   prospect.pipeline_stage = stage;
+  if (objection)       prospect.objection       = objection;
+  if (rappel)          prospect.rappel          = rappel;
+  if (meeting_date)    prospect.meeting_date    = meeting_date;
+  if (notes)           prospect.notes           = notes;
+  if (deal_type)       prospect.deal_type       = deal_type;
+  if (deal_date)       prospect.deal_date       = deal_date;
+  if (deal_recurrence) prospect.deal_recurrence = deal_recurrence;
   updateBadges();
   renderList();
 
-  const res = await apiPut(`/api/prospects/${id}/stage`, { stage });
+  const body = { stage };
+  if (objection)       body.objection       = objection;
+  if (rappel)          body.rappel          = rappel;
+  if (meeting_date)    body.meeting_date    = meeting_date;
+  if (notes)           body.notes           = notes;
+  if (deal_type)       body.deal_type       = deal_type;
+  if (deal_date)       body.deal_date       = deal_date;
+  if (deal_recurrence) body.deal_recurrence = deal_recurrence;
+  const res = await apiPut(`/api/prospects/${id}/stage`, body);
   if (!res || !res.ok) {
-    // Revert
     prospect.pipeline_stage = oldStage;
     updateBadges();
     renderList();
@@ -492,15 +658,87 @@ async function moveStage(id, stage) {
     meeting_to_set:     '📅 Rendez-vous à poser !',
     meeting_confirmed:  '✅ RDV confirmé !',
     closed:             '💰 CLOSÉ ! Bravo !',
-    refused:            '❌ Marqué comme refusé.',
+    refused:            `❌ Refus enregistré${objection ? ' — ' + objection : ''}.`,
     cold_call:          '↩️ Remis en Cold Call.',
   };
   const isSuccess = stage === 'closed';
   showToast(stageMessages[stage] || 'Étape mise à jour.', isSuccess ? 'success' : 'info');
 
-  if (stage === 'closed') {
-    launchConfetti();
+  if (stage === 'closed') launchConfetti();
+}
+
+/* ── DEAL MODAL ── */
+function selectDealChip(group, btn, val) {
+  const selector = group === 'type' ? '#deal-type-chips .deal-chip' : '#deal-rec-chips .deal-chip';
+  document.querySelectorAll(selector).forEach(c => c.classList.remove('deal-chip-selected'));
+  btn.classList.add('deal-chip-selected');
+  if (group === 'type') _dealType = val; else _dealRec = val;
+}
+function closeDealModal() {
+  document.getElementById('deal-modal-overlay').style.display = 'none';
+  _dealTargetId = null;
+}
+function confirmDeal() {
+  if (!_dealTargetId) return;
+  const id       = _dealTargetId;
+  const dealDate = document.getElementById('deal-date-input').value;
+  closeDealModal();
+  _doMoveStage(id, 'closed', null, null, null, null, _dealType || null, dealDate || null, _dealRec || null);
+}
+
+/* ── CALL ATTEMPTS ── */
+let _attemptType = ''; let _attemptResult = '';
+
+function selectAttemptChip(group, btn) {
+  const cls = group === 'type' ? '.attempt-type-chip' : '.attempt-result-chip';
+  document.querySelectorAll(cls).forEach(c => c.classList.remove('chip-selected'));
+  btn.classList.add('chip-selected');
+  if (group === 'type') _attemptType = btn.dataset.val;
+  else _attemptResult = btn.dataset.val;
+}
+
+async function logAttempt() {
+  if (!currentProspect) return;
+  if (!_attemptType)   return showToast('Choisis un type de contact', 'error');
+  if (!_attemptResult) return showToast('Choisis un résultat', 'error');
+  const note = document.getElementById('attempt-note').value.trim();
+  const res = await apiPost(`/api/prospects/${currentProspect.id}/attempts`, {
+    attempt_type: _attemptType, result: _attemptResult, note
+  });
+  if (!res || res.error) return showToast(res?.error || 'Erreur', 'error');
+  document.getElementById('attempt-note').value = '';
+  _attemptType = ''; _attemptResult = '';
+  document.querySelectorAll('.attempt-type-chip,.attempt-result-chip').forEach(c => c.classList.remove('chip-selected'));
+  showToast('Contact loggué ✅', 'success');
+  loadAttempts(currentProspect.id);
+}
+
+async function loadAttempts(prospectId) {
+  const attempts = await apiGet(`/api/prospects/${prospectId}/attempts`);
+  const el = document.getElementById('attempt-list');
+  if (!el) return;
+  const TYPE_ICON   = { call:'📞', sms:'💬', email:'📧', dm:'📱' };
+  const RESULT_LABEL = { no_answer:'Pas répondu', voicemail:'Messagerie', callback:'Rappel demandé', positive:'Positif ✅', negative:'Négatif ❌' };
+  if (!attempts || !attempts.length) {
+    el.innerHTML = '<div class="activity-empty">Aucun contact loggué.</div>'; return;
   }
+  el.innerHTML = attempts.map(a => {
+    const d = new Date(a.created_at);
+    const when = d.toLocaleDateString('fr-FR', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+    return `<div class="attempt-row">
+      <span class="attempt-icon">${TYPE_ICON[a.attempt_type] || '📞'}</span>
+      <span class="attempt-info"><strong>${RESULT_LABEL[a.result] || a.result}</strong>${a.note ? ` — <em>${esc(a.note)}</em>` : ''}</span>
+      <span class="attempt-date">${when}</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleNotesPreview(id, btn) {
+  const el = document.getElementById(`notes-preview-${id}`);
+  if (!el) return;
+  const open = el.style.display === 'none';
+  el.style.display = open ? '' : 'none';
+  btn.textContent = open ? '📝 Masquer' : '📝 Notes';
 }
 
 /* ─────────────────────────────────────────
@@ -556,6 +794,7 @@ function openDetail(id) {
   if (savedEl) savedEl.style.display = 'none';
 
   switchModalTab('info');
+  loadAttempts(p.id); // charge l'historique des contacts
 
   const overlay = document.getElementById('detail-overlay');
   if (overlay) overlay.classList.add('open');
@@ -889,6 +1128,11 @@ function renderNicheChips(cat) {
       document.getElementById('scan-niche').value = n.label;
       document.querySelectorAll('.niche-chip').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      const disp = document.getElementById('niche-selected-display');
+      if (disp) {
+        disp.innerHTML = `✅ Sélectionné : <strong>${n.icon} ${n.label}</strong> — clique sur <b>⚡ Lancer</b> pour démarrer`;
+        disp.style.display = '';
+      }
     };
     container.appendChild(btn);
   });
@@ -1111,58 +1355,118 @@ async function loadRappels() {
   const prospects = await apiGet('/api/prospects');
   if (!prospects) return;
 
-  const today = new Date(); today.setHours(0,0,0,0);
-  const endWeek = new Date(today); endWeek.setDate(endWeek.getDate() + 7);
+  const now     = new Date();
+  const today   = new Date(); today.setHours(23,59,59,999);
+  const endWeek = new Date(); endWeek.setDate(endWeek.getDate() + 7); endWeek.setHours(23,59,59,999);
 
-  const withRappel = prospects
-    .filter(p => p.rappel)
-    .sort((a, b) => new Date(a.rappel) - new Date(b.rappel));
+  // Build unified agenda items from rappels + meetings
+  const items = [];
+  prospects.forEach(p => {
+    if (p.pipeline_stage === 'to_recall' && p.rappel) {
+      items.push({ ...p, _agendaDate: p.rappel, _agendaType: 'recall' });
+    }
+    if ((p.pipeline_stage === 'meeting_to_set' || p.pipeline_stage === 'meeting_confirmed') && p.meeting_date) {
+      items.push({ ...p, _agendaDate: p.meeting_date, _agendaType: 'meeting' });
+    }
+  });
 
-  const todayList   = withRappel.filter(p => { const d = new Date(p.rappel); d.setHours(0,0,0,0); return d <= today; });
-  const weekList    = withRappel.filter(p => { const d = new Date(p.rappel); d.setHours(0,0,0,0); return d > today && d <= endWeek; });
-  const laterList   = withRappel.filter(p => { const d = new Date(p.rappel); d.setHours(0,0,0,0); return d > endWeek; });
+  // Sort chronologically
+  items.sort((a, b) => new Date(a._agendaDate) - new Date(b._agendaDate));
 
-  renderRappelList('rappel-today-list', todayList, 'urgent');
-  renderRappelList('rappel-week-list', weekList, 'soon');
-  renderRappelList('rappel-later-list', laterList, 'later');
+  const overdueList = items.filter(p => new Date(p._agendaDate) <= today);
+  const weekList    = items.filter(p => { const d = new Date(p._agendaDate); return d > today && d <= endWeek; });
+  const laterList   = items.filter(p => new Date(p._agendaDate) > endWeek);
 
-  document.getElementById('rappel-today-section').style.display = todayList.length ? '' : 'none';
-  document.getElementById('rappel-week-section').style.display  = weekList.length  ? '' : 'none';
-  document.getElementById('rappel-later-section').style.display = laterList.length ? '' : 'none';
-  document.getElementById('rappel-empty').style.display = withRappel.length === 0 ? '' : 'none';
+  renderAgendaList('agenda-overdue-list', overdueList, now);
+  renderAgendaList('agenda-week-list',    weekList,    now);
+  renderAgendaList('agenda-later-list',   laterList,   now);
 
-  // Dot in nav
+  document.getElementById('agenda-overdue-section').style.display = overdueList.length ? '' : 'none';
+  document.getElementById('agenda-week-section').style.display    = weekList.length    ? '' : 'none';
+  document.getElementById('agenda-later-section').style.display   = laterList.length   ? '' : 'none';
+  document.getElementById('rappel-empty').style.display           = items.length === 0 ? '' : 'none';
+
+  // Nav dot
   const dot = document.getElementById('nav-notif-dot');
-  if (dot) dot.style.display = todayList.length > 0 ? '' : 'none';
+  if (dot) dot.style.display = overdueList.length > 0 ? '' : 'none';
 
-  // Browser notification for today
-  if (todayList.length > 0 && Notification.permission === 'granted') {
+  // Browser notification
+  if (overdueList.length > 0 && Notification.permission === 'granted') {
     new Notification('🔔 ProspectHunter', {
-      body: `${todayList.length} rappel(s) prévu(s) aujourd'hui !`,
+      body: `${overdueList.length} rappel(s)/RDV prévu(s) aujourd'hui !`,
       icon: '/favicon.ico'
     });
   }
 }
 
-function renderRappelList(containerId, items, type) {
+function renderAgendaList(containerId, items, now) {
   const el = document.getElementById(containerId);
-  if (!items.length) { el.innerHTML = ''; return; }
+  if (!el || !items.length) { if (el) el.innerHTML = ''; return; }
+
   el.innerHTML = items.map(p => {
-    const d = new Date(p.rappel);
-    const dateStr = d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
-    const stageLabel = { cold_call:'📞 Cold Call', to_recall:'🔄 À Rappeler', meeting_to_set:'📅 RDV à poser', meeting_confirmed:'✅ RDV confirmé', closed:'✅ Closé', refused:'❌ Refusé' }[p.pipeline_stage] || p.pipeline_stage;
+    const dateStr   = p._agendaDate;
+    const d         = new Date(dateStr);
+    const hasTime   = dateStr.includes(' ') && dateStr.split(' ')[1] !== '00:00';
+    const isOverdue = hasTime && d < now;
+    const isMeeting = p._agendaType === 'meeting';
+
+    const timeDisplay = hasTime
+      ? d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+      : '—';
+    const dayDisplay = d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+
+    const borderClass = isOverdue ? 'agenda-card-overdue'
+                      : isMeeting ? 'agenda-card-meeting'
+                      : 'agenda-card-recall';
+
+    const tag = isOverdue
+      ? `<span class="agenda-tag tag-overdue">🚨 EN RETARD</span>`
+      : isMeeting
+        ? `<span class="agenda-tag tag-meeting">📅 RDV</span>`
+        : `<span class="agenda-tag tag-recall">🔄 Rappel</span>`;
+
+    const stageLabel = {
+      to_recall: 'À Rappeler', meeting_to_set: 'RDV à poser', meeting_confirmed: 'RDV confirmé'
+    }[p.pipeline_stage] || p.pipeline_stage;
+
+    const notesPreview = p.notes ? esc(p.notes.substring(0, 60)) + (p.notes.length > 60 ? '…' : '') : '';
+    const notesFull    = p.notes && p.notes.length > 60 ? esc(p.notes) : '';
+
     return `
-      <div class="rappel-card rappel-${type}" onclick="openDetail(${p.id})">
-        <div class="rappel-card-left">
-          <div class="rappel-card-name">${esc(p.name)}</div>
-          <div class="rappel-card-meta">${p.phone ? esc(p.phone) + ' · ' : ''}${stageLabel}</div>
-          ${p.notes ? `<div class="rappel-card-notes">${esc(p.notes.substring(0, 80))}${p.notes.length > 80 ? '…' : ''}</div>` : ''}
+      <div class="agenda-card ${borderClass}" onclick="openDetail(${p.id})">
+        <div class="agenda-hour-col ${isOverdue ? 'hour-overdue' : isMeeting ? 'hour-meeting' : 'hour-recall'}">
+          <div class="agenda-hour">${timeDisplay}</div>
+          <div class="agenda-day">${dayDisplay}</div>
         </div>
-        <div class="rappel-card-date rappel-date-${type}">
-          <span>${dateStr}</span>
+        <div class="agenda-content">
+          <div class="agenda-top-row">
+            <span class="agenda-name">${esc(p.name || '—')}</span>
+            ${tag}
+          </div>
+          ${p.phone ? `<a class="agenda-phone" href="tel:${escAttr(p.phone)}" onclick="event.stopPropagation()">📞 ${esc(p.phone)}</a>` : ''}
+          ${notesPreview ? `
+            <div class="agenda-notes-row" onclick="event.stopPropagation()">
+              <span class="agenda-notes-preview" id="notes-prev-${p.id}">${notesPreview}</span>
+              ${notesFull ? `
+                <span class="agenda-notes-full" id="notes-full-${p.id}" style="display:none">${notesFull}</span>
+                <button class="agenda-expand-btn" id="expand-btn-${p.id}" onclick="toggleAgendaNotes(${p.id})">▼</button>
+              ` : ''}
+            </div>
+          ` : ''}
         </div>
       </div>`;
   }).join('');
+}
+
+function toggleAgendaNotes(id) {
+  const prev = document.getElementById(`notes-prev-${id}`);
+  const full = document.getElementById(`notes-full-${id}`);
+  const btn  = document.getElementById(`expand-btn-${id}`);
+  if (!full) return;
+  const expanded = full.style.display !== 'none';
+  prev.style.display = expanded ? '' : 'none';
+  full.style.display = expanded ? 'none' : '';
+  btn.textContent    = expanded ? '▼' : '▲';
 }
 
 async function requestNotifPerm() {
@@ -1177,6 +1481,55 @@ async function requestNotifPerm() {
   } else {
     showToast('Notifications refusées', 'error');
   }
+}
+
+/* ─────────────────────────────────────────
+   AGENDA PANEL (quick view)
+───────────────────────────────────────── */
+function openAgenda() {
+  const panel = document.getElementById('agenda-panel');
+  panel.style.display = panel.style.display === 'none' ? '' : 'none';
+  if (panel.style.display !== 'none') renderAgendaPanel();
+}
+function closeAgenda() {
+  document.getElementById('agenda-panel').style.display = 'none';
+}
+
+function renderAgendaPanel() {
+  const now = new Date();
+  const items = allProspects
+    .filter(p => (p.rappel && p.pipeline_stage === 'to_recall') || (p.meeting_date && (p.pipeline_stage === 'meeting_to_set' || p.pipeline_stage === 'meeting_confirmed')))
+    .map(p => ({
+      ...p,
+      _date: new Date(p.pipeline_stage === 'to_recall' ? p.rappel : p.meeting_date),
+      _type: p.pipeline_stage === 'to_recall' ? 'rappel' : 'rdv'
+    }))
+    .sort((a, b) => a._date - b._date);
+
+  // Update count badge
+  const countEl = document.getElementById('agenda-count');
+  if (countEl) { countEl.textContent = items.length; countEl.style.display = items.length ? '' : 'none'; }
+
+  const body = document.getElementById('agenda-panel-body');
+  if (!items.length) { body.innerHTML = '<div class="agenda-empty">Aucun rappel ou RDV planifié.</div>'; return; }
+
+  body.innerHTML = items.map(p => {
+    const isOverdue = p._date < now;
+    const dayStr  = p._date.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+    const timeStr = (p.rappel || p.meeting_date || '').includes(' ')
+      ? p._date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+      : null;
+    const notePreview = p.notes ? p.notes.substring(0, 60) + (p.notes.length > 60 ? '…' : '') : '';
+    return `<div class="agenda-item ${isOverdue ? 'agenda-overdue' : ''}" onclick="openDetail(${p.id}); closeAgenda();">
+      <div class="agenda-item-time">
+        ${isOverdue ? '🔴' : p._type === 'rdv' ? '📅' : '🔄'}
+        <strong>${timeStr || '—'}</strong>
+        <span class="agenda-item-day">${dayStr}</span>
+      </div>
+      <div class="agenda-item-name">${esc(p.name || '—')}</div>
+      ${notePreview ? `<div class="agenda-item-note">${esc(notePreview)}</div>` : ''}
+    </div>`;
+  }).join('');
 }
 
 /* ─────────────────────────────────────────
@@ -1214,6 +1567,52 @@ async function loadAnalyse() {
   setPbar('meeting', stages.meeting);
   setPbar('closed',  stages.closed);
   setPbar('refused', stages.refused);
+
+  // Search history
+  const searches = await apiGet('/api/prospects/searches');
+  const searchEl = document.getElementById('search-history');
+  const MODE_LABEL = { site:'🌐 Sans site', social:'📱 Sans réseaux', both:'🌐📱 Les deux', fewreviews:'⭐ <10 avis', owners:'🤖 Gérants IA', new:'🆕 Récents' };
+  if (searchEl) {
+    if (searches && searches.length) {
+      searchEl.innerHTML = `
+        <table class="search-hist-table">
+          <thead><tr><th>Niche</th><th>Mode</th><th>Résultats</th><th>Date</th></tr></thead>
+          <tbody>${searches.slice(0,30).map(s => {
+            const d = new Date(s.created_at);
+            const when = d.toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+            return `<tr>
+              <td class="sh-niche">${esc(s.niche)}</td>
+              <td><span class="sh-mode-badge">${MODE_LABEL[s.search_mode]||s.search_mode}</span></td>
+              <td class="sh-count">${s.results_count}</td>
+              <td class="sh-date">${when}</td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>`;
+    } else {
+      searchEl.innerHTML = '<div class="activity-empty">Aucune recherche enregistrée.</div>';
+    }
+  }
+
+  // Objection report
+  const objData = await apiGet('/api/prospects/analytics/objections');
+  const reportEl = document.getElementById('objection-report');
+  if (objData && objData.rows && objData.rows.length > 0) {
+    const maxObj = Math.max(...objData.rows.map(r => r.count), 1);
+    reportEl.innerHTML = `
+      <div class="obj-report-total">Sur <strong>${objData.total}</strong> refus total${objData.total > 1 ? 's' : ''} :</div>
+      ${objData.rows.map(r => {
+        const pct = Math.round((r.count / objData.total) * 100);
+        const w   = Math.round((r.count / maxObj) * 100);
+        return `<div class="obj-report-row">
+          <span class="obj-report-label">${r.objection}</span>
+          <div class="pbar-track"><div class="pbar-fill pbar-refused" style="width:${w}%"></div></div>
+          <span class="obj-report-count">${r.count} <small>(${pct}%)</small></span>
+        </div>`;
+      }).join('')}
+    `;
+  } else {
+    reportEl.innerHTML = '<div class="activity-empty">Pas encore de refus enregistrés.</div>';
+  }
 
   // Activity log
   const data = await apiGet('/api/prospects/analytics');

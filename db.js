@@ -85,6 +85,21 @@ const migrations = [
   `ALTER TABLE prospects ADD COLUMN pipeline_stage TEXT DEFAULT 'cold_call'`,
   `ALTER TABLE prospects ADD COLUMN objection TEXT DEFAULT ''`,
   `ALTER TABLE prospects ADD COLUMN meeting_date TEXT DEFAULT ''`,
+  // ── Deal details ──
+  `ALTER TABLE prospects ADD COLUMN deal_type TEXT DEFAULT ''`,
+  `ALTER TABLE prospects ADD COLUMN deal_date TEXT DEFAULT ''`,
+  `ALTER TABLE prospects ADD COLUMN deal_recurrence TEXT DEFAULT ''`,
+  // ── Call attempts ──
+  `CREATE TABLE IF NOT EXISTS call_attempts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    prospect_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    attempt_type TEXT NOT NULL,
+    result TEXT NOT NULL,
+    note TEXT DEFAULT '',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_call_attempts_prospect ON call_attempts(prospect_id)`,
 ];
 
 for (const sql of migrations) {

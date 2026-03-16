@@ -6,7 +6,7 @@
   <title>ProspectHunter — Pipeline CRM</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=25">
+  <link rel="stylesheet" href="/style.css?v=35">
 </head>
 <body>
 
@@ -24,7 +24,20 @@
       <span class="nav-notif-dot" id="nav-notif-dot" style="display:none"></span>
     </button>
     <button class="app-nav-btn" data-view="analyse" onclick="switchView('analyse')">📊 Analyse</button>
+    <button class="app-nav-btn agenda-btn" onclick="openAgenda()">
+      📅 Agenda
+      <span class="agenda-count" id="agenda-count" style="display:none"></span>
+    </button>
   </nav>
+
+  <!-- ── AGENDA PANEL ── -->
+  <div class="agenda-panel" id="agenda-panel" style="display:none">
+    <div class="agenda-panel-header">
+      <span>📅 Agenda</span>
+      <button class="modal-close" onclick="closeAgenda()">✕</button>
+    </div>
+    <div class="agenda-panel-body" id="agenda-panel-body"></div>
+  </div>
 
   <div class="header-right">
     <div class="credits-badge" id="credits-badge">
@@ -51,8 +64,12 @@
 
       <!-- Niche picker -->
       <div class="niche-picker">
-        <div class="niche-label">Choisis un métier à prospecter :</div>
 
+        <!-- Step 1 -->
+        <div class="niche-step">
+          <span class="niche-step-num">①</span>
+          <span class="niche-step-label">Choisis un secteur d'activité</span>
+        </div>
         <div class="niche-cats">
           <button class="niche-cat-btn active" data-cat="batiment" onclick="switchNicheCat(this)">🏗️ Bâtiment</button>
           <button class="niche-cat-btn" data-cat="restaurant" onclick="switchNicheCat(this)">🍽️ Resto / Food</button>
@@ -62,12 +79,20 @@
           <button class="niche-cat-btn" data-cat="services" onclick="switchNicheCat(this)">💼 Services</button>
         </div>
 
+        <!-- Step 2 -->
+        <div class="niche-step">
+          <span class="niche-step-num">②</span>
+          <span class="niche-step-label">Clique sur un métier pour le sélectionner</span>
+        </div>
         <div class="niche-chips" id="niche-chips">
           <!-- rempli par JS selon catégorie -->
         </div>
 
+        <!-- Selected display -->
+        <div class="niche-selected-display" id="niche-selected-display" style="display:none"></div>
+
         <div class="niche-custom-row">
-          <span class="niche-or">ou tape toi-même :</span>
+          <span class="niche-or">✏️ ou tape directement :</span>
           <input
             class="scan-niche-input"
             type="text"
@@ -161,8 +186,8 @@
 
   <!-- ── MEETING SUB-TABS (shown only on meeting tab) ── -->
   <div class="meeting-subtabs" id="meeting-subtabs" style="display:none">
-    <button class="sub-tab active" data-sub="meeting_to_set" onclick="switchSubTab('meeting_to_set')">🗓️ À poser</button>
-    <button class="sub-tab" data-sub="meeting_confirmed" onclick="switchSubTab('meeting_confirmed')">✅ Confirmés</button>
+    <button class="sub-tab active" data-sub="meeting_to_set" onclick="switchSubTab('meeting_to_set')">🗓️ À poser <span class="sub-tab-badge" id="badge-meeting_to_set"></span></button>
+    <button class="sub-tab" data-sub="meeting_confirmed" onclick="switchSubTab('meeting_confirmed')">✅ Confirmés <span class="sub-tab-badge" id="badge-meeting_confirmed"></span></button>
   </div>
 
   <!-- ── SEARCH BAR ── -->
@@ -171,6 +196,11 @@
       <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="text" id="search-input" placeholder="Rechercher par nom, téléphone, ville..." oninput="applyFilters()" />
     </div>
+    <select id="sort-select" class="sort-select" onchange="applyFilters()">
+      <option value="heat">🔥 Chaleur</option>
+      <option value="recent">🆕 Plus récent</option>
+      <option value="oldest">⏳ Plus ancien</option>
+    </select>
     <button class="btn-add-prospect" onclick="openAddModal()">+ Ajouter</button>
   </div>
 
@@ -213,38 +243,38 @@
 <main id="view-rappels" style="display:none">
   <div class="page-header">
     <div>
-      <h1 class="page-title">🔔 Rappels</h1>
-      <p class="page-sub">Tes prospects à rappeler, triés par date.</p>
+      <h1 class="page-title">📋 Agenda</h1>
+      <p class="page-sub">Rappels &amp; rendez-vous — du plus urgent au plus loin.</p>
     </div>
     <button class="btn-notif" id="btn-notif" onclick="requestNotifPerm()">
-      🔔 Activer les notifications
+      🔔 Notifications
     </button>
   </div>
 
-  <!-- Today -->
-  <div class="rappel-section" id="rappel-today-section">
-    <div class="rappel-section-title rappel-urgent">🔴 À rappeler aujourd'hui</div>
-    <div id="rappel-today-list" class="rappel-list"></div>
+  <!-- En retard / Aujourd'hui -->
+  <div class="rappel-section" id="agenda-overdue-section" style="display:none">
+    <div class="rappel-section-title rappel-urgent">🔴 En retard &amp; aujourd'hui</div>
+    <div id="agenda-overdue-list" class="rappel-list"></div>
   </div>
 
-  <!-- This week -->
-  <div class="rappel-section" id="rappel-week-section">
+  <!-- Cette semaine -->
+  <div class="rappel-section" id="agenda-week-section" style="display:none">
     <div class="rappel-section-title rappel-soon">🟡 Cette semaine</div>
-    <div id="rappel-week-list" class="rappel-list"></div>
+    <div id="agenda-week-list" class="rappel-list"></div>
   </div>
 
-  <!-- Later -->
-  <div class="rappel-section" id="rappel-later-section">
+  <!-- Plus tard -->
+  <div class="rappel-section" id="agenda-later-section" style="display:none">
     <div class="rappel-section-title">📅 Plus tard</div>
-    <div id="rappel-later-list" class="rappel-list"></div>
+    <div id="agenda-later-list" class="rappel-list"></div>
   </div>
 
   <!-- Empty -->
   <div id="rappel-empty" class="rappel-empty" style="display:none">
     <div style="font-size:2.5rem;margin-bottom:.75rem">📭</div>
-    <div>Aucun rappel planifié.</div>
+    <div>Aucun rappel ni RDV planifié.</div>
     <div style="font-size:.82rem;color:var(--muted);margin-top:.4rem">
-      Ouvre une fiche prospect → Notes → Date de rappel
+      Clique "Intéressé" ou "Poser RDV" sur un prospect pour le planifier.
     </div>
   </div>
 </main>
@@ -301,12 +331,122 @@
     </div>
   </div>
 
+  <!-- Search history -->
+  <div class="analyse-section">
+    <div class="analyse-section-title">🔍 Historique des recherches</div>
+    <div id="search-history" class="search-history">
+      <div class="activity-empty">Aucune recherche enregistrée.</div>
+    </div>
+  </div>
+
+  <!-- Objection report -->
+  <div class="analyse-section">
+    <div class="analyse-section-title">❌ Rapport des objections</div>
+    <div id="objection-report" class="objection-report">
+      <div class="activity-empty">Pas encore de refus enregistrés.</div>
+    </div>
+  </div>
+
   <!-- Recent activity -->
   <div class="analyse-section">
     <div class="analyse-section-title">Activité récente</div>
     <div id="activity-log" class="activity-log"></div>
   </div>
 </main>
+
+<!-- ── OBJECTION MODAL ── -->
+<div class="modal-overlay" id="objection-overlay">
+  <div class="modal objection-modal">
+    <div class="modal-header">
+      <div class="modal-title">❌ Raison du refus</div>
+      <button class="modal-close" onclick="closeObjectionModal()">✕</button>
+    </div>
+    <div class="objection-body">
+      <p class="objection-hint">Sélectionne ou tape une objection :</p>
+      <div class="objection-chips" id="objection-chips">
+        <button class="obj-chip" onclick="selectObjChip(this)">Ne répond pas</button>
+        <button class="obj-chip" onclick="selectObjChip(this)">Pas intéressé</button>
+        <button class="obj-chip" onclick="selectObjChip(this)">Trop cher</button>
+        <button class="obj-chip" onclick="selectObjChip(this)">Déjà un prestataire</button>
+        <button class="obj-chip" onclick="selectObjChip(this)">Déjà un site</button>
+        <button class="obj-chip" onclick="selectObjChip(this)">Pas le temps</button>
+        <button class="obj-chip" onclick="selectObjChip(this)">Mauvais timing</button>
+        <button class="obj-chip" onclick="selectObjChip(this)">Rappeler plus tard</button>
+      </div>
+      <input type="text" class="objection-input" id="objection-input" placeholder="Autre — écris ici..." oninput="onObjInput(this)" />
+      <div class="objection-actions">
+        <button class="btn-secondary" onclick="closeObjectionModal()">Annuler</button>
+        <button class="btn-primary" id="objection-confirm-btn" onclick="confirmObjection()">Confirmer le refus</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── DEAL MODAL ── -->
+<div class="modal-overlay" id="deal-modal-overlay" onclick="if(event.target===this)closeDealModal()">
+  <div class="modal deal-modal">
+    <div class="modal-header">
+      <div class="modal-title">💰 Deal signé !</div>
+      <button class="modal-close" onclick="closeDealModal()">✕</button>
+    </div>
+    <div class="deal-body">
+      <p class="objection-hint">Type de prestation :</p>
+      <div class="deal-chips" id="deal-type-chips">
+        <button class="deal-chip" onclick="selectDealChip('type',this,'site_vitrine')">🌐 Site vitrine</button>
+        <button class="deal-chip" onclick="selectDealChip('type',this,'reseaux')">📱 Réseaux sociaux</button>
+        <button class="deal-chip" onclick="selectDealChip('type',this,'seo')">🔍 SEO</button>
+        <button class="deal-chip" onclick="selectDealChip('type',this,'pack')">📦 Pack complet</button>
+        <button class="deal-chip" onclick="selectDealChip('type',this,'autre')">✏️ Autre</button>
+      </div>
+      <p class="objection-hint" style="margin-top:.8rem">Date de signature :</p>
+      <input type="date" class="stage-date-input" id="deal-date-input" />
+      <p class="objection-hint" style="margin-top:.8rem">Facturation :</p>
+      <div class="deal-chips" id="deal-rec-chips">
+        <button class="deal-chip" onclick="selectDealChip('rec',this,'one_shot')">1️⃣ One-shot</button>
+        <button class="deal-chip" onclick="selectDealChip('rec',this,'mensuel')">🔁 Mensuel</button>
+        <button class="deal-chip" onclick="selectDealChip('rec',this,'trimestriel')">📆 Trimestriel</button>
+      </div>
+      <div class="objection-actions" style="margin-top:1rem">
+        <button class="btn-secondary" onclick="closeDealModal()">Annuler</button>
+        <button class="btn-primary" onclick="confirmDeal()">✅ Confirmer le deal</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── STAGE DATE/NOTES MODAL ── -->
+<div class="modal-overlay" id="stage-modal-overlay" onclick="if(event.target===this)closeStageModal()">
+  <div class="modal stage-modal">
+    <div class="modal-header">
+      <div class="modal-title" id="stage-modal-title">📅 Poser un rendez-vous</div>
+      <button class="modal-close" onclick="closeStageModal()">✕</button>
+    </div>
+    <div class="stage-modal-body">
+      <div class="date-shortcuts">
+        <button class="date-shortcut" onclick="setDateShortcut(0)">Aujourd'hui</button>
+        <button class="date-shortcut" onclick="setDateShortcut(1)">Demain</button>
+        <button class="date-shortcut" onclick="setDateShortcut(2)">Dans 2 jours</button>
+        <button class="date-shortcut" onclick="setDateShortcut(7)">Semaine pro</button>
+      </div>
+      <div class="stage-modal-row" id="stage-date-row">
+        <label class="stage-modal-label" id="stage-date-label">📅 Date</label>
+        <input type="date" id="stage-date-input" class="stage-modal-input" />
+      </div>
+      <div class="stage-modal-row" id="stage-time-row">
+        <label class="stage-modal-label" id="stage-time-label">🕐 Heure <span id="stage-time-optional" style="color:var(--muted);font-size:0.8em">(optionnel)</span></label>
+        <input type="time" id="stage-time-input" class="stage-modal-input" />
+      </div>
+      <div class="stage-modal-row">
+        <label class="stage-modal-label">📝 Notes</label>
+        <textarea id="stage-notes-input" class="stage-modal-textarea" placeholder="Ajoute des notes sur ce prospect…" rows="4"></textarea>
+      </div>
+      <div class="objection-actions">
+        <button class="btn-secondary" onclick="closeStageModal()">Annuler</button>
+        <button class="btn-primary" id="stage-modal-confirm-btn" onclick="confirmStageModal()">Confirmer</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ── PROSPECT DETAIL MODAL ── -->
 <div class="modal-overlay" id="detail-overlay" onclick="if(event.target===this)closeDetailModal()">
@@ -346,9 +486,37 @@
 
     <!-- CRM / Notes tab -->
     <div class="mtab-panel" data-mtab="crm">
-      <div class="field">
+
+      <!-- Logger une tentative -->
+      <div class="attempt-log-section">
+        <div class="attempt-log-title">📞 Logger un contact</div>
+        <div class="attempt-chips-row">
+          <button class="attempt-type-chip" data-val="call"  onclick="selectAttemptChip('type',this)">📞 Appel</button>
+          <button class="attempt-type-chip" data-val="sms"   onclick="selectAttemptChip('type',this)">💬 SMS</button>
+          <button class="attempt-type-chip" data-val="email" onclick="selectAttemptChip('type',this)">📧 Email</button>
+          <button class="attempt-type-chip" data-val="dm"    onclick="selectAttemptChip('type',this)">📱 DM</button>
+        </div>
+        <div class="attempt-chips-row" style="margin-top:.4rem">
+          <button class="attempt-result-chip" data-val="no_answer" onclick="selectAttemptChip('result',this)">📵 Pas répondu</button>
+          <button class="attempt-result-chip" data-val="voicemail"  onclick="selectAttemptChip('result',this)">📬 Messagerie</button>
+          <button class="attempt-result-chip" data-val="callback"   onclick="selectAttemptChip('result',this)">🔄 Rappel demandé</button>
+          <button class="attempt-result-chip" data-val="positive"   onclick="selectAttemptChip('result',this)">✅ Positif</button>
+          <button class="attempt-result-chip" data-val="negative"   onclick="selectAttemptChip('result',this)">❌ Négatif</button>
+        </div>
+        <input class="crm-inp" id="attempt-note" type="text" placeholder="Note optionnelle…" style="margin-top:.5rem" />
+        <button class="btn-primary attempt-log-btn" onclick="logAttempt()" style="margin-top:.5rem;width:100%">✅ Logger</button>
+      </div>
+
+      <!-- Timeline des tentatives -->
+      <div class="attempt-timeline" id="attempt-timeline">
+        <div class="attempt-timeline-title">Historique des contacts</div>
+        <div id="attempt-list" class="attempt-list"><div class="activity-empty">Aucun contact loggué.</div></div>
+      </div>
+
+      <!-- Notes & infos -->
+      <div class="field" style="margin-top:1rem">
         <label>Notes</label>
-        <textarea class="crm-ta" id="m-notes" rows="5" placeholder="Notes sur ce prospect..." oninput="debounceSave()"></textarea>
+        <textarea class="crm-ta" id="m-notes" rows="4" placeholder="Notes sur ce prospect..." oninput="debounceSave()"></textarea>
       </div>
       <div class="field">
         <label>Date de rappel</label>
@@ -397,6 +565,6 @@
 <div class="toast-container" id="toast-container"></div>
 
 <!-- ── APP JS ── -->
-<script src="/app.js?v=25"></script>
+<script src="/app.js?v=35"></script>
 </body>
 </html>
