@@ -1,6 +1,8 @@
 // ── Load environment variables FIRST ──
 const path_env = require('path');
-require('dotenv').config({ path: path_env.join(__dirname, '.env') });
+const _env = require('dotenv').config({ path: path_env.join(__dirname, '.env') });
+// dotenvx v17 parses but doesn't always inject — force it
+if (_env.parsed) Object.assign(process.env, _env.parsed);
 
 const express = require('express');
 const path = require('path');
