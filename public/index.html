@@ -203,8 +203,17 @@
     </div>
     <select id="sort-select" class="sort-select" onchange="applyFilters()">
       <option value="heat">🔥 Chaleur</option>
+      <option value="rating">★ Meilleure note</option>
+      <option value="reviews">💬 Plus d'avis</option>
+      <option value="name">🔤 Nom A→Z</option>
       <option value="recent">🆕 Plus récent</option>
       <option value="oldest">⏳ Plus ancien</option>
+    </select>
+    <select id="signal-filter" class="sort-select" onchange="applyFilters()">
+      <option value="all">Tous</option>
+      <option value="nosite">🌐 Sans site</option>
+      <option value="nosocial">📱 Sans réseaux</option>
+      <option value="both">🌐📱 Sans site & réseaux</option>
     </select>
     <button class="btn-add-prospect" onclick="openAddModal()">+ Ajouter</button>
   </div>

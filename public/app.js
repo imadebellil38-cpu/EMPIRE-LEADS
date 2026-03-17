@@ -272,10 +272,23 @@ function getFilteredProspects() {
    RENDER LIST (desktop + mobile)
 ───────────────────────────────────────── */
 function renderList() {
-  const sortMode = document.getElementById('sort-select')?.value || 'heat';
-  const prospects = getFilteredProspects().sort((a, b) => {
-    if (sortMode === 'recent') return new Date(b.created_at || 0) - new Date(a.created_at || 0);
-    if (sortMode === 'oldest') return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+  const sortMode     = document.getElementById('sort-select')?.value || 'heat';
+  const signalFilter = document.getElementById('signal-filter')?.value || 'all';
+
+  let prospects = getFilteredProspects();
+
+  // Signal filter
+  if (signalFilter === 'nosite')    prospects = prospects.filter(p => p.has_website === 0 || p.has_website === false);
+  if (signalFilter === 'nosocial')  prospects = prospects.filter(p => (p.has_facebook === 0 || p.has_facebook === false) && (p.has_instagram === 0 || p.has_instagram === false));
+  if (signalFilter === 'both')      prospects = prospects.filter(p => (p.has_website === 0 || p.has_website === false) && (p.has_facebook === 0 || p.has_facebook === false) && (p.has_instagram === 0 || p.has_instagram === false));
+
+  // Sort
+  prospects = prospects.sort((a, b) => {
+    if (sortMode === 'recent')  return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+    if (sortMode === 'oldest')  return new Date(a.created_at || 0) - new Date(b.created_at || 0);
+    if (sortMode === 'rating')  return (b.rating || 0) - (a.rating || 0);
+    if (sortMode === 'reviews') return (b.reviews || 0) - (a.reviews || 0);
+    if (sortMode === 'name')    return (a.name || '').localeCompare(b.name || '', 'fr');
     return calcHeat(b) - calcHeat(a);
   });
   const empty     = document.getElementById('empty-state');
@@ -1596,23 +1609,34 @@ async function loadAnalyse() {
   // Search history
   const searches = await apiGet('/api/prospects/searches');
   const searchEl = document.getElementById('search-history');
-  const MODE_LABEL = { site:'🌐 Sans site', social:'📱 Sans réseaux', both:'🌐📱 Les deux', fewreviews:'⭐ <10 avis', owners:'🤖 Gérants IA', new:'🆕 Récents' };
+  const MODE_META = {
+    site:        { label: 'Sans site web',        icon: '🌐', color: '#3b82f6' },
+    social:      { label: 'Sans réseaux sociaux', icon: '📱', color: '#a855f7' },
+    both:        { label: 'Sans site & réseaux',  icon: '🌐📱', color: '#f59e0b' },
+    fewreviews:  { label: 'Peu d\'avis',           icon: '⭐', color: '#f59e0b' },
+    owners:      { label: 'Gérants IA',            icon: '🤖', color: '#10b981' },
+    new:         { label: 'Récents',               icon: '🆕', color: '#6b7280' },
+  };
   if (searchEl) {
     if (searches && searches.length) {
-      searchEl.innerHTML = `
-        <table class="search-hist-table">
-          <thead><tr><th>Niche</th><th>Mode</th><th>Résultats</th><th>Date</th></tr></thead>
-          <tbody>${searches.slice(0,30).map(s => {
-            const d = new Date(s.created_at);
-            const when = d.toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-            return `<tr>
-              <td class="sh-niche">${esc(s.niche)}</td>
-              <td><span class="sh-mode-badge">${MODE_LABEL[s.search_mode]||s.search_mode}</span></td>
-              <td class="sh-count">${s.results_count}</td>
-              <td class="sh-date">${when}</td>
-            </tr>`;
-          }).join('')}</tbody>
-        </table>`;
+      searchEl.innerHTML = `<div class="sh-list">${searches.slice(0,30).map(s => {
+        const d = new Date(s.created_at);
+        const when = d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'}) + ' ' + d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+        const meta = MODE_META[s.search_mode] || { label: s.search_mode, icon: '🔍', color: '#6b7280' };
+        return `<div class="sh-row">
+          <div class="sh-left">
+            <div class="sh-niche">${esc(s.niche || '—')}</div>
+            <div class="sh-location">${esc(s.country || '')}</div>
+          </div>
+          <div class="sh-center">
+            <span class="sh-mode-badge" style="border-color:${meta.color};color:${meta.color}">${meta.icon} ${meta.label}</span>
+          </div>
+          <div class="sh-right">
+            <span class="sh-count">${s.results_count} résultats</span>
+            <span class="sh-date">${when}</span>
+          </div>
+        </div>`;
+      }).join('')}</div>`;
     } else {
       searchEl.innerHTML = '<div class="activity-empty">Aucune recherche enregistrée.</div>';
     }
