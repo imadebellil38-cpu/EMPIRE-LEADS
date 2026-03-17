@@ -575,16 +575,23 @@ main {
 }
 
 /* Flag / mode toggle buttons */
-.flag-btn, .mode-btn {
-  padding: .7rem 1.2rem; border-radius: 10px;
+.flag-btn {
+  padding: .5rem .85rem; border-radius: 8px;
   background: var(--card); border: 1px solid var(--border2);
-  color: var(--text2); font-size: .95rem; font-weight: 700;
-  transition: all .15s; white-space: nowrap; min-height: 48px;
+  color: var(--text2); font-size: .82rem; font-weight: 600;
+  transition: all .15s; white-space: nowrap; min-height: 40px;
   cursor: pointer;
 }
-.flag-btn:hover, .mode-btn:hover {
-  border-color: var(--cold-bd); color: var(--text);
+.flag-btn:hover { border-color: var(--cold-bd); color: var(--text); }
+
+.mode-btn {
+  padding: .75rem 1.4rem; border-radius: 10px;
+  background: var(--card); border: 1px solid var(--border2);
+  color: var(--text); font-size: 1rem; font-weight: 700;
+  transition: all .15s; white-space: nowrap; min-height: 52px;
+  cursor: pointer; letter-spacing: .01em;
 }
+.mode-btn:hover { border-color: var(--cold-bd); color: #fff; background: rgba(255,255,255,.06); }
 .flag-btn.active {
   background: var(--cold-bg); border-color: var(--cold-bd);
   color: var(--stage-cold);

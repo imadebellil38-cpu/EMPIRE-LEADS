@@ -93,6 +93,12 @@ router.post('/login', authLimiter, (req, res) => {
 
   const token = createToken(user);
 
+  // Log connexion
+  try {
+    db.prepare('INSERT INTO activity_log (user_id, action, details) VALUES (?,?,?)')
+      .run(user.id, 'login', JSON.stringify({ ip: req.ip || req.headers['x-forwarded-for'] || 'unknown' }));
+  } catch (_) {}
+
   res.json({
     token,
     user: { id: user.id, email: user.email, plan: user.plan, credits: user.credits, is_admin: user.is_admin }

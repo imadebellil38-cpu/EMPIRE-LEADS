@@ -62,9 +62,13 @@
     tbody tr:hover td { background: rgba(0,200,248,.03); }
 
     .plan-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: .7rem; font-weight: 700; text-transform: uppercase; }
-    .plan-free { background: rgba(74,106,136,.12); color: var(--dim); }
-    .plan-pro { background: var(--cyan-glow); color: var(--cyan); }
-    .plan-enterprise { background: var(--purple2); color: var(--purple); }
+    .plan-free     { background: rgba(74,106,136,.12); color: var(--dim); }
+    .plan-trial    { background: rgba(255,184,0,.12);  color: var(--amber); }
+    .plan-starter  { background: rgba(0,200,248,.08);  color: #60d0ff; }
+    .plan-pro      { background: var(--cyan-glow);     color: var(--cyan); }
+    .plan-business { background: var(--purple2);       color: var(--purple); }
+    .plan-legend   { background: rgba(255,100,0,.12);  color: #ff8844; }
+    .plan-enterprise { background: var(--purple2);     color: var(--purple); }
 
     .btn-sm {
       padding: 5px 12px; border-radius: 7px; font-size: .75rem; font-weight: 700;
@@ -125,6 +129,7 @@
       <div class="stat"><div class="stat-n" id="s-prospects">-</div><div class="stat-l">Prospects</div></div>
       <div class="stat"><div class="stat-n" id="s-pro">-</div><div class="stat-l">Abonnés Pro+</div></div>
       <div class="stat"><div class="stat-n" id="s-mrr" style="color:var(--emerald)">-</div><div class="stat-l">MRR (EUR)</div></div>
+      <div class="stat"><div class="stat-n" id="s-logins" style="color:var(--amber)">-</div><div class="stat-l">Connexions aujourd'hui</div></div>
     </div>
 
     <!-- Charts -->
@@ -168,6 +173,17 @@
       </table>
     </div>
 
+    <!-- Connexions récentes -->
+    <div class="card">
+      <div class="card-title">🔐 Connexions récentes</div>
+      <table>
+        <thead>
+          <tr><th>Email</th><th>Plan</th><th>IP</th><th>Date</th></tr>
+        </thead>
+        <tbody id="connections-body"></tbody>
+      </table>
+    </div>
+
     <!-- Recent searches -->
     <div class="card">
       <div class="card-title">Recherches recentes</div>
@@ -188,16 +204,17 @@ const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer '
 
 async function loadAll() {
   try {
-    const [statsRes, usersRes, searchesRes, revenueRes, dailyRes, topRes] = await Promise.all([
+    const [statsRes, usersRes, searchesRes, revenueRes, dailyRes, topRes, connRes] = await Promise.all([
       fetch('/api/admin/stats', { headers }),
       fetch('/api/admin/users', { headers }),
       fetch('/api/admin/searches', { headers }),
       fetch('/api/admin/stats/revenue', { headers }),
       fetch('/api/admin/stats/daily', { headers }),
       fetch('/api/admin/stats/top-users', { headers }),
+      fetch('/api/admin/connections', { headers }),
     ]);
 
-    if (statsRes.status === 403 || usersRes.status === 403) {
+    if (statsRes.status === 403 || usersRes.status === 403 || connRes.status === 403) {
       alert('Accès refusé. Vous devez être administrateur.');
       window.location.href = '/';
       return;
@@ -209,6 +226,7 @@ async function loadAll() {
     const revenue = await revenueRes.json();
     const daily = await dailyRes.json();
     const top = await topRes.json();
+    const connections = await connRes.json();
 
     // KPIs
     document.getElementById('s-users').textContent = stats.totalUsers;
@@ -217,6 +235,22 @@ async function loadAll() {
     const proPlus = (stats.planCounts || []).filter(p => p.plan !== 'free').reduce((a, b) => a + b.c, 0);
     document.getElementById('s-pro').textContent = proPlus;
     document.getElementById('s-mrr').textContent = revenue.mrr + ' €';
+
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const loginsToday = connections.filter(c => c.created_at.slice(0,10) === todayStr).length;
+    document.getElementById('s-logins').textContent = loginsToday;
+
+    // Connections table
+    document.getElementById('connections-body').innerHTML = connections.slice(0,50).map(c => {
+      let ip = '—';
+      try { ip = JSON.parse(c.details).ip || '—'; } catch(_) {}
+      return `<tr>
+        <td style="font-weight:600">${c.email}</td>
+        <td><span class="plan-badge plan-${c.plan}">${c.plan}</span></td>
+        <td style="color:var(--muted);font-size:.8rem">${ip}</td>
+        <td style="color:var(--muted);font-size:.8rem">${new Date(c.created_at).toLocaleString('fr-FR')}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="4" style="color:var(--muted);text-align:center">Aucune connexion enregistrée.</td></tr>';
 
     // Charts
     renderChart('chart-registrations', daily.registrations, 'bar-cyan');
@@ -233,9 +267,12 @@ async function loadAll() {
         <td style="font-weight:600">${u.email}</td>
         <td>
           <select class="plan-select" onchange="changePlan(${u.id}, this.value)">
-            <option value="free" ${u.plan==='free'?'selected':''}>Free</option>
-            <option value="pro" ${u.plan==='pro'?'selected':''}>Pro</option>
-            <option value="enterprise" ${u.plan==='enterprise'?'selected':''}>Enterprise</option>
+            <option value="free"     ${u.plan==='free'?'selected':''}>Free (5 cr.)</option>
+            <option value="trial"    ${u.plan==='trial'?'selected':''}>Trial (20 cr.)</option>
+            <option value="starter"  ${u.plan==='starter'?'selected':''}>Starter — 40€</option>
+            <option value="pro"      ${u.plan==='pro'?'selected':''}>Pro — 100€</option>
+            <option value="business" ${u.plan==='business'?'selected':''}>Business — 300€</option>
+            <option value="legend"   ${u.plan==='legend'?'selected':''}>Legend — 445€</option>
           </select>
         </td>
         <td>

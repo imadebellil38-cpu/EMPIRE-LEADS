@@ -13,11 +13,7 @@
       --grad: linear-gradient(135deg, #ef4444 0%, #e11d48 60%, #f97316 100%);
       --text: #e8eaf6; --text2: #8892b0; --muted: #4a5268;
     }
-    body {
-      background: var(--bg); color: var(--text);
-      font-family: 'Inter', sans-serif; min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-    }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; -webkit-font-smoothing: antialiased; }
     body::before {
       content: ''; position: fixed; top: -10%; left: 50%; transform: translateX(-50%);
       width: 800px; height: 400px;
@@ -30,114 +26,67 @@
       border-bottom: 1px solid var(--border);
       padding: 0 2rem; display: flex; align-items: center; gap: .75rem;
     }
-    .logo-icon {
-      width: 32px; height: 32px; background: var(--grad); border-radius: 8px;
-      display: flex; align-items: center; justify-content: center; font-size: 1rem;
-    }
-    .logo-text {
-      font-size: 1rem; font-weight: 800;
-      background: var(--grad); -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent; background-clip: text;
-    }
-    .hdr-btn {
-      margin-left: auto; padding: .4rem 1rem; border-radius: 7px;
-      background: transparent; border: 1px solid var(--border2);
-      color: var(--text2); font-size: .82rem; font-weight: 500;
-      text-decoration: none; transition: all .15s;
-    }
+    .logo-icon { width: 32px; height: 32px; background: var(--grad); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+    .logo-text { font-size: 1rem; font-weight: 800; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hdr-btn { margin-left: auto; padding: .4rem 1rem; border-radius: 7px; background: transparent; border: 1px solid var(--border2); color: var(--text2); font-size: .82rem; font-weight: 500; text-decoration: none; transition: all .15s; }
     .hdr-btn:hover { border-color: #ef4444; color: var(--text); }
 
-    .page { max-width: 900px; margin: 0 auto; padding: 3rem 1.5rem 5rem; position: relative; z-index: 1; }
-
-    .page-title {
-      text-align: center; font-size: 2.2rem; font-weight: 900;
-      letter-spacing: -.04em; margin-bottom: .5rem;
-      background: var(--grad); -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent; background-clip: text;
-    }
+    .page { max-width: 1050px; margin: 0 auto; padding: 3rem 1.5rem 5rem; position: relative; z-index: 1; }
+    .page-title { text-align: center; font-size: 2.2rem; font-weight: 900; letter-spacing: -.04em; margin-bottom: .5rem; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .page-sub { text-align: center; color: var(--text2); font-size: .95rem; margin-bottom: 3rem; }
 
-    /* ── PACKS GRID ── */
-    .packs {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 1rem;
-    }
+    .plans { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; }
 
-    .pack-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 16px; padding: 1.75rem 1.25rem;
-      display: flex; flex-direction: column; align-items: center;
-      text-align: center; position: relative;
-      transition: border-color .2s, transform .2s;
-      cursor: pointer;
+    .plan-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 1.75rem 1.1rem; display: flex; flex-direction: column; align-items: center;
+      text-align: center; position: relative; transition: border-color .2s, transform .2s;
     }
-    .pack-card:hover { border-color: var(--border2); transform: translateY(-3px); }
-    .pack-card.hot {
-      border-color: rgba(239,68,68,.5);
-      background: linear-gradient(180deg, rgba(239,68,68,.06) 0%, var(--card) 100%);
-    }
-    .pack-card.hot:hover { border-color: rgba(239,68,68,.8); }
+    .plan-card:hover { border-color: var(--border2); transform: translateY(-3px); }
+    .plan-card.hot { border-color: rgba(239,68,68,.5); background: linear-gradient(180deg, rgba(239,68,68,.07) 0%, var(--card) 100%); }
+    .plan-card.hot:hover { border-color: rgba(239,68,68,.9); }
 
     .hot-tag {
-      position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
-      background: var(--grad); color: #fff;
-      font-size: .65rem; font-weight: 800; padding: .2rem .8rem;
-      border-radius: 999px; text-transform: uppercase; letter-spacing: .05em;
-      white-space: nowrap; box-shadow: 0 2px 12px rgba(239,68,68,.4);
+      position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+      background: var(--grad); color: #fff; font-size: .65rem; font-weight: 800;
+      padding: .22rem .9rem; border-radius: 999px; text-transform: uppercase;
+      letter-spacing: .05em; white-space: nowrap; box-shadow: 0 2px 12px rgba(239,68,68,.4);
     }
 
-    .pack-credits {
-      font-size: .72rem; font-weight: 700; text-transform: uppercase;
-      letter-spacing: .07em; color: var(--muted); margin-bottom: .6rem;
-    }
+    .plan-name { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: .6rem; }
 
-    .pack-price {
-      font-size: 2.8rem; font-weight: 900; letter-spacing: -.04em;
-      line-height: 1; margin-bottom: .25rem;
-    }
-    .pack-price span { font-size: 1.2rem; font-weight: 600; color: var(--text2); }
+    .plan-price { font-size: 2.6rem; font-weight: 900; letter-spacing: -.04em; line-height: 1; margin-bottom: .2rem; }
+    .plan-price span { font-size: 1.1rem; font-weight: 500; color: var(--text2); }
 
-    .pack-leads {
-      font-size: .82rem; color: var(--text2); margin-bottom: 1.5rem;
-    }
-    .pack-leads strong { color: var(--text); font-weight: 800; }
+    .plan-credits { font-size: .88rem; color: var(--text2); margin-bottom: 1.5rem; }
+    .plan-credits strong { color: var(--text); font-weight: 800; font-size: 1rem; }
 
-    .pack-perks {
-      list-style: none; width: 100%; margin-bottom: 1.5rem; flex: 1;
-    }
-    .pack-perks li {
+    .plan-features { list-style: none; width: 100%; flex: 1; margin-bottom: 1.5rem; text-align: left; }
+    .plan-features li {
       font-size: .78rem; color: var(--text2); padding: .3rem 0;
       border-bottom: 1px solid rgba(255,255,255,.04);
-      text-align: left; display: flex; align-items: center; gap: .4rem;
+      display: flex; align-items: center; gap: .4rem;
     }
-    .pack-perks li:last-child { border-bottom: none; }
+    .plan-features li:last-child { border-bottom: none; }
 
-    .btn-pack {
-      width: 100%; padding: .7rem; border-radius: 9px;
-      font-size: .85rem; font-weight: 700; cursor: pointer;
-      border: none; font-family: inherit; transition: all .15s;
+    .btn-plan {
+      width: 100%; padding: .72rem; border-radius: 9px;
+      font-size: .85rem; font-weight: 700; cursor: pointer; border: none;
+      font-family: inherit; transition: all .15s;
       background: transparent; border: 1px solid var(--border2); color: var(--text2);
     }
-    .btn-pack:hover { border-color: #ef4444; color: var(--text); }
-    .btn-pack.hot-btn {
-      background: var(--grad); color: #fff; border: none;
-      box-shadow: 0 4px 20px rgba(239,68,68,.35);
-    }
-    .btn-pack.hot-btn:hover { opacity: .9; }
-    .btn-pack:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-plan:hover { border-color: #ef4444; color: var(--text); }
+    .btn-plan.hot-btn { background: var(--grad); color: #fff; border: none; box-shadow: 0 4px 20px rgba(239,68,68,.35); }
+    .btn-plan.hot-btn:hover { opacity: .9; box-shadow: 0 6px 28px rgba(239,68,68,.5); }
+    .btn-plan.current-btn { background: rgba(255,255,255,.05); border-color: var(--border2); color: var(--muted); cursor: default; }
+    .btn-plan:disabled { opacity: .4; cursor: not-allowed; }
 
-    .footnote {
-      text-align: center; margin-top: 2.5rem;
-      color: var(--text2); font-size: .83rem;
-    }
+    .current-label { font-size: .72rem; color: #22c55e; font-weight: 700; margin-top: .45rem; display: none; }
 
-    @media (max-width: 750px) {
-      .packs { grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 420px) {
-      .packs { grid-template-columns: 1fr; max-width: 320px; margin: 0 auto; }
-    }
+    .footnote { text-align: center; margin-top: 2.5rem; color: var(--text2); font-size: .83rem; line-height: 1.7; }
+
+    @media (max-width: 800px) { .plans { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 430px) { .plans { grid-template-columns: 1fr; max-width: 320px; margin: 0 auto; } }
   </style>
 </head>
 <body>
@@ -148,91 +97,98 @@
   </header>
 
   <div class="page">
-    <div class="page-title">Choisis ton pack</div>
-    <div class="page-sub">Paiement unique · Pas d'abonnement · Leads utilisables quand tu veux</div>
+    <div class="page-title">Simples. Transparents. 🎯</div>
+    <div class="page-sub">Choisis ton plan · Paiement unique · Crédits disponibles immédiatement</div>
 
-    <div class="packs">
+    <div class="plans">
 
-      <!-- 5€ -->
-      <div class="pack-card">
-        <div class="pack-credits">Découverte</div>
-        <div class="pack-price">5<span>€</span></div>
-        <div class="pack-leads"><strong>5</strong> prospects</div>
-        <ul class="pack-perks">
+      <!-- FREE -->
+      <div class="plan-card" id="card-free">
+        <div class="plan-name">Gratuit</div>
+        <div class="plan-price">0<span>€</span></div>
+        <div class="plan-credits"><strong>5</strong> crédits</div>
+        <ul class="plan-features">
           <li>✓ Pipeline CRM</li>
+          <li>✓ 5 prospects offerts</li>
           <li>✓ Pitch IA</li>
-          <li>✓ Badges signaux</li>
         </ul>
-        <button class="btn-pack" onclick="buyPack('pack5')" id="btn-pack5">Acheter</button>
+        <button class="btn-plan current-btn" disabled id="btn-free">Plan actuel</button>
+        <div class="current-label" id="tag-free">✓ Actif</div>
       </div>
 
-      <!-- 15€ -->
-      <div class="pack-card">
-        <div class="pack-credits">Starter</div>
-        <div class="pack-price">15<span>€</span></div>
-        <div class="pack-leads"><strong>20</strong> prospects</div>
-        <ul class="pack-perks">
+      <!-- STARTER — 40€ -->
+      <div class="plan-card" id="card-starter">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">40<span>€</span></div>
+        <div class="plan-credits"><strong>100</strong> crédits</div>
+        <ul class="plan-features">
           <li>✓ Pipeline CRM</li>
           <li>✓ Pitch IA</li>
-          <li>✓ Badges signaux</li>
           <li>✓ Filtre sans site</li>
+          <li>✓ Badges signaux</li>
         </ul>
-        <button class="btn-pack" onclick="buyPack('pack15')" id="btn-pack15">Acheter</button>
+        <button class="btn-plan" onclick="buyPack('starter')" id="btn-starter">Choisir</button>
+        <div class="current-label" id="tag-starter">✓ Actif</div>
       </div>
 
-      <!-- 30€ — populaire -->
-      <div class="pack-card hot">
+      <!-- PRO — 100€ (populaire) -->
+      <div class="plan-card hot" id="card-pro">
         <div class="hot-tag">⚡ Populaire</div>
-        <div class="pack-credits">Prospecteur</div>
-        <div class="pack-price">30<span>€</span></div>
-        <div class="pack-leads"><strong>50</strong> prospects</div>
-        <ul class="pack-perks">
+        <div class="plan-name" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Pro</div>
+        <div class="plan-price">100<span>€</span></div>
+        <div class="plan-credits"><strong>500</strong> crédits</div>
+        <ul class="plan-features">
           <li>✓ Tout du Starter</li>
           <li>✓ Filtre sans réseaux</li>
           <li>✓ Autour de moi</li>
+          <li>✓ Multi-villes</li>
           <li>✓ Export CSV</li>
         </ul>
-        <button class="btn-pack hot-btn" onclick="buyPack('pack30')" id="btn-pack30">Acheter</button>
+        <button class="btn-plan hot-btn" onclick="buyPack('pro')" id="btn-pro">Choisir</button>
+        <div class="current-label" id="tag-pro">✓ Actif</div>
       </div>
 
-      <!-- 50€ -->
-      <div class="pack-card">
-        <div class="pack-credits">Chasseur</div>
-        <div class="pack-price">50<span>€</span></div>
-        <div class="pack-leads"><strong>100</strong> prospects</div>
-        <ul class="pack-perks">
-          <li>✓ Tout du Prospecteur</li>
-          <li>✓ Multi-villes</li>
+      <!-- BUSINESS — 300€ -->
+      <div class="plan-card" id="card-business">
+        <div class="plan-name">Business</div>
+        <div class="plan-price">300<span>€</span></div>
+        <div class="plan-credits"><strong>2 000</strong> crédits</div>
+        <ul class="plan-features">
+          <li>✓ Tout du Pro</li>
           <li>✓ Pitch IA illimité</li>
           <li>✓ Support prioritaire</li>
+          <li>✓ Historique complet</li>
         </ul>
-        <button class="btn-pack" onclick="buyPack('pack50')" id="btn-pack50">Acheter</button>
+        <button class="btn-plan" onclick="buyPack('business')" id="btn-business">Choisir</button>
+        <div class="current-label" id="tag-business">✓ Actif</div>
       </div>
 
-      <!-- 100€ -->
-      <div class="pack-card">
-        <div class="pack-credits">Légende 👑</div>
-        <div class="pack-price">100<span>€</span></div>
-        <div class="pack-leads"><strong>250</strong> prospects</div>
-        <ul class="pack-perks">
-          <li>✓ Tout du Chasseur</li>
+      <!-- LEGEND — 445€ -->
+      <div class="plan-card" id="card-legend">
+        <div class="plan-name" style="color:#ff8844">Légende 👑</div>
+        <div class="plan-price">445<span>€</span></div>
+        <div class="plan-credits"><strong>3 000</strong> crédits</div>
+        <ul class="plan-features">
+          <li>✓ Tout du Business</li>
           <li>✓ Onboarding perso</li>
           <li>✓ Accès équipe</li>
-          <li>✓ Support VIP</li>
+          <li>✓ Support VIP 24/7</li>
         </ul>
-        <button class="btn-pack" onclick="buyPack('pack100')" id="btn-pack100">Acheter</button>
+        <button class="btn-plan" style="background:linear-gradient(135deg,#e11d48,#f97316);color:#fff;border:none;box-shadow:0 4px 20px rgba(225,29,72,.3)" onclick="buyPack('legend')" id="btn-legend">Choisir</button>
+        <div class="current-label" id="tag-legend">✓ Actif</div>
       </div>
 
     </div>
 
     <div class="footnote">
-      Paiement sécurisé par Stripe · Crédits ajoutés instantanément après paiement ✌️
+      Paiement sécurisé par Stripe · Crédits ajoutés instantanément<br>
+      1 crédit = 1 prospect trouvé · Pas d'abonnement récurrent ✌️
     </div>
   </div>
 
 <script>
 const token = localStorage.getItem('ph_token');
-if (!token) window.location.href = '/login';
+if (!token) { window.location.href = '/login'; }
 const headers = { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token };
 
 const params = new URLSearchParams(location.search);
@@ -243,20 +199,49 @@ if (params.get('cancelled')) {
   document.body.insertAdjacentHTML('afterbegin', `<div style="background:#ef4444;color:#fff;text-align:center;padding:.75rem;font-weight:700">❌ Paiement annulé.</div>`);
 }
 
+const PLANS = ['free','starter','pro','business','legend'];
+
+async function init() {
+  try {
+    const res = await fetch('/api/me', { headers });
+    if (!res.ok) { window.location.href = '/login'; return; }
+    const data = await res.json();
+    const currentPlan = (data.plan || 'free').toLowerCase();
+
+    PLANS.forEach(p => {
+      const btn = document.getElementById('btn-' + p);
+      const tag = document.getElementById('tag-' + p);
+      if (!btn) return;
+      if (p === currentPlan) {
+        btn.textContent = '✓ Plan actuel';
+        btn.disabled = true;
+        if (tag) tag.style.display = 'block';
+      }
+    });
+  } catch { window.location.href = '/login'; }
+}
+
 async function buyPack(pack) {
   const btn = document.getElementById('btn-' + pack);
-  btn.disabled = true; btn.textContent = 'Chargement...';
+  if (btn) { btn.disabled = true; btn.textContent = 'Chargement...'; }
   try {
     const res = await fetch('/api/stripe/checkout', {
       method: 'POST', headers, body: JSON.stringify({ pack })
     });
     const data = await res.json();
-    if (!res.ok) { alert(data.error || 'Erreur'); btn.disabled = false; btn.textContent = 'Acheter'; return; }
+    if (!res.ok) {
+      alert(data.error || 'Stripe non configuré pour l\'instant.');
+      if (btn) { btn.disabled = false; btn.textContent = 'Choisir'; }
+      return;
+    }
     window.location.href = data.url;
-  } catch { alert('Erreur de connexion.'); btn.disabled = false; btn.textContent = 'Acheter'; }
+  } catch {
+    alert('Erreur de connexion.');
+    if (btn) { btn.disabled = false; btn.textContent = 'Choisir'; }
+  }
 }
 
-fetch('/api/me', { headers }).catch(() => window.location.href = '/login');
+init();
 </script>
 </body>
 </html>

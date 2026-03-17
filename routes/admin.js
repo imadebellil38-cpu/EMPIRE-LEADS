@@ -7,8 +7,8 @@ const router = Router();
 // All admin routes require admin
 router.use(requireAdmin);
 
-const VALID_PLANS = { free: 5, pro: 100, enterprise: 500 };
-const PLAN_PRICES = { free: 0, pro: 29, enterprise: 79 };
+const VALID_PLANS = { free: 5, starter: 100, pro: 500, business: 2000, legend: 3000, trial: 20, enterprise: 500 };
+const PLAN_PRICES = { free: 0, starter: 40, pro: 100, business: 300, legend: 445, trial: 0, enterprise: 100 };
 
 // GET /api/admin/users — list all users
 router.get('/users', (req, res) => {
@@ -122,6 +122,18 @@ router.get('/stats/top-users', (req, res) => {
   `).all();
 
   res.json({ bySearches, byProspects });
+});
+
+// GET /api/admin/connections — recent logins
+router.get('/connections', (req, res) => {
+  const rows = db.prepare(`
+    SELECT al.id, al.user_id, al.details, al.created_at, u.email, u.plan
+    FROM activity_log al
+    JOIN users u ON u.id = al.user_id
+    WHERE al.action = 'login'
+    ORDER BY al.created_at DESC LIMIT 100
+  `).all();
+  res.json(rows);
 });
 
 // GET /api/admin/stats
