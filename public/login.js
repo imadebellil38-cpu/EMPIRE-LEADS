@@ -7,6 +7,11 @@ if (localStorage.getItem('ph_token')) {
 
 // Referral code from URL
 const urlParams = new URLSearchParams(window.location.search);
+const tabParam = urlParams.get('tab');
+if (tabParam) {
+  setTimeout(() => showTab(tabParam), 100);
+}
+
 const refCode = urlParams.get('ref');
 if (refCode) {
   setTimeout(() => {

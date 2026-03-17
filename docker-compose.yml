@@ -9,6 +9,7 @@ services:
       - .env
     environment:
       - NODE_ENV=production
+      - DATABASE_PATH=/app/data/database.sqlite
     volumes:
       - db-data:/app/data
     restart: unless-stopped

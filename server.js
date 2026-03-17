@@ -70,6 +70,9 @@ const searchLimiter = rateLimit({
   message: { error: 'Trop de recherches. Réessayez dans quelques minutes.' },
 });
 
+// ── Health check ──
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
 // === Pages (BEFORE static so they take priority) ===
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'landing.html')));
 app.get('/app', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
