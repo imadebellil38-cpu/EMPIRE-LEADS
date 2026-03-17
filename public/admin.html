@@ -86,6 +86,30 @@
 
     select.plan-select { background: var(--surface); border: 1px solid var(--border2); border-radius: 6px; padding: 4px 8px; color: var(--text); font-size: .8rem; outline: none; cursor: pointer; }
 
+    /* ── Subscriptions ── */
+    .subs-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: .9rem; margin-bottom: 2rem; }
+    .sub-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 1.1rem; position: relative; overflow: hidden;
+    }
+    .sub-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+    .sub-free::before    { background:#4a6a88; }
+    .sub-trial::before   { background:var(--amber); }
+    .sub-starter::before { background:#60d0ff; }
+    .sub-pro::before     { background:var(--cyan); }
+    .sub-business::before{ background:var(--purple); }
+    .sub-legend::before  { background:#ff8844; }
+    .sub-name { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:.5rem; }
+    .sub-count { font-size:1.8rem; font-weight:900; line-height:1; }
+    .sub-free .sub-count    { color:#4a6a88; }
+    .sub-trial .sub-count   { color:var(--amber); }
+    .sub-starter .sub-count { color:#60d0ff; }
+    .sub-pro .sub-count     { color:var(--cyan); }
+    .sub-business .sub-count{ color:var(--purple); }
+    .sub-legend .sub-count  { color:#ff8844; }
+    .sub-label { font-size:.72rem; color:var(--muted); margin-top:.25rem; }
+    .sub-revenue { font-size:.78rem; font-weight:700; color:var(--emerald); margin-top:.4rem; }
+
     /* ── Charts ── */
     .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
     .chart-box {
@@ -130,6 +154,14 @@
       <div class="stat"><div class="stat-n" id="s-pro">-</div><div class="stat-l">Abonnés Pro+</div></div>
       <div class="stat"><div class="stat-n" id="s-mrr" style="color:var(--emerald)">-</div><div class="stat-l">MRR (EUR)</div></div>
       <div class="stat"><div class="stat-n" id="s-logins" style="color:var(--amber)">-</div><div class="stat-l">Connexions aujourd'hui</div></div>
+    </div>
+
+    <!-- Abonnements & Crédits -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-title">💳 Abonnements & Crédits</div>
+      <div class="subs-grid" id="subs-grid" style="padding:1rem">
+        <!-- rempli par JS -->
+      </div>
     </div>
 
     <!-- Charts -->
@@ -235,6 +267,33 @@ async function loadAll() {
     const proPlus = (stats.planCounts || []).filter(p => p.plan !== 'free').reduce((a, b) => a + b.c, 0);
     document.getElementById('s-pro').textContent = proPlus;
     document.getElementById('s-mrr').textContent = revenue.mrr + ' €';
+
+    // Subscriptions grid
+    const PLAN_INFO = {
+      free:     { label:'Gratuit',   credits:5,    price:0,   cls:'sub-free' },
+      trial:    { label:'Trial',     credits:20,   price:0,   cls:'sub-trial' },
+      starter:  { label:'Starter',   credits:100,  price:40,  cls:'sub-starter' },
+      pro:      { label:'Pro',       credits:500,  price:100, cls:'sub-pro' },
+      business: { label:'Business',  credits:2000, price:300, cls:'sub-business' },
+      legend:   { label:'Légende',   credits:3000, price:445, cls:'sub-legend' },
+    };
+    const planMap = {};
+    (stats.planCounts || []).forEach(p => { planMap[p.plan] = p.c; });
+    const totalCreditsPerPlan = {};
+    users.forEach(u => { totalCreditsPerPlan[u.plan] = (totalCreditsPerPlan[u.plan] || 0) + u.credits; });
+
+    document.getElementById('subs-grid').innerHTML = Object.entries(PLAN_INFO).map(([key, info]) => {
+      const count = planMap[key] || 0;
+      const credits = totalCreditsPerPlan[key] || 0;
+      const rev = info.price > 0 ? `+${(info.price * count).toLocaleString('fr-FR')} €` : 'Gratuit';
+      return `<div class="sub-card ${info.cls}">
+        <div class="sub-name">${info.label}</div>
+        <div class="sub-count">${count}</div>
+        <div class="sub-label">utilisateur${count>1?'s':''}</div>
+        <div class="sub-label">${info.credits} cr./plan · ${credits} cr. total</div>
+        <div class="sub-revenue">${rev}</div>
+      </div>`;
+    }).join('');
 
     const todayStr = new Date().toISOString().slice(0, 10);
     const loginsToday = connections.filter(c => c.created_at.slice(0,10) === todayStr).length;
