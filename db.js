@@ -104,6 +104,19 @@ const migrations = [
   `ALTER TABLE users ADD COLUMN stripe_customer_id TEXT DEFAULT ''`,
   `ALTER TABLE users ADD COLUMN stripe_subscription_id TEXT DEFAULT ''`,
   `CREATE INDEX IF NOT EXISTS idx_users_stripe_customer ON users(stripe_customer_id)`,
+  // ── Trial plan ──
+  `ALTER TABLE users ADD COLUMN trial_ends_at DATETIME`,
+  // ── Reset password ──
+  `ALTER TABLE users ADD COLUMN reset_token TEXT`,
+  `ALTER TABLE users ADD COLUMN reset_token_expires DATETIME`,
+  // ── Search cache ──
+  `CREATE TABLE IF NOT EXISTS search_cache (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cache_key TEXT UNIQUE NOT NULL,
+    results_json TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_search_cache_key ON search_cache(cache_key)`,
 ];
 
 for (const sql of migrations) {

@@ -45,9 +45,10 @@ router.post('/register', authLimiter, (req, res) => {
 
   const hash = bcrypt.hashSync(password, 12);
   const newReferralCode = crypto.randomBytes(4).toString('hex');
+  const trialEndsAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
   const result = db.prepare(
-    'INSERT INTO users (email, password, referral_code) VALUES (?, ?, ?)'
-  ).run(cleanEmail, hash, newReferralCode);
+    'INSERT INTO users (email, password, referral_code, plan, credits, trial_ends_at) VALUES (?, ?, ?, ?, ?, ?)'
+  ).run(cleanEmail, hash, newReferralCode, 'trial', 20, trialEndsAt);
 
   // Handle referral bonus (+5 parrain, +5 filleul)
   if (referral_code && typeof referral_code === 'string') {
@@ -96,6 +97,50 @@ router.post('/login', authLimiter, (req, res) => {
     token,
     user: { id: user.id, email: user.email, plan: user.plan, credits: user.credits, is_admin: user.is_admin }
   });
+});
+
+// POST /api/forgot-password (public, rate-limited)
+router.post('/forgot-password', authLimiter, (req, res) => {
+  const { email } = req.body;
+  if (!email || typeof email !== 'string') return res.status(400).json({ error: 'Email requis.' });
+
+  const cleanEmail = validator.normalizeEmail(validator.trim(email));
+  if (!validator.isEmail(cleanEmail)) return res.status(400).json({ error: 'Adresse email invalide.' });
+
+  const user = db.prepare('SELECT id FROM users WHERE email = ?').get(cleanEmail);
+  // Always return ok to avoid email enumeration
+  if (!user) return res.json({ ok: true });
+
+  const token = crypto.randomBytes(32).toString('hex');
+  const expires = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1h
+  db.prepare('UPDATE users SET reset_token = ?, reset_token_expires = ? WHERE id = ?').run(token, expires, user.id);
+
+  const { sendResetEmail } = require('../services/email');
+  sendResetEmail(cleanEmail, token).catch(() => {});
+
+  console.log(`[AUTH] Reset token for ${cleanEmail}: ${token}`);
+  // Return token in dev/test for convenience (email service may not be configured)
+  res.json({ ok: true, token: process.env.NODE_ENV !== 'production' ? token : undefined });
+});
+
+// POST /api/reset-password (public)
+router.post('/reset-password', (req, res) => {
+  const { token, password } = req.body;
+  if (!token || typeof token !== 'string') return res.status(400).json({ error: 'Token requis.' });
+  if (!password || typeof password !== 'string' || password.length < 6) {
+    return res.status(400).json({ error: 'Mot de passe invalide (6 caractères minimum).' });
+  }
+
+  const user = db.prepare(
+    'SELECT id FROM users WHERE reset_token = ? AND reset_token_expires > datetime("now")'
+  ).get(token.trim());
+  if (!user) return res.status(400).json({ error: 'Token invalide ou expiré.' });
+
+  const hash = bcrypt.hashSync(password, 12);
+  db.prepare('UPDATE users SET password = ?, reset_token = NULL, reset_token_expires = NULL WHERE id = ?').run(hash, user.id);
+
+  console.log(`[AUTH] Password reset for user ${user.id}`);
+  res.json({ ok: true });
 });
 
 // GET /api/me — current user info (protected)
