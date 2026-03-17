@@ -1,29 +1,33 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
-const path = require('path');
 
 const dossier = __dirname;
 let timer = null;
 
+// Fichiers/dossiers à ne jamais commiter
+const IGNORE = ['.git', 'node_modules', 'autosave', '.env', 'prospecthunter.db', 'package-lock.json'];
+
 console.log('✅ Sauvegarde automatique activée — je surveille ton projet...');
 
-// Surveille tous les fichiers du dossier
 fs.watch(dossier, { recursive: true }, (event, fichier) => {
   if (!fichier) return;
+  if (IGNORE.some(ig => fichier.includes(ig))) return;
 
-  // Ignore les fichiers Git et node_modules
-  if (fichier.includes('.git') || fichier.includes('node_modules') || fichier.includes('autosave')) return;
-
-  // Attends 2 secondes avant de sauvegarder (évite les doublons)
   clearTimeout(timer);
   timer = setTimeout(() => {
     try {
+      // N'ajoute que les fichiers trackés ou nouvellement créés — respecte le .gitignore
+      execSync(`git -C "${dossier}" add --all -- . ':!.env' ':!*.db' ':!package-lock.json'`, { stdio: 'pipe' });
+
+      // Vérifie s'il y a vraiment des changements à commiter
+      const status = execSync(`git -C "${dossier}" status --porcelain`, { stdio: 'pipe' }).toString().trim();
+      if (!status) return;
+
       const date = new Date().toLocaleString('fr-FR');
-      execSync(`git -C "${dossier}" add .`);
-      execSync(`git -C "${dossier}" commit -m "Sauvegarde automatique — ${date}"`, { stdio: 'pipe' });
-      console.log(`💾 Sauvegardé automatiquement — ${date} (${fichier})`);
+      execSync(`git -C "${dossier}" commit -m "autosave: ${date} (${fichier})"`, { stdio: 'pipe' });
+      console.log(`💾 Sauvegardé — ${date} (${fichier})`);
     } catch (e) {
-      // Pas de changement à sauvegarder, c'est normal
+      // Rien à commiter
     }
   }, 2000);
 });
