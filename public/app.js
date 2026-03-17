@@ -507,24 +507,30 @@ function renderCards(prospects) {
     card.className = 'prospect-card';
     card.dataset.stage = p.pipeline_stage;
 
-    const signals = buildSignals(p);
-    const actions = buildMainAction(p);
+    const signals  = buildSignals(p);
+    const actions  = buildMainAction(p);
+    const address  = p.address || [p.city, p.niche].filter(Boolean).join(', ') || '';
 
-    const callBtn = p.phone
-      ? `<a class="card-call-btn" href="tel:${escAttr(p.phone)}">📞 Appeler</a>`
+    const ratingHtml = p.rating
+      ? `<span class="card-rating">★ ${p.rating}${p.reviews ? `<span class="card-avis">${p.reviews} avis</span>` : ''}</span>`
       : '';
 
-    const cityLine = [p.city, p.niche].filter(Boolean).join(' · ') || p.address || '';
+    const callBtn = p.phone
+      ? `<a class="card-call-btn" href="tel:${escAttr(p.phone)}" title="Appeler">📞</a>`
+      : '';
+
+    const objBadge = (p.pipeline_stage === 'refused' && p.objection)
+      ? `<span class="refused-obj-badge">❌ ${esc(p.objection)}</span>` : '';
 
     card.innerHTML = `
-      <div class="card-top">
-        <div class="card-name-wrap">
-          <div class="card-name" onclick="openDetail(${p.id})">${esc(p.name || '—')}</div>
-          ${cityLine ? `<div class="card-sub">${esc(cityLine)}</div>` : ''}
-        </div>
+      <div class="card-header">
+        <div class="card-name" onclick="openDetail(${p.id})">${esc(p.name || '—')}</div>
         ${callBtn}
       </div>
-      <div class="card-signals">${buildHeatBadge(p)}${signals ? ' ' + signals : ''}${buildDateChip(p)}${(p.pipeline_stage === 'refused' && p.objection) ? `<span class="refused-obj-badge">❌ ${esc(p.objection)}</span>` : ''}</div>
+      ${address ? `<div class="card-address">${esc(address)}</div>` : ''}
+      <div class="card-info-row">
+        ${ratingHtml}${buildHeatBadge(p)}${signals}${buildDateChip(p)}${objBadge}
+      </div>
       ${p.notes ? `<div class="card-notes-row"><button class="notes-peek-btn" onclick="toggleNotesPreview('c${p.id}', this)">📝 Notes</button><div class="notes-preview" id="notes-preview-c${p.id}" style="display:none">${esc(p.notes)}</div></div>` : ''}
       <div class="card-actions">${actions}</div>
     `;

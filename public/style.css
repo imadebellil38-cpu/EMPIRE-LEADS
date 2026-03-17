@@ -1013,31 +1013,47 @@ tbody tr[data-stage="refused"]           { border-left: 3px solid var(--stage-re
 .prospect-card[data-stage="refused"]::before           { background: var(--stage-refused); }
 .prospect-card[data-stage="refused"]                   { opacity: .65; }
 
-.card-top {
-  display: flex; align-items: flex-start;
+.card-header {
+  display: flex; align-items: center;
   justify-content: space-between; gap: .5rem;
-  margin-bottom: .55rem;
+  margin-bottom: .2rem;
 }
-.card-name-wrap { flex: 1; min-width: 0; }
 .card-name {
-  font-weight: 700; font-size: .92rem; color: var(--text);
+  font-weight: 700; font-size: .95rem; color: var(--text);
   cursor: pointer; transition: color .12s;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0;
 }
 .card-name:hover { color: var(--stage-cold); }
-.card-sub { font-size: .72rem; color: var(--muted); margin-top: .1rem; }
+
+.card-address {
+  font-size: .72rem; color: var(--muted);
+  margin-bottom: .55rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.card-info-row {
+  display: flex; align-items: center; gap: .35rem;
+  flex-wrap: wrap; margin-bottom: .7rem;
+}
+
+.card-rating {
+  display: inline-flex; align-items: center; gap: .3rem;
+  font-size: .78rem; font-weight: 700; color: #f59e0b;
+}
+.card-avis {
+  font-weight: 400; color: var(--muted); font-size: .72rem;
+  margin-left: .15rem;
+}
 
 .card-call-btn {
-  display: flex; align-items: center; gap: .3rem;
-  padding: .45rem .8rem; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 8px;
   background: var(--cold-bg); border: 1px solid var(--cold-bd);
-  color: var(--stage-cold); font-size: .78rem; font-weight: 700;
-  text-decoration: none; white-space: nowrap; min-height: 44px;
-  transition: all .12s; flex-shrink: 0;
+  color: var(--stage-cold); font-size: .85rem;
+  text-decoration: none; flex-shrink: 0;
+  transition: all .12s;
 }
 .card-call-btn:hover { background: var(--stage-cold); color: #fff; }
-
-.card-signals { display: flex; gap: .3rem; flex-wrap: wrap; margin-bottom: .7rem; }
 
 .card-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
 
