@@ -33,6 +33,7 @@ let userCredits = 0;
 const STAGE_LABEL = {
   cold_call:          '📞 Cold Call',
   to_recall:          '🔄 À Rappeler',
+  no_answer:          '📵 N\'a pas répondu',
   meeting_to_set:     '🗓️ À poser',
   meeting_confirmed:  '✅ Confirmé',
   closed:             '💰 Closé',
@@ -42,6 +43,7 @@ const STAGE_LABEL = {
 const STAGE_CLASS = {
   cold_call:          'stage-cold_call',
   to_recall:          'stage-to_recall',
+  no_answer:          'stage-no_answer',
   meeting_to_set:     'stage-meeting_to_set',
   meeting_confirmed:  'stage-meeting_confirmed',
   closed:             'stage-closed',
@@ -58,6 +60,11 @@ const EMPTY_STATE = {
     icon: '🔄',
     msg: 'Aucun prospect à rappeler',
     hint: 'Les prospects intéressés apparaîtront ici',
+  },
+  no_answer: {
+    icon: '📵',
+    msg: 'Aucun prospect sans réponse',
+    hint: 'Les prospects qui n\'ont pas répondu apparaîtront ici',
   },
   meeting_to_set: {
     icon: '📅',
@@ -174,7 +181,7 @@ async function loadProspects() {
 ───────────────────────────────────────── */
 function updateBadges() {
   const counts = {
-    cold_call: 0, to_recall: 0,
+    cold_call: 0, to_recall: 0, no_answer: 0,
     meeting_to_set: 0, meeting_confirmed: 0,
     closed: 0, refused: 0,
   };
@@ -188,6 +195,7 @@ function updateBadges() {
 
   document.getElementById('badge-cold_call').textContent = counts.cold_call;
   document.getElementById('badge-to_recall').textContent = counts.to_recall;
+  document.getElementById('badge-no_answer').textContent = counts.no_answer;
   document.getElementById('badge-meeting').textContent   = counts.meeting_to_set + counts.meeting_confirmed;
   document.getElementById('badge-closed').textContent    = counts.closed;
   document.getElementById('badge-refused').textContent   = counts.refused;
@@ -239,6 +247,8 @@ function getFilteredProspects() {
     stages = ['cold_call'];
   } else if (currentTab === 'to_recall') {
     stages = ['to_recall'];
+  } else if (currentTab === 'no_answer') {
+    stages = ['no_answer'];
   } else if (currentTab === 'closed') {
     stages = ['closed'];
   } else if (currentTab === 'refused') {
@@ -376,6 +386,7 @@ function buildMainAction(p) {
   if (stage === 'cold_call') {
     return `
       <button class="act-btn act-btn-interested act-btn-primary" onclick="moveStage(${id},'to_recall')">✅ Intéressé</button>
+      <button class="act-btn act-btn-no-answer" onclick="moveStage(${id},'no_answer')">📵 Pas répondu</button>
       <button class="act-btn act-btn-refuse" onclick="moveStage(${id},'refused')">❌ Refus</button>
     `;
   }
@@ -383,6 +394,14 @@ function buildMainAction(p) {
     return `
       <button class="act-btn act-btn-back" onclick="moveStage(${id},'cold_call')" title="Revenir en Cold Call">◀ Retour</button>
       <button class="act-btn act-btn-meeting act-btn-primary" onclick="moveStage(${id},'meeting_to_set')">📅 Poser RDV</button>
+      <button class="act-btn act-btn-no-answer" onclick="moveStage(${id},'no_answer')">📵 Pas répondu</button>
+      <button class="act-btn act-btn-refuse" onclick="moveStage(${id},'refused')">❌ Refus</button>
+    `;
+  }
+  if (stage === 'no_answer') {
+    return `
+      <button class="act-btn act-btn-back" onclick="moveStage(${id},'cold_call')" title="Remettre en Cold Call">◀ Relancer</button>
+      <button class="act-btn act-btn-interested act-btn-primary" onclick="moveStage(${id},'to_recall')">✅ A répondu</button>
       <button class="act-btn act-btn-refuse" onclick="moveStage(${id},'refused')">❌ Refus</button>
     `;
   }

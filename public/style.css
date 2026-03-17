@@ -27,8 +27,9 @@
   --stage-recall:  #f59e0b;
   --stage-meeting: #a855f7;
   --stage-confirm: #10b981;
-  --stage-closed:  #22c55e;
-  --stage-refused: #6b7280;
+  --stage-closed:   #22c55e;
+  --stage-refused:  #6b7280;
+  --stage-noanswer: #f97316;
 
   /* Semantic */
   --cold-bg:    rgba(59,130,246,.1);   --cold-bd:    rgba(59,130,246,.3);
@@ -36,7 +37,8 @@
   --meeting-bg: rgba(168,85,247,.1);   --meeting-bd: rgba(168,85,247,.3);
   --confirm-bg: rgba(16,185,129,.1);   --confirm-bd: rgba(16,185,129,.3);
   --closed-bg:  rgba(34,197,94,.1);    --closed-bd:  rgba(34,197,94,.3);
-  --refused-bg: rgba(107,114,128,.08); --refused-bd: rgba(107,114,128,.2);
+  --refused-bg:   rgba(107,114,128,.08); --refused-bd:   rgba(107,114,128,.2);
+  --noanswer-bg:  rgba(249,115,22,.1);   --noanswer-bd:  rgba(249,115,22,.3);
 
   /* Utility */
   --green:    #22c55e; --green-bg: rgba(34,197,94,.1);  --green-bd: rgba(34,197,94,.3);
@@ -607,6 +609,7 @@ main {
 /* Per-stage active colors */
 .pipe-tab[data-stage="cold_call"].active  { background: linear-gradient(135deg,#2563eb,#3b82f6); box-shadow: 0 4px 20px rgba(59,130,246,.4); }
 .pipe-tab[data-stage="to_recall"].active  { background: linear-gradient(135deg,#d97706,#f59e0b); box-shadow: 0 4px 20px rgba(245,158,11,.4); }
+.pipe-tab[data-stage="no_answer"].active  { background: linear-gradient(135deg,#ea580c,#f97316); box-shadow: 0 4px 20px rgba(249,115,22,.4); }
 .pipe-tab[data-stage="meeting"].active    { background: linear-gradient(135deg,#7c3aed,#a855f7); box-shadow: 0 4px 20px rgba(168,85,247,.4); }
 .pipe-tab[data-stage="closed"].active     { background: linear-gradient(135deg,#16a34a,#22c55e); box-shadow: 0 4px 20px rgba(34,197,94,.4); }
 .pipe-tab[data-stage="refused"].active    { background: linear-gradient(135deg,#4b5563,#6b7280); box-shadow: none; }
@@ -694,12 +697,13 @@ main {
   padding: .2rem .6rem; border-radius: 999px;
   font-size: .68rem; font-weight: 700; white-space: nowrap;
 }
-.stage-cold_call         { background: var(--cold-bg);    border: 1px solid var(--cold-bd);    color: var(--stage-cold); }
-.stage-to_recall         { background: var(--recall-bg);  border: 1px solid var(--recall-bd);  color: var(--stage-recall); }
-.stage-meeting_to_set    { background: var(--meeting-bg); border: 1px solid var(--meeting-bd); color: var(--stage-meeting); }
-.stage-meeting_confirmed { background: var(--confirm-bg); border: 1px solid var(--confirm-bd); color: var(--stage-confirm); }
-.stage-closed            { background: var(--closed-bg);  border: 1px solid var(--closed-bd);  color: var(--stage-closed); }
-.stage-refused           { background: var(--refused-bg); border: 1px solid var(--refused-bd); color: var(--stage-refused); }
+.stage-cold_call         { background: var(--cold-bg);      border: 1px solid var(--cold-bd);      color: var(--stage-cold); }
+.stage-to_recall         { background: var(--recall-bg);    border: 1px solid var(--recall-bd);    color: var(--stage-recall); }
+.stage-no_answer         { background: var(--noanswer-bg);  border: 1px solid var(--noanswer-bd);  color: var(--stage-noanswer); }
+.stage-meeting_to_set    { background: var(--meeting-bg);   border: 1px solid var(--meeting-bd);   color: var(--stage-meeting); }
+.stage-meeting_confirmed { background: var(--confirm-bg);   border: 1px solid var(--confirm-bd);   color: var(--stage-confirm); }
+.stage-closed            { background: var(--closed-bg);    border: 1px solid var(--closed-bd);    color: var(--stage-closed); }
+.stage-refused           { background: var(--refused-bg);   border: 1px solid var(--refused-bd);   color: var(--stage-refused); }
 
 /* Stage color left-dot */
 .stage-dot {
@@ -707,6 +711,7 @@ main {
 }
 .dot-cold_call         { background: var(--stage-cold); }
 .dot-to_recall         { background: var(--stage-recall); }
+.dot-no_answer         { background: var(--stage-noanswer); }
 .dot-meeting_to_set    { background: var(--stage-meeting); }
 .dot-meeting_confirmed { background: var(--stage-confirm); }
 .dot-closed            { background: var(--stage-closed); }
@@ -797,6 +802,12 @@ main {
   color: var(--green); font-size: .88rem; font-weight: 800;
 }
 .act-btn-close:hover { background: var(--green); color: #fff; }
+
+.act-btn-no-answer {
+  background: var(--noanswer-bg); border-color: var(--noanswer-bd);
+  color: var(--stage-noanswer); font-size: .78rem; font-weight: 600;
+}
+.act-btn-no-answer:hover { background: var(--stage-noanswer); color: #fff; }
 
 .act-btn-refuse {
   background: transparent; border-color: var(--red-bd);
@@ -940,6 +951,7 @@ tbody tr[data-stage="to_recall"]         { border-left: 3px solid var(--stage-re
 tbody tr[data-stage="meeting_to_set"]    { border-left: 3px solid var(--stage-meeting); }
 tbody tr[data-stage="meeting_confirmed"] { border-left: 3px solid var(--stage-confirm); }
 tbody tr[data-stage="closed"]            { border-left: 3px solid var(--stage-closed); }
+tbody tr[data-stage="no_answer"]         { border-left: 3px solid var(--stage-noanswer); }
 tbody tr[data-stage="refused"]           { border-left: 3px solid var(--stage-refused); opacity: .55; }
 
 .prospect-name {
@@ -997,6 +1009,7 @@ tbody tr[data-stage="refused"]           { border-left: 3px solid var(--stage-re
 .prospect-card[data-stage="meeting_to_set"]::before    { background: var(--stage-meeting); }
 .prospect-card[data-stage="meeting_confirmed"]::before { background: var(--stage-confirm); }
 .prospect-card[data-stage="closed"]::before            { background: var(--stage-closed); }
+.prospect-card[data-stage="no_answer"]::before         { background: var(--stage-noanswer); }
 .prospect-card[data-stage="refused"]::before           { background: var(--stage-refused); }
 .prospect-card[data-stage="refused"]                   { opacity: .65; }
 
