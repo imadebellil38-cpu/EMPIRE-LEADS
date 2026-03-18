@@ -72,8 +72,33 @@ async function sendResetEmail(to, token, appUrl) {
   }
 }
 
+/**
+ * Send an email to a prospect (from the pitch generator)
+ */
+async function sendProspectEmail(to, subject, body, userEmail) {
+  if (!transporter) {
+    return { ok: false, error: 'SMTP non configuré. Ajoutez SMTP_HOST, SMTP_USER, SMTP_PASS dans .env.' };
+  }
+  try {
+    const safeBody = body.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    await transporter.sendMail({
+      from: SMTP_FROM,
+      to,
+      replyTo: userEmail || SMTP_FROM,
+      subject,
+      text: body,
+      html: `<div style="font-family:Arial,sans-serif;max-width:600px;white-space:pre-wrap">${safeBody}</div>`,
+    });
+    console.log(`[EMAIL] Email prospect envoyé à ${to}`);
+    return { ok: true };
+  } catch (err) {
+    console.error(`[EMAIL] Erreur envoi prospect à ${to}:`, err.message);
+    return { ok: false, error: err.message };
+  }
+}
+
 function isEmailConfigured() {
   return !!transporter;
 }
 
-module.exports = { sendResetEmail, isEmailConfigured };
+module.exports = { sendResetEmail, sendProspectEmail, isEmailConfigured };

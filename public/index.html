@@ -2,11 +2,15 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0f0f1a">
   <title>ProspectHunter — Pipeline CRM</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/style.css?v=35">
+  <link rel="stylesheet" href="/style.css?v=52">
 </head>
 <body>
 
@@ -24,8 +28,9 @@
       <span class="nav-notif-dot" id="nav-notif-dot" style="display:none"></span>
     </button>
     <button class="app-nav-btn" data-view="analyse" onclick="switchView('analyse')">📊 Analyse</button>
+    <button class="app-nav-btn" data-view="calendrier" onclick="switchView('calendrier')">📅 Calendrier</button>
     <button class="app-nav-btn agenda-btn" onclick="openAgenda()">
-      📅 Agenda
+      🔔 Agenda
       <span class="agenda-count" id="agenda-count" style="display:none"></span>
     </button>
   </nav>
@@ -37,6 +42,7 @@
       <button class="modal-close" onclick="closeAgenda()">✕</button>
     </div>
     <div class="agenda-panel-body" id="agenda-panel-body"></div>
+    <div id="agenda-panel-calendar" style="padding:.75rem;border-top:1px solid var(--border)"></div>
   </div>
 
   <div class="header-right">
@@ -45,6 +51,11 @@
       <span id="hstat-total">0</span>
       <span>leads</span>
     </div>
+    <a class="plan-badge-link" id="plan-badge-link" href="/pricing" title="Voir les abonnements">
+      <span id="plan-badge-label">free</span>
+      <span id="plan-badge-credits">0 cr</span>
+      <span class="plan-badge-upgrade">↑</span>
+    </a>
     <span class="user-email" id="user-email-display"></span>
     <button class="hdr-btn hdr-btn-logout" onclick="logout()">Déconnexion</button>
   </div>
@@ -55,9 +66,9 @@
 
   <!-- ── SCAN PANEL ── -->
   <div class="scan-panel" id="scan-panel">
-    <div class="scan-panel-header">
+    <div class="scan-panel-header" onclick="toggleScanPanel()" style="cursor:pointer">
       <div class="scan-panel-title">🔍 Trouver des prospects</div>
-      <button class="scan-toggle-btn" id="scan-toggle-btn" onclick="toggleScanPanel()" title="Réduire">▲</button>
+      <button class="scan-toggle-btn" id="scan-toggle-btn" title="Réduire" onclick="event.stopPropagation();toggleScanPanel()">▲</button>
     </div>
 
     <div class="scan-body" id="scan-body">
@@ -168,6 +179,7 @@
   </div>
 
   <!-- ── PIPELINE TABS ── -->
+  <div class="pipeline-nav-wrap">
   <nav class="pipeline-nav" id="pipeline-nav">
     <button class="pipe-tab active" data-stage="cold_call" onclick="switchTab('cold_call')">
       <span class="pipe-tab-icon">📞</span>
@@ -200,6 +212,7 @@
       <span class="pipe-tab-badge badge-refused" id="badge-refused">0</span>
     </button>
   </nav>
+  </div><!-- /pipeline-nav-wrap -->
 
   <!-- ── MEETING SUB-TABS (shown only on meeting tab) ── -->
   <div class="meeting-subtabs" id="meeting-subtabs" style="display:none">
@@ -213,6 +226,9 @@
       <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="text" id="search-input" placeholder="Rechercher par nom, téléphone, ville..." oninput="applyFilters()" />
     </div>
+    <select id="niche-filter" class="sort-select" onchange="applyFilters()">
+      <option value="all">🏷️ Tous secteurs</option>
+    </select>
     <select id="sort-select" class="sort-select" onchange="applyFilters()">
       <option value="heat">🔥 Chaleur</option>
       <option value="rating">★ Meilleure note</option>
@@ -267,11 +283,11 @@
   <div class="page-header">
     <div>
       <h1 class="page-title">📋 Agenda</h1>
-      <p class="page-sub">Rappels &amp; rendez-vous — du plus urgent au plus loin.</p>
+      <p class="page-sub">Rappels &amp; rendez-vous</p>
     </div>
-    <button class="btn-notif" id="btn-notif" onclick="requestNotifPerm()">
-      🔔 Notifications
-    </button>
+    <div style="display:flex;gap:.5rem;align-items:center">
+      <button class="btn-notif" id="btn-notif" onclick="requestNotifPerm()" title="Notifications">🔔</button>
+    </div>
   </div>
 
   <!-- En retard / Aujourd'hui -->
@@ -300,6 +316,19 @@
       Clique "Intéressé" ou "Poser RDV" sur un prospect pour le planifier.
     </div>
   </div>
+
+</main>
+
+<!-- ══════════════════════════════════════
+     VIEW : CALENDRIER
+══════════════════════════════════════ -->
+<main id="view-calendrier" style="display:none;background:#f1f5f9;min-height:100vh">
+  <div style="background:#fff;border-radius:16px;padding:1.5rem;box-shadow:0 1px 8px rgba(0,0,0,.07)">
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+      <h1 style="font-size:1.3rem;font-weight:800;color:#111827;margin:0">📅 Calendrier</h1>
+    </div>
+    <div id="agenda-calendar"></div>
+  </div>
 </main>
 
 <!-- ══════════════════════════════════════
@@ -310,6 +339,10 @@
     <div>
       <h1 class="page-title">📊 Analyse</h1>
       <p class="page-sub">Tes stats de prospection en un coup d'œil.</p>
+    </div>
+    <div style="display:flex;gap:.5rem">
+      <button class="btn-import-csv" onclick="openImportModal()">📥 Importer CSV</button>
+      <a class="btn-export-csv" href="/api/prospects/export" download>📤 Exporter CSV</a>
     </div>
   </div>
 
@@ -339,6 +372,35 @@
       <div class="kpi-icon">🔥</div>
       <div class="kpi-val" id="kpi-rate">—</div>
       <div class="kpi-label">Taux de close</div>
+    </div>
+    <div class="kpi-card" style="background:linear-gradient(135deg,rgba(234,179,8,.12),rgba(234,179,8,.04));border-color:rgba(234,179,8,.3)">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-val" id="kpi-ca" style="color:#fbbf24">—</div>
+      <div class="kpi-label">CA total</div>
+    </div>
+  </div>
+
+  <!-- Funnel de conversion -->
+  <div class="analyse-section">
+    <div class="analyse-section-title">🔻 Funnel de conversion</div>
+    <div class="funnel-wrap" id="conversion-funnel"></div>
+  </div>
+
+  <!-- Objectifs de la semaine -->
+  <div class="analyse-section">
+    <div class="analyse-section-title" style="display:flex;justify-content:space-between;align-items:center">
+      <span>🎯 Objectifs de la semaine</span>
+      <button class="btn-goals-edit" id="btn-goals-edit" onclick="toggleGoalsEdit()">✏️ Modifier</button>
+    </div>
+    <div id="goals-display"></div>
+    <div id="goals-edit" style="display:none">
+      <div class="goals-edit-grid">
+        <div class="goals-edit-field"><label>📞 Contacts / semaine</label><input type="number" id="goal-calls" min="1" step="1" placeholder="20" /></div>
+        <div class="goals-edit-field"><label>📅 RDV / semaine</label><input type="number" id="goal-meetings" min="1" step="1" placeholder="5" /></div>
+        <div class="goals-edit-field"><label>✅ Deals / semaine</label><input type="number" id="goal-deals" min="1" step="1" placeholder="2" /></div>
+        <div class="goals-edit-field"><label>💰 CA / semaine (€)</label><input type="number" id="goal-ca" min="0" step="100" placeholder="3000" /></div>
+      </div>
+      <button class="btn-primary" onclick="saveGoals()" style="margin-top:.75rem;padding:.45rem 1.2rem;font-size:.85rem">💾 Sauvegarder</button>
     </div>
   </div>
 
@@ -387,20 +449,19 @@
     <div class="objection-body">
       <p class="objection-hint">Sélectionne ou tape une objection :</p>
       <div class="objection-chips" id="objection-chips">
-        <button class="obj-chip" onclick="selectObjChip(this)">Ne répond pas</button>
         <button class="obj-chip" onclick="selectObjChip(this)">Pas intéressé</button>
         <button class="obj-chip" onclick="selectObjChip(this)">Trop cher</button>
         <button class="obj-chip" onclick="selectObjChip(this)">Déjà un prestataire</button>
-        <button class="obj-chip" onclick="selectObjChip(this)">Déjà un site</button>
+        <button class="obj-chip" onclick="selectObjChip(this)">Déjà un site web</button>
         <button class="obj-chip" onclick="selectObjChip(this)">Pas le temps</button>
         <button class="obj-chip" onclick="selectObjChip(this)">Mauvais timing</button>
-        <button class="obj-chip" onclick="selectObjChip(this)">Rappeler plus tard</button>
+        <button class="obj-chip" onclick="selectObjChip(this)">Pas le bon moment</button>
       </div>
       <input type="text" class="objection-input" id="objection-input" placeholder="Autre — écris ici..." oninput="onObjInput(this)" />
-      <div class="objection-actions">
-        <button class="btn-secondary" onclick="closeObjectionModal()">Annuler</button>
-        <button class="btn-primary" id="objection-confirm-btn" onclick="confirmObjection()">Confirmer le refus</button>
-      </div>
+    </div>
+    <div class="objection-actions">
+      <button class="btn-secondary" onclick="closeObjectionModal()">Annuler</button>
+      <button class="btn-primary" id="objection-confirm-btn" onclick="confirmObjection()">✅ Confirmer le refus</button>
     </div>
   </div>
 </div>
@@ -423,6 +484,11 @@
       </div>
       <p class="objection-hint" style="margin-top:.8rem">Date de signature :</p>
       <input type="date" class="stage-date-input" id="deal-date-input" />
+      <p class="objection-hint" style="margin-top:.8rem">Montant du deal :</p>
+      <div style="display:flex;align-items:center;gap:.5rem;margin-top:.3rem">
+        <input type="number" class="stage-modal-input" id="deal-value-input" placeholder="0" min="0" step="50" style="width:130px" />
+        <span style="color:var(--text2);font-size:.95rem;font-weight:700">€</span>
+      </div>
       <p class="objection-hint" style="margin-top:.8rem">Facturation :</p>
       <div class="deal-chips" id="deal-rec-chips">
         <button class="deal-chip" onclick="selectDealChip('rec',this,'one_shot')">1️⃣ One-shot</button>
@@ -486,6 +552,7 @@
       <button class="mtab active" data-mtab="info" onclick="switchModalTab('info')">📋 Fiche</button>
       <button class="mtab" data-mtab="pitch" onclick="switchModalTab('pitch')">🎯 Pitch IA</button>
       <button class="mtab" data-mtab="crm" onclick="switchModalTab('crm')">📝 Notes</button>
+      <button class="mtab" data-mtab="devis" onclick="switchModalTab('devis')">📄 Devis</button>
     </div>
 
     <!-- Fiche tab -->
@@ -549,7 +616,65 @@
         <label>Nom du gérant</label>
         <input class="crm-inp" id="m-owner" type="text" placeholder="Prénom Nom" oninput="debounceSave()" />
       </div>
+      <div class="field">
+        <label>Email du prospect</label>
+        <input class="crm-inp" id="m-email" type="email" placeholder="contact@entreprise.fr" oninput="debounceSave()" />
+      </div>
       <div class="crm-saved" id="crm-saved" style="display:none">✓ Sauvegardé</div>
+    </div>
+
+    <!-- Devis tab -->
+    <div class="mtab-panel" data-mtab="devis">
+      <div class="devis-tab-header">
+        <button class="btn-primary btn-new-devis" onclick="openNewQuoteModal()">+ Nouveau devis</button>
+      </div>
+      <div id="devis-list-loading" style="display:none;padding:.5rem;color:var(--muted);font-size:.85rem">Chargement…</div>
+      <div id="devis-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── QUOTE MODAL ── -->
+<div class="modal-overlay" id="quote-modal-overlay" onclick="if(event.target===this)closeQuoteModal()">
+  <div class="modal quote-modal" id="quote-modal">
+    <div class="modal-header">
+      <div class="modal-title" id="quote-modal-title">📄 Nouveau devis</div>
+      <button class="modal-close" onclick="closeQuoteModal()">✕</button>
+    </div>
+    <div class="quote-modal-body">
+      <!-- Items -->
+      <div class="quote-section-label">Lignes du devis</div>
+      <div id="quote-items-list"></div>
+      <button class="btn-add-quote-line" onclick="addQuoteLine()">+ Ajouter une ligne</button>
+
+      <!-- TVA + validity -->
+      <div class="quote-meta-row">
+        <div class="quote-meta-field">
+          <label>TVA (%)</label>
+          <input type="number" id="q-tva-rate" value="20" min="0" max="100" step="1" class="crm-inp" style="width:80px" />
+        </div>
+        <div class="quote-meta-field">
+          <label>Valable jusqu'au</label>
+          <input type="date" id="q-valid-until" class="crm-inp" style="width:150px" />
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="field">
+        <label>Notes / conditions</label>
+        <textarea id="q-notes" class="crm-ta" rows="2" placeholder="Conditions de paiement, délais…"></textarea>
+      </div>
+
+      <!-- Totals preview -->
+      <div class="quote-totals-preview" id="quote-totals-preview"></div>
+
+      <!-- Actions -->
+      <div class="quote-modal-actions">
+        <button class="btn-secondary" onclick="closeQuoteModal()">Annuler</button>
+        <button class="btn-outline" id="btn-save-draft" onclick="saveQuote('draft')">💾 Sauvegarder</button>
+        <button class="btn-primary" id="btn-quote-pdf" onclick="downloadQuotePDF()" style="display:none">📥 Télécharger PDF</button>
+        <button class="btn-send-quote" id="btn-send-quote" onclick="sendQuoteEmail()" style="display:none">📧 Envoyer</button>
+      </div>
     </div>
   </div>
 </div>
@@ -584,10 +709,80 @@
   </div>
 </div>
 
+<!-- ── IMPORT CSV MODAL ── -->
+<div class="modal-overlay" id="import-modal-overlay" onclick="if(event.target===this)closeImportModal()">
+  <div class="modal import-modal">
+    <div class="modal-header">
+      <div class="modal-title">📥 Importer des prospects (CSV)</div>
+      <button class="modal-close" onclick="closeImportModal()">✕</button>
+    </div>
+    <div class="import-modal-body">
+      <!-- Step 1: Upload -->
+      <div id="import-step-upload">
+        <div class="import-dropzone" id="import-dropzone"
+          ondragover="event.preventDefault();this.classList.add('drag-over')"
+          ondragleave="this.classList.remove('drag-over')"
+          ondrop="handleCsvDrop(event)">
+          <div class="import-dz-icon">📂</div>
+          <div class="import-dz-text">Glisse ton fichier CSV ici</div>
+          <div class="import-dz-or">ou</div>
+          <label class="btn-primary" style="cursor:pointer;display:inline-block;padding:.5rem 1.2rem;font-size:.85rem">
+            Choisir un fichier
+            <input type="file" accept=".csv,text/csv" style="display:none" onchange="handleCsvFile(this.files[0])">
+          </label>
+          <div class="import-dz-hint">Colonnes supportées : nom, téléphone, email, adresse, ville, notes</div>
+        </div>
+      </div>
+
+      <!-- Step 2: Preview + Mapping -->
+      <div id="import-step-preview" style="display:none">
+        <div class="import-mapping" id="import-mapping"></div>
+        <div class="import-preview-header">Aperçu (<span id="import-preview-count">0</span> lignes)</div>
+        <div class="import-preview-wrap">
+          <table class="import-preview-table" id="import-preview-table"></table>
+        </div>
+        <div id="import-dedup-msg" class="import-dedup-msg"></div>
+        <div class="import-actions">
+          <button class="btn-secondary" onclick="resetImport()">← Retour</button>
+          <button class="btn-primary" id="btn-do-import" onclick="doImport()">✅ Importer <span id="import-btn-count"></span> prospects</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Done -->
+      <div id="import-step-done" style="display:none;text-align:center;padding:2rem">
+        <div style="font-size:2.5rem;margin-bottom:.75rem">✅</div>
+        <div id="import-done-msg" style="font-size:1.1rem;font-weight:700;color:var(--accent)"></div>
+        <button class="btn-primary" onclick="closeImportModal();loadProspects()" style="margin-top:1.5rem">Voir les prospects</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ── TOAST CONTAINER ── -->
 <div class="toast-container" id="toast-container"></div>
 
+<!-- ── NAV MOBILE BAS (visible uniquement sur mobile) ── -->
+<nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+  <button class="mbn-btn active" data-view="pipeline" onclick="switchView('pipeline');mbnSwitch(this)">
+    <span class="mbn-icon">📋</span><span class="mbn-label">Pipeline</span>
+  </button>
+  <button class="mbn-btn" data-view="rappels" onclick="switchView('rappels');mbnSwitch(this)">
+    <span class="mbn-icon">🔔</span><span class="mbn-label">Rappels</span>
+    <span class="mbn-dot" id="mbn-notif-dot" style="display:none"></span>
+  </button>
+  <button class="mbn-btn" data-view="analyse" onclick="switchView('analyse');mbnSwitch(this)">
+    <span class="mbn-icon">📊</span><span class="mbn-label">Analyse</span>
+  </button>
+  <button class="mbn-btn" data-view="calendrier" onclick="switchView('calendrier');mbnSwitch(this)">
+    <span class="mbn-icon">📅</span><span class="mbn-label">Agenda</span>
+  </button>
+  <button class="mbn-btn" onclick="openAgenda()">
+    <span class="mbn-icon">⚡</span><span class="mbn-label">Quick</span>
+    <span class="mbn-dot" id="mbn-agenda-dot" style="display:none"></span>
+  </button>
+</nav>
+
 <!-- ── APP JS ── -->
-<script src="/app.js?v=35"></script>
+<script src="/app.js?v=52"></script>
 </body>
 </html>

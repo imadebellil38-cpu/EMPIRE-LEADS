@@ -96,6 +96,10 @@ app.use('/api/pitch', requireAuth, require('./routes/pitch'));
 app.use('/api/admin', requireAuth, require('./routes/admin'));
 app.use('/api/subscription', requireAuth, require('./routes/subscription'));
 app.use('/api/referral', requireAuth, require('./routes/referral'));
+app.use('/api/quotes', require('./routes/quotes')); // sign/* are public, others need auth inline
+
+// ── Sign page (public) ──
+app.get('/sign/:token', (req, res) => res.sendFile(path.join(__dirname, 'public', 'sign.html')));
 
 // ── 404 handler for API routes ──
 app.use('/api', (req, res) => {

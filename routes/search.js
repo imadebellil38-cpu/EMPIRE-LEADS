@@ -175,9 +175,10 @@ router.post('/', async (req, res) => {
   }
 
   // ── Check credits ──
-  const user = db.prepare('SELECT credits FROM users WHERE id = ?').get(userId);
+  const user = db.prepare('SELECT credits, is_admin FROM users WHERE id = ?').get(userId);
   if (!user) return res.status(404).json({ error: 'Utilisateur introuvable.' });
-  if (user.credits <= 0) return res.status(403).json({ error: 'Plus de crédits disponibles. Passez à un plan supérieur.' });
+  const isAdmin = !!user.is_admin;
+  if (!isAdmin && user.credits <= 0) return res.status(403).json({ error: 'Plus de crédits disponibles. Passez à un plan supérieur.' });
 
   // ── Extract & validate inputs ──
   const { niche, country, smartKeywords, numProspects, geoMode, geoLat, geoLng, geoRadius, searchMode: rawMode } = req.body;
@@ -207,11 +208,11 @@ router.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Pays non supporté. Choix: ' + VALID_COUNTRIES.join(', ') });
   }
 
-  // Validate numProspects (account for credit multiplier)
-  const requestedNum = Math.max(1, Math.min(parseInt(numProspects, 10) || 5, 200));
-  const maxAffordable = Math.floor(user.credits / creditMultiplier);
+  // Validate numProspects — no hard cap, only limited by credits (or unlimited for admins)
+  const requestedNum = Math.max(1, parseInt(numProspects, 10) || 5);
+  const maxAffordable = isAdmin ? requestedNum : Math.floor(user.credits / creditMultiplier);
   const maxProspects = Math.min(requestedNum, maxAffordable);
-  if (maxProspects <= 0) return res.status(403).json({ error: 'Plus de crédits disponibles.' });
+  if (!isAdmin && maxProspects <= 0) return res.status(403).json({ error: 'Plus de crédits disponibles.' });
 
   // Validate geo params if geo mode
   if (geoMode) {
@@ -464,8 +465,9 @@ Réponds UNIQUEMENT en JSON, un tableau avec le numéro et le nom trouvé (vide 
     }
 
     // ── Charge credits ──
+    // Admin: never charged. Regular users: only pay for prospects actually found.
     // owners mode: only charge if names found; site/social = ×1, both = ×2
-    const creditsToCharge = prospects.length * creditMultiplier;
+    const creditsToCharge = isAdmin ? 0 : prospects.length * creditMultiplier;
     if (creditsToCharge > 0) {
       db.prepare('UPDATE users SET credits = credits - ? WHERE id = ?').run(creditsToCharge, userId);
     }

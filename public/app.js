@@ -155,6 +155,11 @@ async function init() {
       if (emailEl) emailEl.textContent = u.email;
       userCredits = u.credits || 0;
       updateProspectsSlider();
+      // Update plan badge
+      const planLabel = document.getElementById('plan-badge-label');
+      const planCredits = document.getElementById('plan-badge-credits');
+      if (planLabel) planLabel.textContent = u.plan || 'free';
+      if (planCredits) planCredits.textContent = (u.credits || 0) + ' cr';
     }
   } catch (e) {}
 
@@ -175,6 +180,7 @@ async function loadProspects() {
     if (!p.pipeline_stage) p.pipeline_stage = 'cold_call';
   });
 
+  rebuildNicheFilter();
   updateBadges();
   renderList();
 }
@@ -240,8 +246,39 @@ function switchSubTab(sub) {
 ───────────────────────────────────────── */
 function applyFilters() { renderList(); }
 
+function filterByNiche(niche) {
+  const sel = document.getElementById('niche-filter');
+  if (!sel) return;
+  sel.value = nicheKey(niche);
+  renderList();
+  // Visual feedback
+  showToast(`Filtre : ${niche}`, 'info', 1500);
+}
+
+function nicheKey(raw) { return decodeHtml((raw || '').trim()).toLowerCase(); }
+
+function rebuildNicheFilter() {
+  const sel = document.getElementById('niche-filter');
+  if (!sel) return;
+  const current = sel.value;
+  // Map lowercase key → original display name
+  const nicheMap = {};
+  allProspects.forEach(p => {
+    const k = nicheKey(p.niche);
+    if (k && !nicheMap[k]) nicheMap[k] = decodeHtml((p.niche || '').trim());
+  });
+  const keys = Object.keys(nicheMap).sort((a, b) => a.localeCompare(b, 'fr'));
+  sel.innerHTML = `<option value="all">🏷️ Tous secteurs (${allProspects.length})</option>` +
+    keys.map(k => {
+      const count = allProspects.filter(p => nicheKey(p.niche) === k).length;
+      const label = nicheMap[k];
+      return `<option value="${k}"${current === k ? ' selected' : ''}>${esc(label)} (${count})</option>`;
+    }).join('');
+}
+
 function getFilteredProspects() {
   const searchVal = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+  const nicheFilter = document.getElementById('niche-filter')?.value || 'all';
 
   let stages = [];
   if (currentTab === 'meeting') {
@@ -260,12 +297,14 @@ function getFilteredProspects() {
 
   return allProspects.filter(p => {
     if (!stages.includes(p.pipeline_stage)) return false;
+    if (nicheFilter !== 'all' && nicheKey(p.niche) !== nicheFilter) return false;
     if (searchVal) {
       const name  = (p.name    || '').toLowerCase();
       const phone = (p.phone   || '').toLowerCase();
       const addr  = (p.address || '').toLowerCase();
       const city  = (p.city    || '').toLowerCase();
-      if (!name.includes(searchVal) && !phone.includes(searchVal) && !addr.includes(searchVal) && !city.includes(searchVal)) return false;
+      const niche = (p.niche   || '').toLowerCase();
+      if (!name.includes(searchVal) && !phone.includes(searchVal) && !addr.includes(searchVal) && !city.includes(searchVal) && !niche.includes(searchVal)) return false;
     }
     return true;
   });
@@ -479,12 +518,14 @@ function renderTable(prospects) {
       ? `<span class="row-rating">★ ${p.rating}${p.reviews ? ` <span class="row-avis">${p.reviews} avis</span>` : ''}</span>`
       : '';
 
+    const nicheBadge = p.niche ? `<span class="niche-tag" onclick="filterByNiche('${escAttr(p.niche)}')" title="Filtrer par ${esc(p.niche)}">${esc(p.niche)}</span>` : '';
+
     tr.innerHTML = `
       <td class="td-main">
         <div class="prospect-name" onclick="openDetail(${p.id})">${esc(p.name || '—')}</div>
         ${p.address ? `<div class="prospect-addr">${esc(p.address)}</div>` : ''}
         <div class="row-meta-line">
-          ${ratingHtml}${signals}${dateChip}${objBadge}
+          ${nicheBadge}${ratingHtml}${signals}${dateChip}${objBadge}
         </div>
         <div class="row-bottom-line">
           <div class="row-heat">${buildHeatBadge(p)}</div>
@@ -501,6 +542,7 @@ function renderTable(prospects) {
           ${phoneCopy}
         </div>
         <button class="btn-fiche" onclick="openDetail(${p.id})" title="Voir la fiche complète">📋 Fiche</button>
+        ${p.pipeline_stage === 'cold_call' ? `<button class="btn-delete-row" onclick="deleteProspect(${p.id})" title="Supprimer">🗑️</button>` : ''}
       </td>
     `;
     tbody.appendChild(tr);
@@ -510,6 +552,144 @@ function renderTable(prospects) {
 /* ─────────────────────────────────────────
    RENDER CARDS (mobile)
 ───────────────────────────────────────── */
+const STAGE_LABELS = {
+  cold_call:          { icon: '📞', label: 'À appeler',     cls: 'stage-badge-cold' },
+  to_recall:          { icon: '🔄', label: 'À rappeler',    cls: 'stage-badge-recall' },
+  no_answer:          { icon: '📵', label: 'Pas répondu',   cls: 'stage-badge-noanswer' },
+  meeting_to_set:     { icon: '📅', label: 'RDV à poser',   cls: 'stage-badge-meeting' },
+  meeting_confirmed:  { icon: '✅', label: 'RDV confirmé',  cls: 'stage-badge-confirm' },
+  closed:             { icon: '💰', label: 'Deal closé',    cls: 'stage-badge-closed' },
+  refused:            { icon: '❌', label: 'Refusé',        cls: 'stage-badge-refused' },
+};
+
+function buildStageBadge(stage) {
+  const s = STAGE_LABELS[stage];
+  if (!s) return '';
+  return `<span class="stage-badge ${s.cls}">${s.icon} ${s.label}</span>`;
+}
+
+const COACH_PHRASES = {
+  cold_call: [
+    "Spoiler : il va pas\nte rappeler tout seul 🙄",
+    "Ta zone de confort,\nc'est là où les deals meurent 😂",
+    "Chaque appel que tu fais,\nc'est un concurrent qui le fait pas 🏆",
+    "Le téléphone c'est\nton arme secrète. DÉGAINE ! 🔫",
+    "Il a un problème.\nT'as la solution. APPELLE ! 💥",
+    "Les millionnaires ont commencé\npar des coups de fil. Vas-y 💰",
+    "Ce prospect attend\nquelqu'un comme toi… Bouge ! 🚀",
+    "Jordan a raté 9000 tirs.\nToi t'as même pas essayé 😤",
+    "1 appel = 1 chance.\nZéro appel = zéro chance 🎯",
+    "Il dort peut-être.\nOu il a juste besoin qu'on l'appelle 😴",
+    "T'as peur de quoi ?\nIl peut pas te mordre au téléphone 😂",
+    "Le deal de ta vie\nest peut-être dans cette liste 🤑",
+  ],
+  to_recall: [
+    "Il était chaud.\nRappelle avant qu'il refroidisse ! 🔥",
+    "T'as planté la graine.\nArrose-la maintenant 🌱",
+    "Un rappel = un deal\npotentiel. Fais le math 🧮",
+    "Il t'attend même\ns'il le sait pas encore 😏",
+    "Les champions font\nle suivi. Les autres font pas 👑",
+    "Tu l'as accroché.\nMaintenant ferme ! 🎣",
+    "Chaque minute qui passe,\nil oublie qui t'es 😬",
+    "Dans 10 ans tu te diras\n« j'aurais dû rappeler » 🤦",
+  ],
+  no_answer: [
+    "La messagerie c'est\npas un non ! Réessaie 📵",
+    "Statistiquement il faut\n8 tentatives. T'en es où ? 📊",
+    "Il était peut-être\naux toilettes. Réessaie ! 🚽",
+    "Les losers abandonnent\nau 1er essai. Toi non 💪",
+    "Son téléphone existe.\nIl va finir par répondre 😅",
+    "La persistance c'est\nce qui sépare les pros 🏆",
+    "Il a juste pas vu\nton appel. Encore ! 🔔",
+    "Thomas Edison a essayé\n1000 fois. T'as essayé combien ? 💡",
+  ],
+  meeting_to_set: [
+    "Un RDV dans l'agenda =\nargent dans ta poche 💼",
+    "Propose 2 créneaux.\nL'un des deux va marcher 📅",
+    "T'es à 1 appel\nd'un deal. UN seul 🎯",
+    "Il a dit oui à l'intérêt.\nMaintenant pose la date ! 🗓️",
+    "Le RDV c'est 80%\ndu deal déjà fait 💰",
+    "Pendant que tu lis ça,\nun concurrent appelle 😬",
+  ],
+  meeting_confirmed: [
+    "Prépare ton meilleur pitch.\nC'est maintenant ou jamais 🎪",
+    "Il a dit oui au RDV.\nFais-le dire oui au deal 💰",
+    "Ferme dès qu'il accepte.\nLe silence est d'or 🤐",
+    "T'es à deux doigts\nde fermer. Lâche rien ! 🏁",
+    "Visualise la signature.\nPuis va la chercher 🖊️",
+    "Ce RDV c'est\nton moment. Brille ! ✨",
+  ],
+  closed: [
+    "Deal closé 🏆\nT'assures vraiment !",
+    "CHAMPION ! 🥇\nPassons au prochain ?",
+    "Compte les billets.\nPuis recommence 💸",
+    "C'est ce qu'on fait\nquand on est bon 😎",
+    "Mérite un café ☕\nCelui du gagnant !",
+  ],
+  refused: [
+    "Pas grave.\nProchain !! 🚀",
+    "Michael Jordan aussi\na été recalé. Suite ! 🏀",
+    "Chaque refus te rapproche\ndu oui suivant 📈",
+    "C'était pas le bon.\nLe bon arrive 🎯",
+    "Statistiquement tu viens\nde te rapprocher d'un oui 😎",
+    "Les meilleurs vendeurs\nont les plus de refus aussi 🏆",
+  ],
+};
+
+function pickCoachPhrase(stage) {
+  const pool = COACH_PHRASES[stage] || COACH_PHRASES.cold_call;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function buildSwipeActions(p) {
+  const phrase = pickCoachPhrase(p.pipeline_stage).replace(/\n/g, '<br>');
+  return `<div class="csw-phrase">${phrase}</div>`;
+}
+
+function addSwipeHandler(card) {
+  const inner = card.querySelector('.card-inner');
+  if (!inner) return;
+  let startX = 0, startY = 0, dragging = false, opened = false;
+  const W = 150;
+
+  card.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    dragging = true;
+  }, { passive: true });
+
+  card.addEventListener('touchmove', e => {
+    if (!dragging) return;
+    const dx = e.touches[0].clientX - startX;
+    const dy = e.touches[0].clientY - startY;
+    if (Math.abs(dy) > Math.abs(dx) + 5) { dragging = false; return; }
+    e.preventDefault();
+    const base = opened ? -W : 0;
+    const tx = Math.max(Math.min(base + dx, 0), -W);
+    inner.style.transition = 'none';
+    inner.style.transform = `translateX(${tx}px)`;
+  }, { passive: false });
+
+  card.addEventListener('touchend', e => {
+    if (!dragging) return;
+    dragging = false;
+    const dx = e.changedTouches[0].clientX - startX;
+    const base = opened ? -W : 0;
+    const final = base + dx;
+    inner.style.transition = 'transform .25s cubic-bezier(.25,.1,.25,1)';
+    if (final < -W / 2) { inner.style.transform = `translateX(-${W}px)`; opened = true; }
+    else { inner.style.transform = 'translateX(0)'; opened = false; }
+  });
+
+  document.addEventListener('touchstart', e => {
+    if (opened && !card.contains(e.target)) {
+      inner.style.transition = 'transform .25s';
+      inner.style.transform = 'translateX(0)';
+      opened = false;
+    }
+  }, { passive: true });
+}
+
 function renderCards(prospects) {
   const wrap = document.getElementById('cards-wrap');
   if (!wrap) return;
@@ -518,39 +698,53 @@ function renderCards(prospects) {
   prospects.forEach(p => {
     const card = document.createElement('div');
     card.className = 'prospect-card';
+    card.id = 'pcard-' + p.id;
     card.dataset.stage = p.pipeline_stage;
 
-    const signals  = buildSignals(p);
     const actions  = buildMainAction(p);
-    const address  = p.address || [p.city, p.niche].filter(Boolean).join(', ') || '';
+    const address  = p.address || p.city || '';
 
-    const ratingHtml = p.rating
-      ? `<span class="card-rating">★ ${p.rating}${p.reviews ? `<span class="card-avis">${p.reviews} avis</span>` : ''}</span>`
+    // Ligne méta compacte : secteur · note · chaleur · signaux — tout en gris neutre
+    const metaParts = [];
+    if (p.niche)    metaParts.push(`<span class="cm-tag" onclick="filterByNiche('${escAttr(nicheKey(p.niche))}')">${esc(p.niche)}</span>`);
+    if (p.rating)   metaParts.push(`★ ${p.rating}${p.reviews ? ` (${p.reviews})` : ''}`);
+    const heatScore = calcHeat(p);
+    if (heatScore >= 6) metaParts.push('🔥🔥 Brûlant');
+    else if (heatScore >= 3) metaParts.push('🔥 Chaud');
+    if (!p.website_url) metaParts.push('🌐 Sans site');
+    if (p.has_facebook === 0 && p.has_instagram === 0) metaParts.push('📵 Sans réseaux');
+    if (p.pipeline_stage === 'refused' && p.objection) metaParts.push(`❌ ${esc(p.objection)}`);
+    const metaLine = metaParts.join(' · ');
+
+    const mapsQuery = encodeURIComponent((p.name || '') + ' ' + address);
+    const mapsUrl   = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
+
+    const callBtnMobile = p.phone
+      ? `<a class="card-call-btn-mobile" href="tel:${escAttr(p.phone)}">📞 Appeler</a>`
       : '';
 
-    const callBtn = p.phone
-      ? `<a class="card-call-btn" href="tel:${escAttr(p.phone)}" title="Appeler">📞</a>`
-      : '';
-
-    const objBadge = (p.pipeline_stage === 'refused' && p.objection)
-      ? `<span class="refused-obj-badge">❌ ${esc(p.objection)}</span>` : '';
+    const swipeActions = buildSwipeActions(p);
+    const stageBadge   = buildStageBadge(p.pipeline_stage);
+    const dateChip     = buildDateChip(p);
 
     card.innerHTML = `
-      <div class="card-header">
-        <div class="card-name" onclick="openDetail(${p.id})">${esc(p.name || '—')}</div>
-        ${callBtn}
-      </div>
-      ${address ? `<div class="card-address">${esc(address)}</div>` : ''}
-      <div class="card-info-row">
-        ${ratingHtml}${signals}${buildDateChip(p)}${objBadge}
-      </div>
-      <div class="card-bottom">
-        <div class="card-heat">${buildHeatBadge(p)}</div>
+      <div class="card-swipe-actions">${swipeActions}</div>
+      <div class="card-inner">
+        ${stageBadge}
+        <div class="card-name">${esc(p.name || '—')}</div>
+        ${address ? `<div class="card-address">${esc(address)}</div>` : ''}
+        <div class="card-meta-line">${metaLine}${dateChip}</div>
+        <div class="card-links-row">
+          <button class="card-link-btn" onclick="openDetail(${p.id})">📋 Fiche</button>
+          <a class="card-link-btn" href="${escAttr(mapsUrl)}" target="_blank" rel="noopener">📍 Google Maps</a>
+        </div>
         <div class="card-actions">${actions}</div>
+        ${callBtnMobile}
+        ${p.notes ? `<div class="card-notes-row"><button class="notes-peek-btn" onclick="toggleNotesPreview('c${p.id}', this)">📝 Notes</button><div class="notes-preview" id="notes-preview-c${p.id}" style="display:none">${esc(p.notes)}</div></div>` : ''}
       </div>
-      ${p.notes ? `<div class="card-notes-row"><button class="notes-peek-btn" onclick="toggleNotesPreview('c${p.id}', this)">📝 Notes</button><div class="notes-preview" id="notes-preview-c${p.id}" style="display:none">${esc(p.notes)}</div></div>` : ''}
     `;
     wrap.appendChild(card);
+    addSwipeHandler(card);
   });
 }
 
@@ -569,6 +763,14 @@ let _dealTargetId = null;
 let _dealType = ''; let _dealRec = '';
 
 function moveStage(id, stage) {
+  // Fade-out immédiat de la carte pour éviter l'effet "bouton collé" iOS
+  const cardEl = document.getElementById('pcard-' + id);
+  if (cardEl) {
+    cardEl.style.transition = 'opacity .15s, transform .15s';
+    cardEl.style.opacity = '0.15';
+    cardEl.style.transform = 'scale(0.97)';
+    cardEl.style.pointerEvents = 'none';
+  }
   if (stage === 'refused') {
     _objectionTargetId = id;
     _objectionValue    = '';
@@ -661,7 +863,7 @@ function confirmObjection() {
   _doMoveStage(id, 'refused', obj, null, null, null);
 }
 
-async function _doMoveStage(id, stage, objection, rappel, meeting_date, notes, deal_type, deal_date, deal_recurrence) {
+async function _doMoveStage(id, stage, objection, rappel, meeting_date, notes, deal_type, deal_date, deal_recurrence, deal_value) {
   const prospect = allProspects.find(p => p.id === id);
   if (!prospect) return;
 
@@ -674,8 +876,10 @@ async function _doMoveStage(id, stage, objection, rappel, meeting_date, notes, d
   if (deal_type)       prospect.deal_type       = deal_type;
   if (deal_date)       prospect.deal_date       = deal_date;
   if (deal_recurrence) prospect.deal_recurrence = deal_recurrence;
+  if (deal_value)      prospect.deal_value      = deal_value;
   updateBadges();
-  renderList();
+  // Délai iOS : évite que le touch state colle sur la prochaine carte (400ms = iOS safe)
+  setTimeout(() => renderList(), 400);
 
   const body = { stage };
   if (objection)       body.objection       = objection;
@@ -685,6 +889,7 @@ async function _doMoveStage(id, stage, objection, rappel, meeting_date, notes, d
   if (deal_type)       body.deal_type       = deal_type;
   if (deal_date)       body.deal_date       = deal_date;
   if (deal_recurrence) body.deal_recurrence = deal_recurrence;
+  if (deal_value)      body.deal_value      = deal_value;
   const res = await apiPut(`/api/prospects/${id}/stage`, body);
   if (!res || !res.ok) {
     prospect.pipeline_stage = oldStage;
@@ -721,10 +926,11 @@ function closeDealModal() {
 }
 function confirmDeal() {
   if (!_dealTargetId) return;
-  const id       = _dealTargetId;
-  const dealDate = document.getElementById('deal-date-input').value;
+  const id        = _dealTargetId;
+  const dealDate  = document.getElementById('deal-date-input').value;
+  const dealValue = parseFloat(document.getElementById('deal-value-input')?.value) || null;
   closeDealModal();
-  _doMoveStage(id, 'closed', null, null, null, null, _dealType || null, dealDate || null, _dealRec || null);
+  _doMoveStage(id, 'closed', null, null, null, null, _dealType || null, dealDate || null, _dealRec || null, dealValue);
 }
 
 /* ── CALL ATTEMPTS ── */
@@ -747,11 +953,22 @@ async function logAttempt() {
     attempt_type: _attemptType, result: _attemptResult, note
   });
   if (!res || res.error) return showToast(res?.error || 'Erreur', 'error');
+  const lastResult = _attemptResult;
   document.getElementById('attempt-note').value = '';
   _attemptType = ''; _attemptResult = '';
   document.querySelectorAll('.attempt-type-chip,.attempt-result-chip').forEach(c => c.classList.remove('chip-selected'));
   showToast('Contact loggué ✅', 'success');
   loadAttempts(currentProspect.id);
+  // Suggérer de passer en no_answer après 3 sans réponse
+  if (lastResult === 'no_answer' && currentProspect.pipeline_stage !== 'no_answer') {
+    const allAttempts = await apiGet(`/api/prospects/${currentProspect.id}/attempts`);
+    if (allAttempts) {
+      const noAnswerCount = allAttempts.filter(a => a.result === 'no_answer').length;
+      if (noAnswerCount >= 3) {
+        showToast(`📵 ${noAnswerCount}× sans réponse — clic sur "Pas répondu" pour déplacer.`, 'warn', 6000);
+      }
+    }
+  }
 }
 
 async function loadAttempts(prospectId) {
@@ -827,9 +1044,11 @@ function openDetail(id) {
   const notesEl  = document.getElementById('m-notes');
   const rappelEl = document.getElementById('m-rappel');
   const ownerEl  = document.getElementById('m-owner');
+  const emailEl  = document.getElementById('m-email');
   if (notesEl)  notesEl.value  = p.notes      || '';
   if (rappelEl) rappelEl.value = p.rappel      || '';
   if (ownerEl)  ownerEl.value  = p.owner_name || '';
+  if (emailEl)  emailEl.value  = p.email       || '';
 
   const savedEl = document.getElementById('crm-saved');
   if (savedEl) savedEl.style.display = 'none';
@@ -907,6 +1126,18 @@ function buildDetailInfo(p) {
     `;
   }
 
+  if (p.phone) {
+    const waPhone = p.phone.replace(/\D/g, '');
+    const intlWa = waPhone.startsWith('33') ? waPhone : waPhone.startsWith('0') ? '33' + waPhone.slice(1) : waPhone;
+    html += `
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem">
+        <a class="btn-action-sm btn-wa-sm" href="https://wa.me/${intlWa}" target="_blank" rel="noopener">💬 WhatsApp</a>
+        <a class="btn-action-sm btn-sms-sm" href="sms:${escAttr(p.phone)}">📱 SMS</a>
+        <button class="btn-action-sm btn-email-find" id="btn-find-email" onclick="findEmail()">🔍 Trouver email</button>
+      </div>
+    `;
+  }
+
   c.innerHTML = html;
 }
 
@@ -916,6 +1147,7 @@ function buildDetailInfo(p) {
 function switchModalTab(tab) {
   document.querySelectorAll('.mtab').forEach(t => t.classList.toggle('active', t.dataset.mtab === tab));
   document.querySelectorAll('.mtab-panel').forEach(p => p.classList.toggle('active', p.dataset.mtab === tab));
+  if (tab === 'devis' && currentProspect) loadProspectQuotes(currentProspect.id);
 }
 
 /* ─────────────────────────────────────────
@@ -979,9 +1211,27 @@ async function generatePitch() {
     const data = await res.json();
     const text = data?.content?.[0]?.text || data.pitch || data.text || '';
     if (zone) {
+      // Action buttons depending on pitch type
+      let extraBtns = '';
+      if (pitchType === 'email') {
+        extraBtns = currentProspect?.email
+          ? `<button class="btn-send-pitch-email" onclick="sendPitchEmail(this)">📧 Envoyer à ${esc(currentProspect.email)}</button>`
+          : `<button class="btn-send-pitch-email" style="opacity:.5" title="Ajoutez l'email dans la fiche" disabled>📧 Email manquant</button>`;
+      }
+      if ((pitchType === 'dm' || pitchType === 'sms') && currentProspect?.phone) {
+        const phone = currentProspect.phone.replace(/\D/g, '');
+        const intlPhone = phone.startsWith('33') ? phone : phone.startsWith('0') ? '33' + phone.slice(1) : phone;
+        const waUrl = `https://wa.me/${intlPhone}?text=${encodeURIComponent(text)}`;
+        const smsUrl = `sms:${currentProspect.phone}?body=${encodeURIComponent(text.substring(0, 160))}`;
+        extraBtns = `<a class="btn-whatsapp" href="${waUrl}" target="_blank" rel="noopener">💬 WhatsApp</a>
+                     <a class="btn-sms-link" href="${smsUrl}">📱 SMS natif</a>`;
+      }
       zone.innerHTML = `
         <div class="pitch-result">${esc(text)}</div>
-        <button class="btn-copy-pitch" onclick="copyPitch(this)">📋 Copier le pitch</button>
+        <div class="pitch-actions">
+          <button class="btn-copy-pitch" onclick="copyPitch(this)">📋 Copier</button>
+          ${extraBtns}
+        </div>
       `;
     }
   } catch (e) {
@@ -991,8 +1241,54 @@ async function generatePitch() {
   }
 }
 
+/* ─────────────────────────────────────────
+   EMAIL FINDER
+───────────────────────────────────────── */
+async function findEmail() {
+  if (!currentProspect) return;
+  const btn = document.getElementById('btn-find-email');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Recherche...'; }
+
+  const res = await apiPost(`/api/prospects/${currentProspect.id}/find-email`, {});
+  if (btn) { btn.disabled = false; btn.textContent = '🔍 Trouver email'; }
+
+  if (res && res.email) {
+    currentProspect.email = res.email;
+    const emailEl = document.getElementById('m-email');
+    if (emailEl) emailEl.value = res.email;
+    showToast(`📧 Email trouvé : ${res.email}`, 'success', 5000);
+    switchModalTab('crm');
+  } else if (res && res.suggestions && res.suggestions.length) {
+    showToast(`💡 Essayez : ${res.suggestions.slice(0, 3).join(' · ')}`, 'info', 7000);
+  } else {
+    showToast(res?.error || 'Email introuvable.', 'warn', 4000);
+  }
+}
+
+async function sendPitchEmail(btn) {
+  if (!currentProspect || !currentProspect.email) return showToast('Ajoutez l\'email dans la fiche', 'error');
+  const zone = document.getElementById('pitch-zone');
+  const pitchEl = zone?.querySelector('.pitch-result');
+  if (!pitchEl) return;
+  const fullText = pitchEl.textContent.trim();
+  // Extract subject (first line) and body (rest)
+  const lines = fullText.split('\n');
+  let subject = lines[0].replace(/^(Objet\s*:\s*|Subject\s*:\s*)/i, '').trim() || `Proposition pour ${currentProspect.name}`;
+  const body = lines.slice(1).join('\n').trim() || fullText;
+  btn.disabled = true; btn.textContent = '⏳ Envoi...';
+  const res = await apiPost(`/api/prospects/${currentProspect.id}/send-email`, { subject, body });
+  if (res && res.ok) {
+    showToast(`📧 Email envoyé à ${currentProspect.email} !`, 'success');
+    btn.textContent = '✅ Envoyé !';
+    setTimeout(() => { btn.disabled = false; btn.textContent = `📧 Envoyer à ${currentProspect.email}`; }, 3000);
+  } else {
+    showToast(res?.error || 'Erreur d\'envoi', 'error');
+    btn.disabled = false; btn.textContent = `📧 Envoyer à ${currentProspect.email}`;
+  }
+}
+
 function copyPitch(btn) {
-  const pitchEl = btn.previousElementSibling;
+  const pitchEl = btn.closest('div')?.previousElementSibling || btn.previousElementSibling;
   if (!pitchEl) return;
   navigator.clipboard.writeText(pitchEl.textContent.trim()).then(() => {
     showToast('Pitch copié !', 'success', 2000);
@@ -1014,12 +1310,14 @@ async function saveCRM() {
   const notes      = document.getElementById('m-notes')?.value  || '';
   const rappel     = document.getElementById('m-rappel')?.value || '';
   const owner_name = document.getElementById('m-owner')?.value  || '';
+  const email      = document.getElementById('m-email')?.value  || '';
 
-  const res = await apiPut(`/api/prospects/${currentProspect.id}/notes`, { notes, rappel, owner_name });
+  const res = await apiPut(`/api/prospects/${currentProspect.id}/notes`, { notes, rappel, owner_name, email });
   if (res && res.ok) {
     currentProspect.notes      = notes;
     currentProspect.rappel     = rappel;
     currentProspect.owner_name = owner_name;
+    currentProspect.email      = email;
     const savedEl = document.getElementById('crm-saved');
     if (savedEl) {
       savedEl.style.display = 'block';
@@ -1031,6 +1329,34 @@ async function saveCRM() {
 /* ─────────────────────────────────────────
    ADD PROSPECT MODAL
 ───────────────────────────────────────── */
+async function deleteProspect(id) {
+  const p = allProspects.find(x => x.id === id);
+  if (!p) return;
+  if (!confirm(`Supprimer "${p.name}" ? Irréversible.`)) return;
+  const res = await apiFetch(`/api/prospects/${id}`, { method: 'DELETE' });
+  if (res !== null) {
+    allProspects = allProspects.filter(x => x.id !== id);
+    rebuildNicheFilter(); updateBadges(); renderList();
+    showToast('Prospect supprimé.', 'success');
+  }
+}
+
+async function deleteFilteredProspects() {
+  const visible = getFilteredProspects();
+  if (visible.length === 0) { showToast('Aucun prospect à supprimer.', 'info'); return; }
+  const ok = confirm(`Supprimer ${visible.length} prospect${visible.length > 1 ? 's' : ''} ? Cette action est irréversible.`);
+  if (!ok) return;
+  let deleted = 0;
+  for (const p of visible) {
+    const res = await apiFetch(`/api/prospects/${p.id}`, { method: 'DELETE' });
+    if (res !== null) { deleted++; allProspects = allProspects.filter(x => x.id !== p.id); }
+  }
+  rebuildNicheFilter();
+  updateBadges();
+  renderList();
+  showToast(`${deleted} prospect${deleted > 1 ? 's' : ''} supprimé${deleted > 1 ? 's' : ''}.`, 'success');
+}
+
 function openAddModal() {
   const overlay = document.getElementById('add-overlay');
   if (overlay) overlay.classList.add('open');
@@ -1394,9 +1720,23 @@ document.head.appendChild(confettiStyle);
 /* ─────────────────────────────────────────
    ESCAPE HELPERS
 ───────────────────────────────────────── */
-function esc(str) {
+function mbnSwitch(btn) {
+  document.querySelectorAll('.mbn-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function decodeHtml(str) {
   if (!str) return '';
   return String(str)
+    .replace(/&#x27;/gi, "'").replace(/&#39;/gi, "'")
+    .replace(/&#x2F;/gi, '/').replace(/&#47;/gi, '/')
+    .replace(/&amp;/gi, '&').replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>').replace(/&quot;/gi, '"')
+    .replace(/&#x(\w+);/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+}
+function esc(str) {
+  if (!str) return '';
+  return String(decodeHtml(str))
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
@@ -1421,14 +1761,16 @@ document.addEventListener('keydown', e => {
    VIEW SWITCHER (Pipeline | Rappels | Analyse)
 ───────────────────────────────────────── */
 function switchView(view) {
-  ['pipeline', 'rappels', 'analyse'].forEach(v => {
-    document.getElementById('view-' + v).style.display = v === view ? '' : 'none';
+  ['pipeline', 'rappels', 'analyse', 'calendrier'].forEach(v => {
+    const el = document.getElementById('view-' + v);
+    if (el) el.style.display = v === view ? '' : 'none';
   });
   document.querySelectorAll('.app-nav-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.view === view);
   });
-  if (view === 'rappels') loadRappels();
-  if (view === 'analyse') loadAnalyse();
+  if (view === 'rappels')    loadRappels();
+  if (view === 'analyse')    loadAnalyse();
+  if (view === 'calendrier') renderCalendar();
 }
 
 /* ─────────────────────────────────────────
@@ -1464,10 +1806,19 @@ async function loadRappels() {
   renderAgendaList('agenda-week-list',    weekList,    now);
   renderAgendaList('agenda-later-list',   laterList,   now);
 
-  document.getElementById('agenda-overdue-section').style.display = overdueList.length ? '' : 'none';
-  document.getElementById('agenda-week-section').style.display    = weekList.length    ? '' : 'none';
-  document.getElementById('agenda-later-section').style.display   = laterList.length   ? '' : 'none';
-  document.getElementById('rappel-empty').style.display           = items.length === 0 ? '' : 'none';
+  const _setAgendaSection = (id, visible) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const display = visible ? '' : 'none';
+    el._wasDisplay = display; // remember for calendar toggle
+    if (agendaView === 'list') el.style.display = display;
+  };
+  _setAgendaSection('agenda-overdue-section', overdueList.length > 0);
+  _setAgendaSection('agenda-week-section',    weekList.length > 0);
+  _setAgendaSection('agenda-later-section',   laterList.length > 0);
+  _setAgendaSection('rappel-empty',           items.length === 0);
+
+  renderCalendar();
 
   // Nav dot
   const dot = document.getElementById('nav-notif-dot');
@@ -1567,12 +1918,226 @@ async function requestNotifPerm() {
 }
 
 /* ─────────────────────────────────────────
+   AGENDA VIEW SWITCHER (Liste / Calendrier)
+───────────────────────────────────────── */
+let agendaView = 'list';
+let calendarMonth = new Date();
+
+function switchAgendaView(view) {
+  agendaView = view;
+  document.getElementById('btn-agenda-list')?.classList.toggle('active', view === 'list');
+  document.getElementById('btn-agenda-cal')?.classList.toggle('active', view === 'calendar');
+  document.getElementById('agenda-calendar-wrap').style.display = view === 'calendar' ? '' : 'none';
+  const listSections = ['agenda-overdue-section', 'agenda-week-section', 'agenda-later-section', 'rappel-empty'];
+  listSections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = view === 'list' ? (el._wasDisplay ?? 'none') : 'none';
+  });
+  if (view === 'calendar') renderCalendar();
+}
+
+function renderCalendar() {
+  const cal = document.getElementById('agenda-calendar');
+  if (!cal) return;
+
+  const year     = calendarMonth.getFullYear();
+  const month    = calendarMonth.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const lastDay  = new Date(year, month + 1, 0);
+  const startDow = (firstDay.getDay() + 6) % 7; // Lundi = 0
+  const monthName = firstDay.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+
+  // Parse date string en heure locale (évite le décalage UTC)
+  function parseLocalDate(str) {
+    if (!str) return null;
+    // "2026-03-19 17:30" ou "2026-03-19"
+    const parts = str.trim().split(' ');
+    const [y, m, d] = parts[0].split('-').map(Number);
+    if (parts[1]) {
+      const [h, min] = parts[1].split(':').map(Number);
+      return new Date(y, m - 1, d, h, min);
+    }
+    return new Date(y, m - 1, d);
+  }
+
+  const items = [];
+  allProspects.forEach(p => {
+    if (p.pipeline_stage === 'to_recall' && p.rappel) {
+      const date = parseLocalDate(p.rappel);
+      if (date) items.push({ p, date, type: 'rappel', raw: p.rappel });
+    }
+    if ((p.pipeline_stage === 'meeting_to_set' || p.pipeline_stage === 'meeting_confirmed') && p.meeting_date) {
+      const date = parseLocalDate(p.meeting_date);
+      if (date) items.push({ p, date, type: 'meeting', raw: p.meeting_date });
+    }
+  });
+  items.sort((a, b) => a.date - b.date);
+
+  const DAYS = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+
+  let html = `
+    <div class="gcal-header">
+      <div class="gcal-nav-group">
+        <button class="gcal-btn gcal-btn-today" onclick="calToday()">Aujourd'hui</button>
+        <button class="gcal-btn" onclick="calNav(-1)">&#8249;</button>
+        <button class="gcal-btn" onclick="calNav(1)">&#8250;</button>
+      </div>
+      <div class="gcal-month-title">${monthName}</div>
+      <div class="gcal-legend">
+        <div class="gcal-legend-item"><div class="gcal-legend-dot meeting"></div>Rendez-vous</div>
+        <div class="gcal-legend-item"><div class="gcal-legend-dot rappel"></div>Rappel</div>
+      </div>
+    </div>
+    <div class="gcal-dow-row">
+      ${DAYS.map(d => `<div class="gcal-dow">${d}</div>`).join('')}
+    </div>
+    <div class="gcal-grid">
+  `;
+
+  // Empty cells before first day
+  for (let i = 0; i < startDow; i++) {
+    html += `<div class="gcal-day gcal-day-empty"></div>`;
+  }
+
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const dayDate   = new Date(year, month, d);
+    const dow       = (dayDate.getDay() + 6) % 7; // 0=Lun, 5=Sam, 6=Dim
+    const isToday   = `${year}-${month}-${d}` === todayStr;
+    const isPast    = dayDate < today && !isToday;
+    const isWeekend = dow === 5 || dow === 6;
+
+    const dayItems = items.filter(it =>
+      it.date.getFullYear() === year &&
+      it.date.getMonth()    === month &&
+      it.date.getDate()     === d
+    );
+
+    let classes = 'gcal-day';
+    if (isToday)   classes += ' gcal-today';
+    if (isPast)    classes += ' gcal-past';
+    if (isWeekend) classes += ' gcal-weekend';
+
+    html += `<div class="${classes}">
+      <div class="gcal-day-num-wrap">
+        <div class="gcal-day-num">${d}</div>
+      </div>
+      <div class="gcal-events">`;
+
+    const maxShow = 3;
+    dayItems.slice(0, maxShow).forEach(it => {
+      const cls  = it.type === 'meeting' ? 'gcal-evt-meeting' : 'gcal-evt-rappel';
+      const hasTime = it.raw && it.raw.includes(' ');
+      const timeStr = hasTime
+        ? it.date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+        : 'Toute la journée';
+      html += `<div class="gcal-evt ${cls}" onclick="openDetail(${it.p.id})" title="${esc(it.p.name || '')}">
+        <span class="gcal-evt-time">${timeStr}</span>
+        <span class="gcal-evt-name">${esc((it.p.name || '').substring(0, 16))}</span>
+      </div>`;
+    });
+    if (dayItems.length > maxShow) {
+      html += `<div class="gcal-more">+${dayItems.length - maxShow} autre${dayItems.length - maxShow > 1 ? 's' : ''}</div>`;
+    }
+
+    html += `</div></div>`;
+  }
+
+  html += `</div>`;
+  cal.innerHTML = html;
+}
+
+function calNav(dir) {
+  calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + dir, 1);
+  renderCalendar();
+}
+
+function calToday() {
+  calendarMonth = new Date();
+  renderCalendar();
+}
+
+/* ─────────────────────────────────────────
    AGENDA PANEL (quick view)
 ───────────────────────────────────────── */
+let miniCalMonth = new Date();
+
+function renderMiniCalendar() {
+  const wrap = document.getElementById('agenda-panel-calendar');
+  if (!wrap) return;
+  const year = miniCalMonth.getFullYear();
+  const month = miniCalMonth.getMonth();
+  const firstDay = new Date(year, month, 1);
+  const lastDay  = new Date(year, month + 1, 0);
+  const startDow = (firstDay.getDay() + 6) % 7;
+  const monthName = firstDay.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  const today = new Date();
+
+  function parseLD(str) {
+    if (!str) return null;
+    const parts = str.trim().split(' ');
+    const [y, m, d] = parts[0].split('-').map(Number);
+    return parts[1] ? new Date(y, m-1, d, ...parts[1].split(':').map(Number)) : new Date(y, m-1, d);
+  }
+  const events = {};
+  allProspects.forEach(p => {
+    let d = null;
+    if (p.pipeline_stage === 'to_recall' && p.rappel) d = parseLD(p.rappel);
+    if ((p.pipeline_stage === 'meeting_to_set' || p.pipeline_stage === 'meeting_confirmed') && p.meeting_date) d = parseLD(p.meeting_date);
+    if (d && d.getFullYear() === year && d.getMonth() === month) {
+      const k = d.getDate();
+      events[k] = (events[k] || 0) + 1;
+    }
+  });
+
+  let html = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+      <button onclick="miniCalNav(-1)" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:.1rem .4rem">‹</button>
+      <span style="font-size:.8rem;font-weight:700;text-transform:capitalize;color:var(--text)">${monthName}</span>
+      <button onclick="miniCalNav(1)"  style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:.1rem .4rem">›</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center">
+      ${['L','M','M','J','V','S','D'].map(d => `<div style="font-size:.6rem;font-weight:700;color:var(--muted);padding:.2rem 0">${d}</div>`).join('')}
+  `;
+  for (let i = 0; i < startDow; i++) html += `<div></div>`;
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+    const hasEvt  = !!events[d];
+    html += `<div onclick="miniCalClickDay(${d})" style="
+      font-size:.72rem;font-weight:${isToday?'800':'600'};padding:.25rem .1rem;border-radius:50%;cursor:pointer;
+      background:${isToday?'#7c3aed':'transparent'};color:${isToday?'#fff':hasEvt?'#a78bfa':'var(--text2)'};
+      position:relative;
+    ">${d}${hasEvt && !isToday ? `<span style="position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:#a78bfa;display:block"></span>` : ''}</div>`;
+  }
+  html += `</div>`;
+  wrap.innerHTML = html;
+}
+
+function miniCalNav(dir) {
+  miniCalMonth = new Date(miniCalMonth.getFullYear(), miniCalMonth.getMonth() + dir, 1);
+  renderMiniCalendar();
+}
+
+function miniCalClickDay(d) {
+  // Navigate to rappels view and jump to full calendar at that month
+  calendarMonth = new Date(miniCalMonth.getFullYear(), miniCalMonth.getMonth(), 1);
+  closeAgenda();
+  switchView('rappels');
+  setTimeout(() => {
+    renderCalendar();
+    document.getElementById('agenda-calendar-wrap')?.scrollIntoView({ behavior: 'smooth' });
+  }, 200);
+}
+
 function openAgenda() {
   const panel = document.getElementById('agenda-panel');
   panel.style.display = panel.style.display === 'none' ? '' : 'none';
-  if (panel.style.display !== 'none') renderAgendaPanel();
+  if (panel.style.display !== 'none') {
+    renderAgendaPanel();
+    renderMiniCalendar();
+  }
 }
 function closeAgenda() {
   document.getElementById('agenda-panel').style.display = 'none';
@@ -1619,6 +2184,7 @@ function renderAgendaPanel() {
    ANALYSE
 ───────────────────────────────────────── */
 async function loadAnalyse() {
+  loadFunnelAndGoals(); // async, runs in parallel
   // Pipeline breakdown from allProspects (already loaded)
   const stages = { cold_call: 0, to_recall: 0, meeting: 0, closed: 0, refused: 0 };
   allProspects.forEach(p => {
@@ -1633,11 +2199,16 @@ async function loadAnalyse() {
   const called = allProspects.filter(p => p.status === 'called').length;
   const rate = total > 0 ? Math.round((stages.closed / total) * 100) : 0;
 
+  const ca = allProspects.filter(p => p.pipeline_stage === 'closed' && p.deal_value > 0)
+    .reduce((sum, p) => sum + (p.deal_value || 0), 0);
+
   document.getElementById('kpi-total').textContent   = total;
   document.getElementById('kpi-called').textContent  = called;
   document.getElementById('kpi-meeting').textContent = stages.meeting;
   document.getElementById('kpi-closed').textContent  = stages.closed;
   document.getElementById('kpi-rate').textContent    = rate + '%';
+  const caEl = document.getElementById('kpi-ca');
+  if (caEl) caEl.textContent = ca > 0 ? ca.toLocaleString('fr-FR') + ' €' : '0 €';
 
   // Bars
   const maxVal = Math.max(...Object.values(stages), 1);
@@ -1726,6 +2297,414 @@ async function loadAnalyse() {
       }).join('');
     }
   }
+}
+
+/* ─────────────────────────────────────────
+   FUNNEL + GOALS + STREAK
+───────────────────────────────────────── */
+async function loadFunnelAndGoals() {
+  // Funnel from allProspects
+  const total    = allProspects.length;
+  const contacted = allProspects.filter(p => (p.status === 'called' || p.status === 'client')).length;
+  const meeting  = allProspects.filter(p => p.pipeline_stage === 'meeting_to_set' || p.pipeline_stage === 'meeting_confirmed').length;
+  const closed   = allProspects.filter(p => p.pipeline_stage === 'closed').length;
+
+  const funnelEl = document.getElementById('conversion-funnel');
+  if (funnelEl) {
+    const steps = [
+      { label: '🎯 Trouvés',   n: total,     color: '#3b82f6' },
+      { label: '📞 Contactés', n: contacted, color: '#f59e0b' },
+      { label: '📅 RDV',       n: meeting,   color: '#8b5cf6' },
+      { label: '✅ Closés',    n: closed,    color: '#10b981' },
+    ];
+    const maxN = Math.max(total, 1);
+    funnelEl.innerHTML = steps.map((s, i) => {
+      const prev = steps[i - 1];
+      const pct = i === 0 ? null : Math.round((s.n / Math.max(prev.n, 1)) * 100);
+      const w = Math.max(Math.round((s.n / maxN) * 100), 6);
+      return `<div class="funnel-step">
+        ${i > 0 ? `<div class="funnel-arrow">↓ <span class="funnel-conv-pct">${pct}%</span></div>` : ''}
+        <div class="funnel-bar-wrap">
+          <div class="funnel-bar" style="width:${w}%;background:${s.color}18;border:1.5px solid ${s.color}50">
+            <span class="funnel-label" style="color:${s.color}">${s.label}</span>
+            <span class="funnel-n" style="color:${s.color}">${s.n}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Goals + weekly stats
+  const stats = await apiGet('/api/prospects/stats');
+  if (!stats) return;
+
+  const goals = JSON.parse(localStorage.getItem('ph_goals') || '{}');
+  const g = {
+    calls:    parseInt(goals.calls)    || 20,
+    meetings: parseInt(goals.meetings) || 5,
+    deals:    parseInt(goals.deals)    || 2,
+    ca:       parseInt(goals.ca)       || 3000,
+  };
+
+  const goalRows = [
+    { label: '📞 Contacts',  val: stats.callsThisWeek,    goal: g.calls,    unit: '' },
+    { label: '📅 RDV',       val: stats.meetingsThisWeek, goal: g.meetings, unit: '' },
+    { label: '✅ Deals',     val: stats.dealsThisWeek,    goal: g.deals,    unit: '' },
+    { label: '💰 CA',        val: stats.caThisWeek,       goal: g.ca,       unit: ' €' },
+  ];
+
+  const streakHtml = stats.streak > 0
+    ? `<div class="streak-badge">🔥 ${stats.streak} jour${stats.streak > 1 ? 's' : ''} d'affilée !</div>`
+    : '<div class="streak-badge streak-zero">💤 Pas encore d\'activité cette semaine</div>';
+
+  const goalsEl = document.getElementById('goals-display');
+  if (goalsEl) {
+    goalsEl.innerHTML = streakHtml + goalRows.map(r => {
+      const pct = Math.min(Math.round((r.val / r.goal) * 100), 100);
+      const color = pct >= 100 ? '#10b981' : pct >= 60 ? '#f59e0b' : '#3b82f6';
+      const valFmt = r.unit ? (r.val || 0).toLocaleString('fr-FR') + r.unit : r.val;
+      const goalFmt = r.unit ? (r.goal || 0).toLocaleString('fr-FR') + r.unit : r.goal;
+      return `<div class="goal-row">
+        <div class="goal-row-top">
+          <span class="goal-label">${r.label}</span>
+          <span class="goal-progress-text" style="color:${color}">${valFmt} / ${goalFmt} <small>(${pct}%)</small></span>
+        </div>
+        <div class="goal-track"><div class="goal-fill" style="width:${pct}%;background:${color}"></div></div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function toggleGoalsEdit() {
+  const editEl = document.getElementById('goals-edit');
+  const isOpen = editEl.style.display !== 'none';
+  if (!isOpen) {
+    const goals = JSON.parse(localStorage.getItem('ph_goals') || '{}');
+    document.getElementById('goal-calls').value    = goals.calls    || 20;
+    document.getElementById('goal-meetings').value = goals.meetings || 5;
+    document.getElementById('goal-deals').value    = goals.deals    || 2;
+    document.getElementById('goal-ca').value       = goals.ca       || 3000;
+  }
+  editEl.style.display = isOpen ? 'none' : 'block';
+}
+
+function saveGoals() {
+  const goals = {
+    calls:    parseInt(document.getElementById('goal-calls').value)    || 20,
+    meetings: parseInt(document.getElementById('goal-meetings').value) || 5,
+    deals:    parseInt(document.getElementById('goal-deals').value)    || 2,
+    ca:       parseInt(document.getElementById('goal-ca').value)       || 3000,
+  };
+  localStorage.setItem('ph_goals', JSON.stringify(goals));
+  document.getElementById('goals-edit').style.display = 'none';
+  loadFunnelAndGoals();
+  showToast('Objectifs sauvegardés ✅', 'success');
+}
+
+/* ─────────────────────────────────────────
+   IMPORT CSV
+───────────────────────────────────────── */
+let csvParsedRows = [];
+let csvHeaders = [];
+
+function openImportModal() {
+  document.getElementById('import-modal-overlay').style.display = 'flex';
+  resetImport();
+}
+function closeImportModal() {
+  document.getElementById('import-modal-overlay').style.display = 'none';
+}
+function resetImport() {
+  csvParsedRows = []; csvHeaders = [];
+  document.getElementById('import-step-upload').style.display = 'block';
+  document.getElementById('import-step-preview').style.display = 'none';
+  document.getElementById('import-step-done').style.display = 'none';
+  const dz = document.getElementById('import-dropzone');
+  if (dz) dz.classList.remove('drag-over');
+}
+function handleCsvDrop(e) {
+  e.preventDefault();
+  document.getElementById('import-dropzone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) handleCsvFile(file);
+}
+function handleCsvFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => parseCsvContent(e.target.result);
+  reader.readAsText(file, 'utf-8');
+}
+function parseCsvLine(line, sep) {
+  const fields = []; let cur = '', inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const c = line[i];
+    if (c === '"') { if (inQ && line[i+1] === '"') { cur += '"'; i++; } else inQ = !inQ; continue; }
+    if (c === sep && !inQ) { fields.push(cur.trim()); cur = ''; } else cur += c;
+  }
+  fields.push(cur.trim());
+  return fields;
+}
+function parseCsvContent(text) {
+  const t = text.replace(/^\ufeff/, ''); // strip BOM
+  const firstLine = t.split('\n')[0];
+  const sep = firstLine.includes(';') ? ';' : ',';
+  const lines = t.replace(/\r/g, '').split('\n').filter(l => l.trim());
+  if (lines.length < 2) return showToast('Fichier CSV vide ou invalide', 'error');
+  csvHeaders = parseCsvLine(lines[0], sep).map(h =>
+    h.toLowerCase().replace(/\s+/g,'_').replace(/[éèê]/g,'e').replace(/[àâ]/g,'a').replace(/ô/g,'o').replace(/[^a-z0-9_]/g,''));
+  csvParsedRows = lines.slice(1).map(l => parseCsvLine(l, sep));
+  showImportPreview();
+}
+const CSV_FIELD_MAP = {
+  nom:'name', name:'name', entreprise:'name', company:'name', raison_sociale:'name',
+  telephone:'phone', tel:'phone', phone:'phone', mobile:'phone', portable:'phone', num:'phone',
+  email:'email', mail:'email', courriel:'email',
+  adresse:'address', address:'address', rue:'address',
+  ville:'city', city:'city', commune:'city',
+  notes:'notes', note:'notes', commentaire:'notes', commentaires:'notes',
+  secteur:'niche', niche:'niche', activite:'niche', metier:'niche',
+  gerant:'owner_name', dirigeant:'owner_name', owner:'owner_name', contact:'owner_name',
+};
+function showImportPreview() {
+  document.getElementById('import-step-upload').style.display = 'none';
+  document.getElementById('import-step-preview').style.display = 'block';
+  const mappings = csvHeaders.map(h => CSV_FIELD_MAP[h] || '');
+  const FIELD_OPTS = ['','name','phone','email','address','city','notes','niche','owner_name'];
+  const FIELD_LBL  = {'':'Ignorer','name':'Nom','phone':'Téléphone','email':'Email','address':'Adresse','city':'Ville','notes':'Notes','niche':'Secteur','owner_name':'Gérant'};
+  document.getElementById('import-mapping').innerHTML = `
+    <div class="import-mapping-title">Correspondance des colonnes</div>
+    <div class="import-mapping-grid">${csvHeaders.map((h,i) => `
+      <div class="import-col-map">
+        <div class="import-col-orig">${esc(h)}</div>
+        <select class="import-col-sel" id="col-map-${i}">
+          ${FIELD_OPTS.map(f => `<option value="${f}"${mappings[i]===f?' selected':''}>${FIELD_LBL[f]}</option>`).join('')}
+        </select>
+      </div>`).join('')}
+    </div>`;
+  const preview = csvParsedRows.slice(0, 8);
+  document.getElementById('import-preview-count').textContent = csvParsedRows.length;
+  document.getElementById('import-btn-count').textContent = csvParsedRows.length;
+  document.getElementById('import-preview-table').innerHTML = `
+    <thead><tr>${csvHeaders.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead>
+    <tbody>${preview.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody>`;
+}
+async function doImport() {
+  const colMap = csvHeaders.map((_,i) => { const s = document.getElementById(`col-map-${i}`); return s ? s.value : ''; });
+  const rows = csvParsedRows.map(fields => {
+    const obj = {};
+    colMap.forEach((t,i) => { if (t) obj[t] = (fields[i]||'').trim(); });
+    return obj;
+  }).filter(r => r.name || r.phone);
+  if (!rows.length) return showToast('Aucune ligne valide (nom ou téléphone requis)', 'error');
+  const btn = document.getElementById('btn-do-import');
+  btn.disabled = true; btn.textContent = 'Import en cours…';
+  const res = await apiPost('/api/prospects/import', { rows });
+  btn.disabled = false;
+  if (res?.ok) {
+    document.getElementById('import-step-preview').style.display = 'none';
+    document.getElementById('import-step-done').style.display = 'block';
+    document.getElementById('import-done-msg').textContent =
+      `${res.imported} prospect${res.imported > 1 ? 's' : ''} importé${res.imported > 1 ? 's' : ''} ! (${res.skipped} doublons ignorés)`;
+  } else {
+    showToast(res?.error || 'Erreur import', 'error');
+    btn.textContent = '✅ Importer';
+  }
+}
+
+/* ─────────────────────────────────────────
+   DEVIS / QUOTES
+───────────────────────────────────────── */
+let currentQuoteId = null;
+let quoteLines = [];
+
+function openNewQuoteModal() {
+  currentQuoteId = null;
+  quoteLines = [{ description: '', qty: 1, price: 0 }];
+  document.getElementById('quote-modal-title').textContent = '📄 Nouveau devis';
+  document.getElementById('btn-quote-pdf').style.display = 'none';
+  document.getElementById('btn-send-quote').style.display = 'none';
+  document.getElementById('btn-save-draft').textContent = '💾 Créer le devis';
+  document.getElementById('q-notes').value = '';
+  document.getElementById('q-tva-rate').value = 20;
+  // Set default validity: +30 days
+  const d = new Date(); d.setDate(d.getDate() + 30);
+  document.getElementById('q-valid-until').value = d.toISOString().split('T')[0];
+  renderQuoteLines();
+  updateQuoteTotals();
+  document.getElementById('quote-modal-overlay').style.display = 'flex';
+}
+
+function openEditQuoteModal(quoteId) {
+  apiGet(`/api/quotes/${quoteId}`).then(q => {
+    if (!q) return;
+    currentQuoteId = quoteId;
+    quoteLines = typeof q.items === 'string' ? JSON.parse(q.items) : (q.items || []);
+    if (!quoteLines.length) quoteLines = [{ description: '', qty: 1, price: 0 }];
+    document.getElementById('quote-modal-title').textContent = `📄 Devis N° ${q.number}`;
+    document.getElementById('q-notes').value = q.notes || '';
+    document.getElementById('q-tva-rate').value = q.tva_rate || 20;
+    document.getElementById('q-valid-until').value = q.valid_until || '';
+    document.getElementById('btn-quote-pdf').style.display = '';
+    document.getElementById('btn-send-quote').style.display = '';
+    document.getElementById('btn-save-draft').textContent = '💾 Sauvegarder';
+    renderQuoteLines();
+    updateQuoteTotals();
+    document.getElementById('quote-modal-overlay').style.display = 'flex';
+  });
+}
+
+function closeQuoteModal() {
+  document.getElementById('quote-modal-overlay').style.display = 'none';
+}
+
+function renderQuoteLines() {
+  const container = document.getElementById('quote-items-list');
+  container.innerHTML = quoteLines.map((line, i) => `
+    <div class="quote-line" data-idx="${i}">
+      <input class="crm-inp quote-line-desc" type="text" placeholder="Description de la prestation…"
+        value="${esc(line.description || '')}" oninput="updateQuoteLine(${i},'description',this.value)" />
+      <input class="crm-inp quote-line-qty" type="number" min="0.5" step="0.5" placeholder="Qté"
+        value="${line.qty || 1}" oninput="updateQuoteLine(${i},'qty',this.value)" />
+      <input class="crm-inp quote-line-price" type="number" min="0" step="10" placeholder="Prix HT (€)"
+        value="${line.price || ''}" oninput="updateQuoteLine(${i},'price',this.value)" />
+      <span class="quote-line-total">${fmtEur((parseFloat(line.qty)||1)*(parseFloat(line.price)||0))}</span>
+      <button class="quote-line-del" onclick="removeQuoteLine(${i})" title="Supprimer">✕</button>
+    </div>
+  `).join('');
+}
+
+function updateQuoteLine(idx, field, val) {
+  quoteLines[idx][field] = field === 'description' ? val : (parseFloat(val) || 0);
+  // Update total cell without full re-render
+  const lineEl = document.querySelector(`.quote-line[data-idx="${idx}"] .quote-line-total`);
+  if (lineEl) lineEl.textContent = fmtEur((parseFloat(quoteLines[idx].qty)||1)*(parseFloat(quoteLines[idx].price)||0));
+  updateQuoteTotals();
+}
+
+function addQuoteLine() {
+  quoteLines.push({ description: '', qty: 1, price: 0 });
+  renderQuoteLines();
+  updateQuoteTotals();
+}
+
+function removeQuoteLine(idx) {
+  if (quoteLines.length <= 1) { quoteLines[0] = { description: '', qty: 1, price: 0 }; renderQuoteLines(); return; }
+  quoteLines.splice(idx, 1);
+  renderQuoteLines();
+  updateQuoteTotals();
+}
+
+function updateQuoteTotals() {
+  const tvaRate = parseFloat(document.getElementById('q-tva-rate').value) || 20;
+  const subtotal = quoteLines.reduce((s, l) => s + (parseFloat(l.qty)||1)*(parseFloat(l.price)||0), 0);
+  const tva   = Math.round(subtotal * tvaRate) / 100;
+  const total = subtotal + tva;
+  document.getElementById('quote-totals-preview').innerHTML = `
+    <div class="qt-row"><span>Sous-total HT</span><span>${fmtEur(subtotal)}</span></div>
+    <div class="qt-row"><span>TVA (${tvaRate}%)</span><span>${fmtEur(tva)}</span></div>
+    <div class="qt-row qt-total"><span>TOTAL TTC</span><span>${fmtEur(total)}</span></div>
+  `;
+}
+
+async function saveQuote(status = 'draft') {
+  if (!currentProspect) return;
+  const payload = {
+    prospect_id: currentProspect.id,
+    items: quoteLines,
+    tva_rate: parseFloat(document.getElementById('q-tva-rate').value) || 20,
+    notes: document.getElementById('q-notes').value.trim(),
+    valid_until: document.getElementById('q-valid-until').value,
+    status,
+  };
+
+  let res;
+  if (currentQuoteId) {
+    res = await apiPut(`/api/quotes/${currentQuoteId}`, payload);
+    showToast('Devis mis à jour', 'success');
+  } else {
+    res = await apiPost('/api/quotes', payload);
+    if (res?.id) {
+      currentQuoteId = res.id;
+      document.getElementById('btn-quote-pdf').style.display = '';
+      document.getElementById('btn-send-quote').style.display = '';
+      document.getElementById('btn-save-draft').textContent = '💾 Sauvegarder';
+      showToast(`Devis ${res.number} créé`, 'success');
+    }
+  }
+  loadProspectQuotes(currentProspect.id);
+}
+
+async function downloadQuotePDF() {
+  if (!currentQuoteId) return;
+  await saveQuote();
+  window.open(`/api/quotes/${currentQuoteId}/pdf`, '_blank');
+}
+
+async function sendQuoteEmail() {
+  if (!currentQuoteId || !currentProspect) return;
+  await saveQuote();
+  const email = currentProspect.email || '';
+  const to = email || prompt('Email du prospect ?');
+  if (!to) return;
+  const res = await apiPost(`/api/quotes/${currentQuoteId}/send`, { email: to });
+  if (res?.ok) {
+    showToast(res.warning ? res.warning : 'Devis envoyé par email ✅', res.warning ? 'info' : 'success');
+    loadProspectQuotes(currentProspect.id);
+  } else {
+    showToast(res?.error || 'Erreur envoi email', 'error');
+  }
+}
+
+async function deleteQuote(quoteId) {
+  if (!confirm('Supprimer ce devis ?')) return;
+  await apiDelete(`/api/quotes/${quoteId}`);
+  showToast('Devis supprimé', 'info');
+  loadProspectQuotes(currentProspect.id);
+}
+
+async function loadProspectQuotes(prospectId) {
+  const listEl = document.getElementById('devis-list');
+  if (!listEl) return;
+  const loadEl = document.getElementById('devis-list-loading');
+  if (loadEl) loadEl.style.display = 'block';
+
+  const all = await apiGet('/api/quotes');
+  if (loadEl) loadEl.style.display = 'none';
+
+  const quotes = (all || []).filter(q => q.prospect_id === prospectId);
+
+  if (!quotes.length) {
+    listEl.innerHTML = '<div class="activity-empty">Aucun devis pour ce prospect.<br>Cliquez sur "+ Nouveau devis" pour en créer un.</div>';
+    return;
+  }
+
+  const STATUS_COLORS = { draft: '#6b7280', sent: '#3b82f6', accepted: '#10b981', refused: '#ef4444' };
+  const STATUS_LABELS = { draft: 'Brouillon', sent: 'Envoyé', accepted: 'Accepté', refused: 'Refusé' };
+
+  listEl.innerHTML = quotes.map(q => {
+    const sc = STATUS_COLORS[q.status] || '#6b7280';
+    const sl = STATUS_LABELS[q.status] || q.status;
+    const date = new Date(q.created_at).toLocaleDateString('fr-FR');
+    return `<div class="devis-row">
+      <div class="devis-row-left">
+        <div class="devis-num">N° ${q.number}</div>
+        <div class="devis-date">${date}</div>
+      </div>
+      <div class="devis-row-center">
+        <span class="devis-status-badge" style="background:${sc}20;color:${sc};border-color:${sc}40">${sl}</span>
+        <span class="devis-total">${fmtEur(q.total)}</span>
+      </div>
+      <div class="devis-row-actions">
+        <button class="btn-devis-edit" onclick="openEditQuoteModal(${q.id})" title="Modifier">✏️</button>
+        <a class="btn-devis-pdf" href="/api/quotes/${q.id}/pdf" target="_blank" title="Télécharger PDF">📥</a>
+        <button class="btn-devis-del" onclick="deleteQuote(${q.id})" title="Supprimer">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function fmtEur(n) {
+  return (parseFloat(n)||0).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
 }
 
 /* ─────────────────────────────────────────

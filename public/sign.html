@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signature de devis — ProspectHunter</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/shared.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #020b18; color: #ddeeff; min-height: 100vh; padding: 2rem 1rem; }
+    .sign-wrap { max-width: 700px; margin: 0 auto; }
+    .sign-header { display: flex; align-items: center; gap: .75rem; margin-bottom: 2rem; }
+    .sign-logo { font-size: 1.4rem; font-weight: 800; color: #00c8f8; }
+    .sign-logo em { font-style: normal; color: #fff; }
+    .sign-card { background: #030f1e; border: 1px solid #1e3a5f; border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem; }
+    .sign-card h2 { color: #00c8f8; font-size: 1.1rem; margin-bottom: 1rem; }
+    .quote-number { font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: .25rem; }
+    .quote-meta { color: #7a9ab8; font-size: .85rem; margin-bottom: 1rem; }
+    .status-badge { display: inline-block; padding: .3rem .8rem; border-radius: 20px; font-size: .8rem; font-weight: 700; margin-bottom: 1rem; }
+    .status-draft    { background: #374151; color: #9ca3af; }
+    .status-sent     { background: #1e3a5f; color: #60a5fa; }
+    .status-accepted { background: #064e3b; color: #34d399; }
+    .status-refused  { background: #450a0a; color: #f87171; }
+    .client-row { display: flex; gap: 2rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .client-block label { color: #7a9ab8; font-size: .75rem; font-weight: 600; display: block; margin-bottom: .2rem; }
+    .client-block span { color: #ddeeff; font-size: .95rem; }
+    table.items { width: 100%; border-collapse: collapse; margin-top: .5rem; }
+    table.items th { background: #0d1f35; color: #00c8f8; font-size: .8rem; padding: .6rem .8rem; text-align: left; }
+    table.items th:not(:first-child) { text-align: right; }
+    table.items td { padding: .6rem .8rem; border-bottom: 1px solid #0d1f35; font-size: .9rem; }
+    table.items td:not(:first-child) { text-align: right; }
+    table.items tr:nth-child(even) td { background: #061222; }
+    .totals { margin-top: 1rem; }
+    .total-row { display: flex; justify-content: flex-end; gap: 2rem; padding: .35rem 0; font-size: .95rem; color: #7a9ab8; }
+    .total-row.main { color: #00c8f8; font-weight: 800; font-size: 1.1rem; border-top: 1px solid #1e3a5f; margin-top: .4rem; padding-top: .6rem; }
+    .total-row span:last-child { min-width: 100px; text-align: right; }
+    .notes-block { margin-top: 1rem; padding: 1rem; background: #0d1f35; border-radius: 8px; font-size: .9rem; color: #bdd; white-space: pre-wrap; }
+    /* Signature */
+    .sign-zone { margin-top: 1rem; }
+    .sign-zone p { color: #7a9ab8; font-size: .9rem; margin-bottom: .75rem; }
+    canvas#sig-pad { display: block; width: 100%; height: 160px; background: #0d1f35; border: 1px dashed #1e3a5f; border-radius: 8px; cursor: crosshair; touch-action: none; }
+    .sign-actions { display: flex; gap: .75rem; margin-top: .75rem; flex-wrap: wrap; }
+    .btn-clear { background: #1e3a5f; color: #ddeeff; border: none; padding: .6rem 1.2rem; border-radius: 8px; cursor: pointer; font-size: .9rem; }
+    .btn-accept { background: linear-gradient(135deg, #00c8f8, #0096d4); color: #020b18; border: none; padding: .7rem 2rem; border-radius: 8px; cursor: pointer; font-size: .95rem; font-weight: 700; flex: 1; }
+    .btn-accept:disabled { opacity: .5; cursor: not-allowed; }
+    .sign-already { text-align: center; padding: 2rem; color: #34d399; font-weight: 600; }
+    .sign-already span { display: block; font-size: 2.5rem; margin-bottom: .5rem; }
+    #sign-error { color: #f87171; font-size: .85rem; margin-top: .5rem; display: none; }
+    #sign-success { text-align: center; padding: 2rem 0; display: none; }
+    #sign-success .big-check { font-size: 3rem; margin-bottom: .75rem; }
+    #sign-success h2 { color: #34d399; font-size: 1.3rem; margin-bottom: .5rem; }
+    #sign-success p { color: #7a9ab8; }
+    .loading { text-align: center; padding: 3rem; color: #7a9ab8; font-size: 1.1rem; }
+  </style>
+</head>
+<body>
+<div class="sign-wrap">
+  <div class="sign-header">
+    <div class="sign-logo">Prospect<em>Hunter</em></div>
+  </div>
+
+  <div id="loading-state" class="loading">Chargement du devis…</div>
+  <div id="error-state" style="display:none;text-align:center;padding:3rem;color:#f87171;">Devis introuvable ou non disponible.</div>
+
+  <div id="main-content" style="display:none">
+
+    <!-- Quote info -->
+    <div class="sign-card">
+      <div class="quote-number" id="q-number"></div>
+      <div class="quote-meta" id="q-meta"></div>
+      <div class="status-badge" id="q-status"></div>
+
+      <div class="client-row">
+        <div class="client-block">
+          <label>Client</label>
+          <span id="q-client"></span>
+        </div>
+        <div class="client-block">
+          <label>De</label>
+          <span id="q-sender"></span>
+        </div>
+        <div class="client-block" id="q-valid-block" style="display:none">
+          <label>Valable jusqu'au</label>
+          <span id="q-valid"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Items -->
+    <div class="sign-card">
+      <h2>📋 Détail du devis</h2>
+      <table class="items">
+        <thead>
+          <tr>
+            <th>Description</th>
+            <th>Qté</th>
+            <th>P.U. HT</th>
+            <th>Total HT</th>
+          </tr>
+        </thead>
+        <tbody id="q-items"></tbody>
+      </table>
+      <div class="totals" id="q-totals"></div>
+      <div id="q-notes" style="display:none" class="notes-block"></div>
+    </div>
+
+    <!-- Already signed -->
+    <div class="sign-card sign-already" id="already-signed" style="display:none">
+      <span>✅</span>
+      Ce devis a déjà été signé. Merci !
+    </div>
+
+    <!-- Signature zone -->
+    <div class="sign-card" id="sig-card">
+      <h2>✍️ Signature électronique</h2>
+      <div class="sign-zone">
+        <p>En signant ci-dessous, vous acceptez le devis et ses conditions. Dessinez votre signature :</p>
+        <canvas id="sig-pad" width="640" height="160"></canvas>
+        <div id="sign-error"></div>
+        <div class="sign-actions">
+          <button class="btn-clear" onclick="clearSig()">🗑️ Effacer</button>
+          <button class="btn-accept" id="btn-accept" onclick="submitSignature()">✅ Accepter et signer le devis</button>
+        </div>
+      </div>
+      <div id="sign-success">
+        <div class="big-check">✅</div>
+        <h2>Devis accepté !</h2>
+        <p>Votre signature a été enregistrée. Le prestataire a été notifié.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+'use strict';
+
+const token = window.location.pathname.split('/sign/')[1];
+let quoteData = null;
+
+async function loadQuote() {
+  try {
+    const r = await fetch(`/api/quotes/sign/${token}`);
+    if (!r.ok) throw new Error('not found');
+    quoteData = await r.json();
+    renderQuote(quoteData);
+  } catch(e) {
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('error-state').style.display = 'block';
+  }
+}
+
+function eur(n) {
+  return (parseFloat(n)||0).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+}
+
+function renderQuote(q) {
+  document.getElementById('loading-state').style.display = 'none';
+  document.getElementById('main-content').style.display = 'block';
+
+  document.getElementById('q-number').textContent = 'Devis N° ' + q.number;
+  const createdDate = new Date(q.created_at).toLocaleDateString('fr-FR');
+  document.getElementById('q-meta').textContent = 'Créé le ' + createdDate;
+
+  const LABELS = { draft: 'Brouillon', sent: 'Envoyé', accepted: 'Accepté', refused: 'Refusé' };
+  const statusEl = document.getElementById('q-status');
+  statusEl.textContent = LABELS[q.status] || q.status;
+  statusEl.className = 'status-badge status-' + q.status;
+
+  document.getElementById('q-client').textContent = q.prospect?.name || 'Client';
+  document.getElementById('q-sender').textContent = q.sender_email || '';
+
+  if (q.valid_until) {
+    document.getElementById('q-valid-block').style.display = '';
+    document.getElementById('q-valid').textContent = new Date(q.valid_until).toLocaleDateString('fr-FR');
+  }
+
+  const items = typeof q.items === 'string' ? JSON.parse(q.items) : (q.items || []);
+  const tbody = document.getElementById('q-items');
+  tbody.innerHTML = items.map(it => {
+    const lt = (parseFloat(it.qty)||1) * (parseFloat(it.price)||0);
+    return `<tr><td>${esc(it.description||'')}</td><td>${it.qty||1}</td><td>${eur(it.price)}</td><td>${eur(lt)}</td></tr>`;
+  }).join('');
+
+  const tvaRate = parseFloat(q.tva_rate) || 20;
+  document.getElementById('q-totals').innerHTML = `
+    <div class="total-row"><span>Sous-total HT</span><span>${eur(q.subtotal)}</span></div>
+    <div class="total-row"><span>TVA (${tvaRate}%)</span><span>${eur(q.tva)}</span></div>
+    <div class="total-row main"><span>TOTAL TTC</span><span>${eur(q.total)}</span></div>
+  `;
+
+  if (q.notes) {
+    const notesEl = document.getElementById('q-notes');
+    notesEl.style.display = 'block';
+    notesEl.textContent = q.notes;
+  }
+
+  if (q.status === 'accepted') {
+    document.getElementById('already-signed').style.display = 'block';
+    document.getElementById('sig-card').style.display = 'none';
+  } else {
+    initCanvas();
+  }
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Canvas signature ──
+let canvas, ctx, drawing = false, hasSig = false;
+
+function initCanvas() {
+  canvas = document.getElementById('sig-pad');
+  ctx = canvas.getContext('2d');
+  ctx.strokeStyle = '#00c8f8';
+  ctx.lineWidth = 2.5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  const getPos = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    if (e.touches) {
+      return { x: (e.touches[0].clientX - rect.left) * scaleX, y: (e.touches[0].clientY - rect.top) * scaleY };
+    }
+    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY };
+  };
+
+  const start = (e) => { e.preventDefault(); drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+  const move  = (e) => { e.preventDefault(); if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); hasSig = true; };
+  const end   = (e) => { drawing = false; };
+
+  canvas.addEventListener('mousedown', start);
+  canvas.addEventListener('mousemove', move);
+  canvas.addEventListener('mouseup', end);
+  canvas.addEventListener('mouseleave', end);
+  canvas.addEventListener('touchstart', start, { passive: false });
+  canvas.addEventListener('touchmove', move, { passive: false });
+  canvas.addEventListener('touchend', end);
+}
+
+function clearSig() {
+  if (!ctx) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  hasSig = false;
+}
+
+async function submitSignature() {
+  const errEl = document.getElementById('sign-error');
+  errEl.style.display = 'none';
+
+  if (!hasSig) {
+    errEl.textContent = 'Veuillez dessiner votre signature avant de valider.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const sigData = canvas.toDataURL('image/png');
+  const btn = document.getElementById('btn-accept');
+  btn.disabled = true;
+  btn.textContent = 'Envoi…';
+
+  try {
+    const r = await fetch(`/api/quotes/sign/${token}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ signature_data: sigData }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Erreur');
+    document.querySelector('.sign-zone').style.display = 'none';
+    document.getElementById('sign-success').style.display = 'block';
+  } catch(e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '✅ Accepter et signer le devis';
+  }
+}
+
+loadQuote();
+</script>
+</body>
+</html>

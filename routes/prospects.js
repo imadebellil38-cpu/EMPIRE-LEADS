@@ -1,11 +1,13 @@
 const { Router } = require('express');
 const validator = require('validator');
 const db = require('../db');
+const { sendProspectEmail, isEmailConfigured } = require('../services/email');
+const { findEmailForProspect } = require('../services/emailFinder');
 
 const router = Router();
 
 const VALID_STATUSES = ['todo', 'called', 'nope', 'client'];
-const VALID_STAGES = ['cold_call', 'to_recall', 'meeting_to_set', 'meeting_confirmed', 'closed', 'refused'];
+const VALID_STAGES = ['cold_call', 'to_recall', 'no_answer', 'meeting_to_set', 'meeting_confirmed', 'closed', 'refused'];
 
 // GET /api/prospects/analytics/objections — objection breakdown
 router.get('/analytics/objections', (req, res) => {
@@ -60,6 +62,125 @@ router.get('/analytics', (req, res) => {
   res.json({ dailyStats, weeklyConversion, activityLog, totals });
 });
 
+// GET /api/prospects/export — export prospects as CSV
+router.get('/export', (req, res) => {
+  const userId = req.user.id;
+  const rows = db.prepare(
+    `SELECT name, phone, email, address, city, niche, notes, pipeline_stage, owner_name,
+            deal_value, deal_type, deal_recurrence, website_url, rating, reviews, created_at
+     FROM prospects WHERE user_id = ? ORDER BY created_at DESC`
+  ).all(userId);
+
+  const cols = ['name','phone','email','address','city','niche','notes','pipeline_stage',
+                'owner_name','deal_value','deal_type','deal_recurrence','website_url','rating','reviews','created_at'];
+  const header = cols.join(';');
+  const escCsv = v => {
+    if (v == null) return '';
+    const s = String(v).replace(/"/g, '""');
+    return /[;\n\r"]/.test(s) ? `"${s}"` : s;
+  };
+  const body = rows.map(r => cols.map(c => escCsv(r[c])).join(';')).join('\n');
+  const csv = '\ufeff' + header + '\n' + body; // BOM for Excel
+
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="prospects-${Date.now()}.csv"`);
+  res.send(csv);
+});
+
+// GET /api/prospects/stats — streak + weekly stats for analytics
+router.get('/stats', (req, res) => {
+  const userId = req.user.id;
+  const now = new Date();
+  const startOfWeek = new Date(now);
+  startOfWeek.setDate(now.getDate() - now.getDay() + 1); // Mon
+  startOfWeek.setHours(0,0,0,0);
+  const swStr = startOfWeek.toISOString().split('T')[0];
+
+  // Contacts this week (call_attempts)
+  const callsThisWeek = db.prepare(
+    `SELECT COUNT(*) as n FROM call_attempts WHERE user_id = ? AND date(created_at) >= ?`
+  ).get(userId, swStr).n;
+
+  // Meetings set this week (stage moved to meeting*)
+  const meetingsThisWeek = db.prepare(
+    `SELECT COUNT(*) as n FROM activity_log
+     WHERE user_id = ? AND action = 'stage_change' AND details LIKE '%meeting%'
+     AND date(created_at) >= ?`
+  ).get(userId, swStr).n;
+
+  // Deals + CA this week
+  const dealsRow = db.prepare(
+    `SELECT COUNT(*) as n, COALESCE(SUM(deal_value),0) as ca
+     FROM prospects WHERE user_id = ? AND pipeline_stage='closed' AND date(created_at) >= ?`
+  ).get(userId, swStr);
+
+  // Streak — consecutive active days (days with at least 1 call_attempt)
+  const activeDays = db.prepare(
+    `SELECT DISTINCT date(created_at) as d FROM call_attempts
+     WHERE user_id = ? ORDER BY d DESC LIMIT 60`
+  ).all(userId).map(r => r.d);
+
+  let streak = 0;
+  const todayStr = now.toISOString().split('T')[0];
+  const yesterStr = new Date(now - 86400000).toISOString().split('T')[0];
+  const startDay = activeDays[0] === todayStr || activeDays[0] === yesterStr ? activeDays[0] : null;
+  if (startDay) {
+    let cursor = new Date(startDay);
+    for (const d of activeDays) {
+      const curStr = cursor.toISOString().split('T')[0];
+      if (d === curStr) { streak++; cursor.setDate(cursor.getDate() - 1); }
+      else break;
+    }
+  }
+
+  res.json({
+    callsThisWeek,
+    meetingsThisWeek,
+    dealsThisWeek: dealsRow.n,
+    caThisWeek: dealsRow.ca,
+    streak,
+  });
+});
+
+// POST /api/prospects/import — bulk import from CSV
+router.post('/import', (req, res) => {
+  const userId = req.user.id;
+  const { rows } = req.body;
+  if (!Array.isArray(rows) || rows.length === 0) return res.status(400).json({ error: 'Données requises.' });
+  if (rows.length > 2000) return res.status(400).json({ error: 'Max 2000 prospects par import.' });
+
+  // Fetch existing phones for dedup
+  const existingPhones = new Set(
+    db.prepare("SELECT phone FROM prospects WHERE user_id = ? AND phone != ''").all(userId).map(r => r.phone)
+  );
+
+  const insert = db.prepare(`
+    INSERT INTO prospects (user_id, name, phone, email, address, city, notes, niche, pipeline_stage, status, owner_name)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'cold_call', 'todo', ?)
+  `);
+
+  const safe = s => (typeof s === 'string' ? validator.trim(s).substring(0, 500) : '');
+  let imported = 0, skipped = 0;
+
+  const importAll = db.transaction(() => {
+    for (const row of rows) {
+      const phone = safe(row.phone).replace(/\s/g, '');
+      if (phone && existingPhones.has(phone)) { skipped++; continue; }
+      insert.run(userId, safe(row.name), phone, safe(row.email), safe(row.address), safe(row.city), safe(row.notes), safe(row.niche), safe(row.owner_name));
+      if (phone) existingPhones.add(phone);
+      imported++;
+    }
+  });
+
+  try {
+    importAll();
+    try { db.prepare('INSERT INTO activity_log (user_id,action,details) VALUES (?,?,?)').run(userId, 'import', JSON.stringify({ imported, skipped })); } catch {}
+    res.json({ ok: true, imported, skipped });
+  } catch (err) {
+    res.status(500).json({ error: 'Erreur import: ' + err.message });
+  }
+});
+
 // GET /api/prospects/searches — search history for current user
 router.get('/searches', (req, res) => {
   const searches = db.prepare(
@@ -95,9 +216,9 @@ router.put('/:id/status', (req, res) => {
   res.json({ ok: true });
 });
 
-// PUT /api/prospects/:id/notes — update notes + rappel + owner_name
+// PUT /api/prospects/:id/notes — update notes + rappel + owner_name + email
 router.put('/:id/notes', (req, res) => {
-  const { notes, rappel, owner_name } = req.body;
+  const { notes, rappel, owner_name, email } = req.body;
 
   // ── Validate ──
   const id = parseInt(req.params.id, 10);
@@ -106,12 +227,13 @@ router.put('/:id/notes', (req, res) => {
   const cleanNotes = typeof notes === 'string' ? validator.trim(notes).substring(0, 2000) : '';
   const cleanRappel = typeof rappel === 'string' ? validator.trim(rappel).substring(0, 100) : '';
   const cleanOwner = typeof owner_name === 'string' ? validator.trim(owner_name).substring(0, 200) : '';
+  const cleanEmail = typeof email === 'string' ? validator.trim(email).substring(0, 200) : '';
 
   const prospect = db.prepare('SELECT id FROM prospects WHERE id = ? AND user_id = ?').get(id, req.user.id);
   if (!prospect) return res.status(404).json({ error: 'Prospect introuvable.' });
 
-  db.prepare('UPDATE prospects SET notes = ?, rappel = ?, owner_name = ? WHERE id = ?')
-    .run(cleanNotes, cleanRappel, cleanOwner, id);
+  db.prepare('UPDATE prospects SET notes = ?, rappel = ?, owner_name = ?, email = ? WHERE id = ?')
+    .run(cleanNotes, cleanRappel, cleanOwner, cleanEmail, id);
   res.json({ ok: true });
 });
 
@@ -142,7 +264,7 @@ router.put('/bulk/status', (req, res) => {
 
 // PUT /api/prospects/:id/stage — move prospect to a new pipeline stage
 router.put('/:id/stage', (req, res) => {
-  const { stage, objection, meeting_date, rappel, notes, deal_type, deal_date, deal_recurrence } = req.body;
+  const { stage, objection, meeting_date, rappel, notes, deal_type, deal_date, deal_recurrence, deal_value } = req.body;
 
   const id = parseInt(req.params.id, 10);
   if (isNaN(id) || id <= 0) return res.status(400).json({ error: 'ID invalide.' });
@@ -170,12 +292,62 @@ router.put('/:id/stage', (req, res) => {
     if (deal_type)       db.prepare('UPDATE prospects SET deal_type = ? WHERE id = ?').run(String(deal_type).trim().substring(0, 100), id);
     if (deal_date)       db.prepare('UPDATE prospects SET deal_date = ? WHERE id = ?').run(String(deal_date).trim().substring(0, 50), id);
     if (deal_recurrence) db.prepare('UPDATE prospects SET deal_recurrence = ? WHERE id = ?').run(String(deal_recurrence).trim().substring(0, 50), id);
+    if (typeof deal_value === 'number' && deal_value >= 0) db.prepare('UPDATE prospects SET deal_value = ? WHERE id = ?').run(deal_value, id);
   }
   if (notes) {
     db.prepare('UPDATE prospects SET notes = ? WHERE id = ?').run(String(notes).trim().substring(0, 2000), id);
   }
   try { db.prepare('INSERT INTO activity_log (user_id, action, details) VALUES (?, ?, ?)').run(req.user.id, 'stage_change', JSON.stringify({ prospectId: id, stage, objection: objection || null })); } catch {}
   res.json({ ok: true });
+});
+
+// POST /api/prospects/:id/find-email — find email using Hunter.io or pattern matching
+router.post('/:id/find-email', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id) || id <= 0) return res.status(400).json({ error: 'ID invalide.' });
+
+  const prospect = db.prepare('SELECT id, name, website_url, owner_name FROM prospects WHERE id = ? AND user_id = ?').get(id, req.user.id);
+  if (!prospect) return res.status(404).json({ error: 'Prospect introuvable.' });
+
+  try {
+    const result = await findEmailForProspect(prospect);
+    if (result.found) {
+      db.prepare('UPDATE prospects SET email = ? WHERE id = ?').run(result.email, id);
+      return res.json({ ok: true, email: result.email });
+    }
+    return res.json({ ok: true, found: false, suggestions: result.suggestions, error: result.error });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/prospects/:id/send-email — send pitch email to prospect
+router.post('/:id/send-email', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id) || id <= 0) return res.status(400).json({ error: 'ID invalide.' });
+
+  const prospect = db.prepare('SELECT id, email, name FROM prospects WHERE id = ? AND user_id = ?').get(id, req.user.id);
+  if (!prospect) return res.status(404).json({ error: 'Prospect introuvable.' });
+  if (!prospect.email) return res.status(400).json({ error: 'Aucun email renseigné. Ajoutez l\'email dans la fiche.' });
+
+  const { subject, body } = req.body;
+  if (!subject || !body) return res.status(400).json({ error: 'Sujet et corps requis.' });
+
+  const user = db.prepare('SELECT email FROM users WHERE id = ?').get(req.user.id);
+  const result = await sendProspectEmail(
+    prospect.email,
+    validator.trim(subject).substring(0, 200),
+    validator.trim(body).substring(0, 5000),
+    user?.email
+  );
+
+  if (result.ok) {
+    try { db.prepare('INSERT INTO activity_log (user_id, action, details) VALUES (?, ?, ?)').run(req.user.id, 'email_sent', JSON.stringify({ prospectId: id, to: prospect.email, subject })); } catch {}
+    try { db.prepare('INSERT INTO call_attempts (prospect_id, user_id, attempt_type, result, note) VALUES (?,?,?,?,?)').run(id, req.user.id, 'email', 'positive', `Email envoyé: ${subject}`); } catch {}
+    res.json({ ok: true });
+  } else {
+    res.status(500).json({ error: result.error });
+  }
 });
 
 // POST /api/prospects/:id/attempts — log a contact attempt

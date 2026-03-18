@@ -1,68 +1,259 @@
 /* ProspectHunter — Shared Variables & Base Reset */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* ═══════════════════════════════════
+   MODE CLAIR (defaut)
+═══════════════════════════════════ */
 :root {
-  --bg:       #03050f;
-  --surface:  #060c1e;
-  --card:     #0b1128;
-  --card2:    #0f1630;
-  --border:   #1a2040;
-  --border2:  #232b4a;
+  color-scheme: light;
 
-  --grad: linear-gradient(135deg, #ef4444 0%, #e11d48 60%, #f97316 100%);
-  --grad-text: linear-gradient(135deg, #ff6b6b 0%, #f43f5e 60%, #fb923c 100%);
+  /* ── Surfaces ── */
+  --bg:       #FFFFFF;
+  --surface:  #F8F9FC;
+  --surface2: #F1F3F8;
+  --card:     #FFFFFF;
+  --card2:    #F8F9FC;
+  --border:   #E5E7EB;
+  --border2:  #D1D5DB;
 
-  --blue:     #ef4444;
-  --blue-bg:  rgba(239,68,68,.1);
-  --blue-bd:  rgba(239,68,68,.3);
+  /* ── Brand Orange ── */
+  --accent:        #F97316;
+  --accent-hover:  #EA580C;
+  --accent-light:  #FFF7ED;
+  --accent-soft:   rgba(249,115,22,.08);
+  --accent-border: rgba(249,115,22,.25);
 
-  --purple:   #e11d48;
-  --purple-bg: rgba(225,29,72,.1);
-  --purple-bd: rgba(225,29,72,.3);
+  /* ── Gradients ── */
+  --grad:      linear-gradient(135deg, #F97316 0%, #EA580C 50%, #DC2626 100%);
+  --grad-text: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  --grad-subtle: linear-gradient(135deg, #FFF7ED 0%, #FEF3C7 100%);
+  --glow:      rgba(249,115,22,.2);
 
-  --teal:     #f97316;
-  --teal-bg:  rgba(249,115,22,.1);
-  --teal-bd:  rgba(249,115,22,.3);
+  /* ── Text ── */
+  --text:     #111827;
+  --text1:    #111827;
+  --text2:    #6B7280;
+  --muted:    #9CA3AF;
+  --dim:      #D1D5DB;
 
-  --emerald:  #22c55e;
-  --emerald2: rgba(34,197,94,.08);
+  /* ── Stage Colors (CRM pipeline) ── */
+  --cold:       #2563EB;
+  --cold-bg:    rgba(37,99,235,.06);
+  --cold-bd:    rgba(37,99,235,.2);
 
-  --amber:    #f97316;
-  --amber2:   rgba(249,115,22,.1);
+  --recall:     #D97706;
+  --recall-bg:  rgba(217,119,6,.06);
+  --recall-bd:  rgba(217,119,6,.2);
 
-  --text:     #e8eaf6;
-  --text2:    #8892b0;
-  --muted:    #4a5268;
-  --dim:      #6b7394;
+  --meeting:    #7C3AED;
+  --meeting-bg: rgba(124,58,237,.06);
+  --meeting-bd: rgba(124,58,237,.2);
 
-  --red-bg:   rgba(239,68,68,.06);
-  --red-bd:   rgba(239,68,68,.2);
-  --red-tx:   #f87171;
+  --closed:     #16A34A;
+  --closed-bg:  rgba(22,163,74,.06);
+  --closed-bd:  rgba(22,163,74,.2);
 
-  --green-tx: #22c55e;
+  --refused:    #6B7280;
+  --refused-bg: rgba(107,114,128,.05);
+  --refused-bd: rgba(107,114,128,.15);
 
-  /* Legacy compat */
-  --cyan:     #14b8a6;
-  --cyan2:    #2dd4bf;
-  --cyan-glow: rgba(20,184,166,.1);
-  --cyan-glow2: rgba(20,184,166,.05);
+  --noanswer:     #EA580C;
+  --noanswer-bg:  rgba(234,88,12,.06);
+  --noanswer-bd:  rgba(234,88,12,.2);
+
+  --hot:        #DC2626;
+  --hot-bg:     rgba(220,38,38,.06);
+  --hot-bd:     rgba(220,38,38,.2);
+
+  --devis:      #7C3AED;
+  --devis-bg:   rgba(124,58,237,.06);
+  --devis-bd:   rgba(124,58,237,.2);
+
+  /* ── Utility Colors ── */
+  --emerald:  #16A34A;
+  --emerald2: rgba(22,163,74,.06);
+
+  --red:      #DC2626;
+  --red-bg:   rgba(220,38,38,.06);
+  --red-bd:   rgba(220,38,38,.2);
+  --red-tx:   #DC2626;
+
+  --green-tx: #16A34A;
+
+  --blue:     #2563EB;
+  --blue-bg:  rgba(37,99,235,.06);
+  --blue-bd:  rgba(37,99,235,.2);
+
+  --purple:   #7C3AED;
+  --purple-bg: rgba(124,58,237,.06);
+  --purple-bd: rgba(124,58,237,.2);
+
+  --amber:    #D97706;
+  --amber2:   rgba(217,119,6,.06);
+
+  --teal:     #0D9488;
+  --teal-bg:  rgba(13,148,136,.06);
+  --teal-bd:  rgba(13,148,136,.2);
+
+  /* ── Legacy compat ── */
+  --cyan:       #F97316;
+  --cyan2:      #EA580C;
+  --cyan-glow:  rgba(249,115,22,.1);
+  --cyan-glow2: rgba(249,115,22,.05);
+
+  /* ── Overlay ── */
+  --overlay: rgba(0,0,0,.4);
+
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
+  --shadow:    0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,.1), 0 6px 10px rgba(0,0,0,.08);
+  --shadow-xl: 0 25px 50px rgba(0,0,0,.12);
+
+  /* ── Radius ── */
+  --radius-sm: 6px;
+  --radius:    10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
 }
 
+/* ═══════════════════════════════════
+   MODE SOMBRE
+═══════════════════════════════════ */
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* ── Surfaces ── */
+  --bg:       #09090B;
+  --surface:  #0F0F12;
+  --surface2: #18181B;
+  --card:     #18181B;
+  --card2:    #1F1F23;
+  --border:   #27272A;
+  --border2:  #3F3F46;
+
+  /* ── Brand Orange (plus lumineux sur fond sombre) ── */
+  --accent:        #F97316;
+  --accent-hover:  #FB923C;
+  --accent-light:  rgba(249,115,22,.1);
+  --accent-soft:   rgba(249,115,22,.08);
+  --accent-border: rgba(249,115,22,.3);
+
+  /* ── Gradients ── */
+  --grad:      linear-gradient(135deg, #F97316 0%, #EA580C 50%, #DC2626 100%);
+  --grad-text: linear-gradient(135deg, #FB923C 0%, #F97316 100%);
+  --grad-subtle: linear-gradient(135deg, rgba(249,115,22,.1) 0%, rgba(220,38,38,.05) 100%);
+  --glow:      rgba(249,115,22,.25);
+
+  /* ── Text ── */
+  --text:     #F4F4F5;
+  --text1:    #FAFAFA;
+  --text2:    #A1A1AA;
+  --muted:    #71717A;
+  --dim:      #52525B;
+
+  /* ── Stage Colors (plus vifs sur fond sombre) ── */
+  --cold:       #3B82F6;
+  --cold-bg:    rgba(59,130,246,.1);
+  --cold-bd:    rgba(59,130,246,.3);
+
+  --recall:     #F59E0B;
+  --recall-bg:  rgba(245,158,11,.08);
+  --recall-bd:  rgba(245,158,11,.25);
+
+  --meeting:    #A855F7;
+  --meeting-bg: rgba(168,85,247,.08);
+  --meeting-bd: rgba(168,85,247,.25);
+
+  --closed:     #22C55E;
+  --closed-bg:  rgba(34,197,94,.08);
+  --closed-bd:  rgba(34,197,94,.25);
+
+  --refused:    #9CA3AF;
+  --refused-bg: rgba(156,163,175,.06);
+  --refused-bd: rgba(156,163,175,.15);
+
+  --noanswer:     #F97316;
+  --noanswer-bg:  rgba(249,115,22,.08);
+  --noanswer-bd:  rgba(249,115,22,.25);
+
+  --hot:        #EF4444;
+  --hot-bg:     rgba(239,68,68,.08);
+  --hot-bd:     rgba(239,68,68,.25);
+
+  --devis:      #A855F7;
+  --devis-bg:   rgba(168,85,247,.08);
+  --devis-bd:   rgba(168,85,247,.25);
+
+  /* ── Utility Colors ── */
+  --emerald:  #22C55E;
+  --emerald2: rgba(34,197,94,.08);
+
+  --red:      #EF4444;
+  --red-bg:   rgba(239,68,68,.08);
+  --red-bd:   rgba(239,68,68,.25);
+  --red-tx:   #F87171;
+
+  --green-tx: #22C55E;
+
+  --blue:     #3B82F6;
+  --blue-bg:  rgba(59,130,246,.1);
+  --blue-bd:  rgba(59,130,246,.3);
+
+  --purple:   #A855F7;
+  --purple-bg: rgba(168,85,247,.08);
+  --purple-bd: rgba(168,85,247,.25);
+
+  --amber:    #F59E0B;
+  --amber2:   rgba(245,158,11,.08);
+
+  --teal:     #14B8A6;
+  --teal-bg:  rgba(20,184,166,.08);
+  --teal-bd:  rgba(20,184,166,.25);
+
+  /* ── Legacy compat ── */
+  --cyan:       #F97316;
+  --cyan2:      #FB923C;
+  --cyan-glow:  rgba(249,115,22,.1);
+  --cyan-glow2: rgba(249,115,22,.05);
+
+  /* ── Overlay ── */
+  --overlay: rgba(0,0,0,.65);
+
+  /* ── Shadows (plus marquees en sombre) ── */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.3);
+  --shadow:    0 1px 3px rgba(0,0,0,.4), 0 1px 2px rgba(0,0,0,.3);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.35), 0 2px 4px rgba(0,0,0,.3);
+  --shadow-lg: 0 10px 25px rgba(0,0,0,.45), 0 6px 10px rgba(0,0,0,.35);
+  --shadow-xl: 0 25px 50px rgba(0,0,0,.5);
+}
+
+/* ═══════════════════════════════════
+   BASE STYLES
+═══════════════════════════════════ */
 body {
   background: var(--bg);
   color: var(--text);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   min-height: 100vh;
-  line-height: 1.5;
+  line-height: 1.6;
+  transition: background-color .3s ease, color .3s ease;
 }
 
 /* Focus visible for accessibility */
 :focus-visible {
-  outline: 2px solid var(--blue);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
 button:focus:not(:focus-visible),
 a:focus:not(:focus-visible) {
   outline: none;
+}
+
+/* Smooth theme transitions on key elements */
+header, main, .modal, .card, .scan-panel, .toast,
+input, textarea, select, .pipeline-nav, .kpi-card {
+  transition: background-color .3s ease, border-color .3s ease, color .3s ease;
 }

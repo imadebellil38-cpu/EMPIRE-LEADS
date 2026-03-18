@@ -109,6 +109,9 @@ const migrations = [
   // ── Reset password ──
   `ALTER TABLE users ADD COLUMN reset_token TEXT`,
   `ALTER TABLE users ADD COLUMN reset_token_expires DATETIME`,
+  // ── Deal value + prospect email ──
+  `ALTER TABLE prospects ADD COLUMN deal_value REAL DEFAULT 0`,
+  `ALTER TABLE prospects ADD COLUMN email TEXT DEFAULT ''`,
   // ── Search cache ──
   `CREATE TABLE IF NOT EXISTS search_cache (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -117,6 +120,30 @@ const migrations = [
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`,
   `CREATE INDEX IF NOT EXISTS idx_search_cache_key ON search_cache(cache_key)`,
+  // ── Quotes / Devis ──
+  `CREATE TABLE IF NOT EXISTS quotes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    prospect_id INTEGER,
+    number TEXT NOT NULL,
+    items TEXT NOT NULL DEFAULT '[]',
+    subtotal REAL DEFAULT 0,
+    tva_rate REAL DEFAULT 20,
+    tva REAL DEFAULT 0,
+    total REAL DEFAULT 0,
+    status TEXT DEFAULT 'draft',
+    token TEXT UNIQUE,
+    notes TEXT DEFAULT '',
+    valid_until TEXT DEFAULT '',
+    signature_data TEXT DEFAULT '',
+    signed_at DATETIME,
+    sent_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  )`,
+  `CREATE INDEX IF NOT EXISTS idx_quotes_user ON quotes(user_id)`,
+  `CREATE INDEX IF NOT EXISTS idx_quotes_token ON quotes(token)`,
+  `CREATE INDEX IF NOT EXISTS idx_quotes_prospect ON quotes(prospect_id)`,
 ];
 
 for (const sql of migrations) {
