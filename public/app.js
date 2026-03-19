@@ -26,6 +26,7 @@ let saveTimer      = null;
 let scanCountry = 'fr';
 let scanMode    = 'site';
 let userCredits = 0;
+let calendarWeek  = getWeekStart(new Date()); // Monday of current week
 let scanLat     = null;
 let scanLng     = null;
 let scanRadius  = 10;
@@ -198,9 +199,11 @@ function updateBadges() {
     if (counts[p.pipeline_stage] !== undefined) counts[p.pipeline_stage]++;
   });
 
-  const active = allProspects.filter(p => p.pipeline_stage !== 'refused' && p.pipeline_stage !== 'closed').length;
   const totalEl = document.getElementById('hstat-total');
-  if (totalEl) totalEl.textContent = active;
+  if (totalEl) totalEl.textContent = userCredits;
+
+  const active = allProspects.filter(p => p.pipeline_stage !== 'refused').length;
+  if (typeof updateSeeProspectsCount === 'function') updateSeeProspectsCount(active);
 
   document.getElementById('badge-cold_call').textContent = counts.cold_call;
   document.getElementById('badge-to_recall').textContent = counts.to_recall;
@@ -230,6 +233,15 @@ function switchTab(stage) {
     meetingSubtabs.style.display = stage === 'meeting' ? 'flex' : 'none';
   }
 
+  // Auto-fermer le panel "Trouver des prospects" si on change d'onglet
+  const scanBody = document.getElementById('scan-body');
+  const scanToggleBtn = document.getElementById('scan-toggle-btn');
+  if (scanBody && scanBody.style.display !== 'none') {
+    scanBody.style.display = 'none';
+    if (scanToggleBtn) scanToggleBtn.classList.add('collapsed');
+  }
+
+  rebuildNicheFilter();
   renderList();
 }
 
@@ -257,23 +269,41 @@ function filterByNiche(niche) {
 
 function nicheKey(raw) { return decodeHtml((raw || '').trim()).toLowerCase(); }
 
+function getTabProspects() {
+  // Prospects du tab actif, sans filtre niche/search
+  const stageMap = {
+    cold_call: ['cold_call'],
+    to_recall: ['to_recall'],
+    no_answer: ['no_answer'],
+    meeting:   ['meeting_to_set', 'meeting_confirmed'],
+    closed:    ['closed'],
+    refused:   ['refused'],
+  };
+  const stages = stageMap[currentTab] || [];
+  return allProspects.filter(p => stages.includes(p.pipeline_stage));
+}
+
 function rebuildNicheFilter() {
   const sel = document.getElementById('niche-filter');
   if (!sel) return;
   const current = sel.value;
-  // Map lowercase key → original display name
+  const tabProspects = getTabProspects();
+  // Map lowercase key → original display name (basé sur l'onglet actif)
   const nicheMap = {};
-  allProspects.forEach(p => {
+  tabProspects.forEach(p => {
     const k = nicheKey(p.niche);
     if (k && !nicheMap[k]) nicheMap[k] = decodeHtml((p.niche || '').trim());
   });
   const keys = Object.keys(nicheMap).sort((a, b) => a.localeCompare(b, 'fr'));
-  sel.innerHTML = `<option value="all">🏷️ Tous secteurs (${allProspects.length})</option>` +
+  // Si le filtre actuel n'existe plus dans ce tab, reset à "all"
+  const newVal = nicheMap[current] ? current : 'all';
+  sel.innerHTML = `<option value="all">🏷️ Tous (${tabProspects.length})</option>` +
     keys.map(k => {
-      const count = allProspects.filter(p => nicheKey(p.niche) === k).length;
+      const count = tabProspects.filter(p => nicheKey(p.niche) === k).length;
       const label = nicheMap[k];
-      return `<option value="${k}"${current === k ? ' selected' : ''}>${esc(label)} (${count})</option>`;
+      return `<option value="${k}"${newVal === k ? ' selected' : ''}>${esc(label)} (${count})</option>`;
     }).join('');
+  if (sel.value !== newVal) sel.value = newVal;
 }
 
 function getFilteredProspects() {
@@ -842,12 +872,24 @@ function selectObjChip(btn) {
   document.querySelectorAll('.obj-chip').forEach(c => c.classList.remove('obj-chip-selected'));
   btn.classList.add('obj-chip-selected');
   document.getElementById('objection-input').value = '';
+  const preview = document.getElementById('objection-custom-preview');
+  if (preview) preview.style.display = 'none';
   _objectionValue = btn.textContent;
 }
 
 function onObjInput(input) {
   document.querySelectorAll('.obj-chip').forEach(c => c.classList.remove('obj-chip-selected'));
-  _objectionValue = input.value.trim();
+  const val = input.value.trim();
+  _objectionValue = val ? '⚡ ' + val : '';
+  const preview = document.getElementById('objection-custom-preview');
+  if (preview) {
+    if (val) {
+      preview.style.display = 'block';
+      preview.innerHTML = `<span class="obj-chip obj-chip-pro obj-chip-selected">⚡ ${esc(val)}</span>`;
+    } else {
+      preview.style.display = 'none';
+    }
+  }
 }
 
 function closeObjectionModal() {
@@ -1514,7 +1556,65 @@ function switchNicheCat(btn) {
 // Init chips on load
 document.addEventListener('DOMContentLoaded', () => {
   renderNicheChips('batiment');
+  initSwipeToClose();
 });
+
+/* ─────────────────────────────────────────
+   SWIPE DOWN TO CLOSE — bottom sheet modals
+───────────────────────────────────────── */
+function initSwipeToClose() {
+  // Close function per overlay id
+  const closeFns = {
+    'stage-modal-overlay':   () => closeStageModal(),
+    'deal-modal-overlay':    () => closeDealModal(),
+    'detail-overlay':        () => closeDetailModal(),
+    'add-overlay':           () => closeAddModal(),
+    'objection-overlay':     () => closeObjectionModal(),
+  };
+
+  document.querySelectorAll('.modal').forEach(modal => {
+    let startY = 0, startX = 0;
+
+    modal.addEventListener('touchstart', e => {
+      startY = e.touches[0].clientY;
+      startX = e.touches[0].clientX;
+      modal.style.transition = 'none';
+    }, { passive: true });
+
+    modal.addEventListener('touchmove', e => {
+      const dy = e.touches[0].clientY - startY;
+      if (dy > 0) {
+        modal.style.transform = `translateY(${dy}px)`;
+        modal.style.opacity = Math.max(0, 1 - dy / 300);
+      }
+    }, { passive: true });
+
+    modal.addEventListener('touchend', e => {
+      const dy = e.changedTouches[0].clientY - startY;
+      modal.style.transition = 'transform .25s ease, opacity .25s ease';
+      if (dy > 90) {
+        modal.style.transform = 'translateY(100%)';
+        modal.style.opacity = '0';
+        setTimeout(() => {
+          modal.style.transform = '';
+          modal.style.opacity = '';
+          modal.style.transition = '';
+          // Find and call the close function
+          const overlay = modal.closest('.modal-overlay');
+          if (overlay) {
+            const fn = closeFns[overlay.id];
+            if (fn) fn();
+            else overlay.style.display = 'none';
+          }
+        }, 250);
+      } else {
+        modal.style.transform = '';
+        modal.style.opacity = '';
+        modal.style.transition = '';
+      }
+    }, { passive: true });
+  });
+}
 
 /* ─────────────────────────────────────────
    SCAN — country / mode selectors
@@ -1723,6 +1823,17 @@ document.head.appendChild(confettiStyle);
 function mbnSwitch(btn) {
   document.querySelectorAll('.mbn-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
+}
+
+function mbnGoScan() {
+  switchView('pipeline');
+  const body = document.getElementById('scan-body');
+  const toggleBtn = document.getElementById('scan-toggle-btn');
+  if (body && body.style.display === 'none') {
+    body.style.display = '';
+    if (toggleBtn) toggleBtn.classList.remove('collapsed');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function decodeHtml(str) {
@@ -1936,128 +2047,116 @@ function switchAgendaView(view) {
   if (view === 'calendar') renderCalendar();
 }
 
+function getWeekStart(d) {
+  const day = d.getDay();
+  const diff = (day === 0 ? -6 : 1 - day);
+  const mon = new Date(d);
+  mon.setDate(d.getDate() + diff);
+  mon.setHours(0,0,0,0);
+  return mon;
+}
+
 function renderCalendar() {
   const cal = document.getElementById('agenda-calendar');
   if (!cal) return;
 
-  const year     = calendarMonth.getFullYear();
-  const month    = calendarMonth.getMonth();
-  const firstDay = new Date(year, month, 1);
-  const lastDay  = new Date(year, month + 1, 0);
-  const startDow = (firstDay.getDay() + 6) % 7; // Lundi = 0
-  const monthName = firstDay.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  const weekStart = new Date(calendarWeek);
+  const weekEnd   = new Date(calendarWeek);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  weekEnd.setHours(23,59,59);
 
-  const today = new Date();
-  const todayStr = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
-
-  // Parse date string en heure locale (évite le décalage UTC)
-  function parseLocalDate(str) {
+  // Collect all events this week
+  const items = [];
+  const now = new Date();
+  function parseLD(str) {
     if (!str) return null;
-    // "2026-03-19 17:30" ou "2026-03-19"
     const parts = str.trim().split(' ');
     const [y, m, d] = parts[0].split('-').map(Number);
-    if (parts[1]) {
-      const [h, min] = parts[1].split(':').map(Number);
-      return new Date(y, m - 1, d, h, min);
-    }
-    return new Date(y, m - 1, d);
+    return parts[1] ? new Date(y, m-1, d, ...parts[1].split(':').map(Number)) : new Date(y, m-1, d);
   }
-
-  const items = [];
   allProspects.forEach(p => {
-    if (p.pipeline_stage === 'to_recall' && p.rappel) {
-      const date = parseLocalDate(p.rappel);
-      if (date) items.push({ p, date, type: 'rappel', raw: p.rappel });
+    if (p.rappel) {
+      const d = parseLD(p.rappel);
+      if (d && d >= weekStart && d <= weekEnd) {
+        items.push({ date: d, p, type: 'rappel' });
+      }
     }
-    if ((p.pipeline_stage === 'meeting_to_set' || p.pipeline_stage === 'meeting_confirmed') && p.meeting_date) {
-      const date = parseLocalDate(p.meeting_date);
-      if (date) items.push({ p, date, type: 'meeting', raw: p.meeting_date });
+    if (p.meeting_date) {
+      const d = parseLD(p.meeting_date);
+      if (d && d >= weekStart && d <= weekEnd) {
+        items.push({ date: d, p, type: 'meeting' });
+      }
     }
   });
-  items.sort((a, b) => a.date - b.date);
 
-  const DAYS = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  const MONTHS_FR = ['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct','nov','déc'];
+  const DAYS_FR   = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  const DAYS_FULL = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+
+  const fmt = d => `${d.getDate()} ${MONTHS_FR[d.getMonth()]}`;
+  const title = `${fmt(weekStart)} — ${fmt(weekEnd)} ${weekEnd.getFullYear()}`;
 
   let html = `
-    <div class="gcal-header">
-      <div class="gcal-nav-group">
-        <button class="gcal-btn gcal-btn-today" onclick="calToday()">Aujourd'hui</button>
-        <button class="gcal-btn" onclick="calNav(-1)">&#8249;</button>
-        <button class="gcal-btn" onclick="calNav(1)">&#8250;</button>
-      </div>
-      <div class="gcal-month-title">${monthName}</div>
-      <div class="gcal-legend">
-        <div class="gcal-legend-item"><div class="gcal-legend-dot meeting"></div>Rendez-vous</div>
-        <div class="gcal-legend-item"><div class="gcal-legend-dot rappel"></div>Rappel</div>
-      </div>
+    <div class="wcal-header">
+      <button class="wcal-btn" onclick="calNavWeek(-1)">‹</button>
+      <div class="wcal-title">${title}</div>
+      <button class="wcal-btn wcal-today-btn" onclick="calTodayWeek()">Auj.</button>
+      <button class="wcal-btn" onclick="calNavWeek(1)">›</button>
     </div>
-    <div class="gcal-dow-row">
-      ${DAYS.map(d => `<div class="gcal-dow">${d}</div>`).join('')}
-    </div>
-    <div class="gcal-grid">
+    <div class="wcal-body">
   `;
 
-  // Empty cells before first day
-  for (let i = 0; i < startDow; i++) {
-    html += `<div class="gcal-day gcal-day-empty"></div>`;
-  }
+  for (let i = 0; i < 7; i++) {
+    const day = new Date(weekStart);
+    day.setDate(weekStart.getDate() + i);
 
-  for (let d = 1; d <= lastDay.getDate(); d++) {
-    const dayDate   = new Date(year, month, d);
-    const dow       = (dayDate.getDay() + 6) % 7; // 0=Lun, 5=Sam, 6=Dim
-    const isToday   = `${year}-${month}-${d}` === todayStr;
-    const isPast    = dayDate < today && !isToday;
-    const isWeekend = dow === 5 || dow === 6;
+    const isToday = day.toDateString() === now.toDateString();
+    const isWeekend = day.getDay() === 0 || day.getDay() === 6;
+    const dayItems = items.filter(it => it.date.toDateString() === day.toDateString())
+                          .sort((a,b) => a.date - b.date);
 
-    const dayItems = items.filter(it =>
-      it.date.getFullYear() === year &&
-      it.date.getMonth()    === month &&
-      it.date.getDate()     === d
-    );
+    const dayClass = ['wcal-day', isToday ? 'wcal-today' : '', isWeekend ? 'wcal-weekend' : ''].filter(Boolean).join(' ');
 
-    let classes = 'gcal-day';
-    if (isToday)   classes += ' gcal-today';
-    if (isPast)    classes += ' gcal-past';
-    if (isWeekend) classes += ' gcal-weekend';
-
-    html += `<div class="${classes}">
-      <div class="gcal-day-num-wrap">
-        <div class="gcal-day-num">${d}</div>
-      </div>
-      <div class="gcal-events">`;
-
-    const maxShow = 3;
-    dayItems.slice(0, maxShow).forEach(it => {
-      const cls  = it.type === 'meeting' ? 'gcal-evt-meeting' : 'gcal-evt-rappel';
-      const hasTime = it.raw && it.raw.includes(' ');
-      const timeStr = hasTime
-        ? it.date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
-        : 'Toute la journée';
-      html += `<div class="gcal-evt ${cls}" onclick="openDetail(${it.p.id})" title="${esc(it.p.name || '')}">
-        <span class="gcal-evt-time">${timeStr}</span>
-        <span class="gcal-evt-name">${esc((it.p.name || '').substring(0, 16))}</span>
+    html += `<div class="${dayClass}">
+      <div class="wcal-day-header">
+        <span class="wcal-day-name">${DAYS_FR[day.getDay()]}</span>
+        <span class="wcal-day-num ${isToday ? 'wcal-day-num-today' : ''}">${day.getDate()}</span>
       </div>`;
-    });
-    if (dayItems.length > maxShow) {
-      html += `<div class="gcal-more">+${dayItems.length - maxShow} autre${dayItems.length - maxShow > 1 ? 's' : ''}</div>`;
+
+    if (dayItems.length === 0) {
+      html += `<div class="wcal-empty">—</div>`;
+    } else {
+      dayItems.forEach(it => {
+        const timeStr = it.date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+        const cls = it.type === 'meeting' ? 'wcal-evt-meeting' : 'wcal-evt-rappel';
+        const name = (it.p.name || '').substring(0, 22);
+        html += `<div class="wcal-evt ${cls}" onclick="openDetail(${it.p.id})">
+          <span class="wcal-evt-time">${timeStr}</span>
+          <span class="wcal-evt-name">${esc(name)}</span>
+        </div>`;
+      });
     }
 
-    html += `</div></div>`;
+    html += `</div>`;
   }
 
   html += `</div>`;
   cal.innerHTML = html;
 }
 
-function calNav(dir) {
-  calendarMonth = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + dir, 1);
+function calNavWeek(dir) {
+  calendarWeek = new Date(calendarWeek);
+  calendarWeek.setDate(calendarWeek.getDate() + dir * 7);
   renderCalendar();
 }
 
-function calToday() {
-  calendarMonth = new Date();
+function calTodayWeek() {
+  calendarWeek = getWeekStart(new Date());
   renderCalendar();
 }
+
+function calNav(dir) { calNavWeek(dir); }
+function calToday()  { calTodayWeek(); }
 
 /* ─────────────────────────────────────────
    AGENDA PANEL (quick view)
@@ -2067,13 +2166,7 @@ let miniCalMonth = new Date();
 function renderMiniCalendar() {
   const wrap = document.getElementById('agenda-panel-calendar');
   if (!wrap) return;
-  const year = miniCalMonth.getFullYear();
-  const month = miniCalMonth.getMonth();
-  const firstDay = new Date(year, month, 1);
-  const lastDay  = new Date(year, month + 1, 0);
-  const startDow = (firstDay.getDay() + 6) % 7;
-  const monthName = firstDay.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
-  const today = new Date();
+  const now = new Date();
 
   function parseLD(str) {
     if (!str) return null;
@@ -2081,54 +2174,58 @@ function renderMiniCalendar() {
     const [y, m, d] = parts[0].split('-').map(Number);
     return parts[1] ? new Date(y, m-1, d, ...parts[1].split(':').map(Number)) : new Date(y, m-1, d);
   }
-  const events = {};
+
+  // Collect all upcoming events (next 30 days)
+  const horizon = new Date(now); horizon.setDate(horizon.getDate() + 30);
+  const upcoming = [];
   allProspects.forEach(p => {
-    let d = null;
-    if (p.pipeline_stage === 'to_recall' && p.rappel) d = parseLD(p.rappel);
-    if ((p.pipeline_stage === 'meeting_to_set' || p.pipeline_stage === 'meeting_confirmed') && p.meeting_date) d = parseLD(p.meeting_date);
-    if (d && d.getFullYear() === year && d.getMonth() === month) {
-      const k = d.getDate();
-      events[k] = (events[k] || 0) + 1;
+    if (p.rappel) {
+      const d = parseLD(p.rappel);
+      if (d && d >= now && d <= horizon) upcoming.push({ date: d, p, type: 'rappel' });
+    }
+    if (p.meeting_date) {
+      const d = parseLD(p.meeting_date);
+      if (d && d >= now && d <= horizon) upcoming.push({ date: d, p, type: 'meeting' });
     }
   });
+  upcoming.sort((a, b) => a.date - b.date);
 
-  let html = `
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
-      <button onclick="miniCalNav(-1)" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:.1rem .4rem">‹</button>
-      <span style="font-size:.8rem;font-weight:700;text-transform:capitalize;color:var(--text)">${monthName}</span>
-      <button onclick="miniCalNav(1)"  style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:1rem;padding:.1rem .4rem">›</button>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center">
-      ${['L','M','M','J','V','S','D'].map(d => `<div style="font-size:.6rem;font-weight:700;color:var(--muted);padding:.2rem 0">${d}</div>`).join('')}
-  `;
-  for (let i = 0; i < startDow; i++) html += `<div></div>`;
-  for (let d = 1; d <= lastDay.getDate(); d++) {
-    const isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-    const hasEvt  = !!events[d];
-    html += `<div onclick="miniCalClickDay(${d})" style="
-      font-size:.72rem;font-weight:${isToday?'800':'600'};padding:.25rem .1rem;border-radius:50%;cursor:pointer;
-      background:${isToday?'#7c3aed':'transparent'};color:${isToday?'#fff':hasEvt?'#a78bfa':'var(--text2)'};
-      position:relative;
-    ">${d}${hasEvt && !isToday ? `<span style="position:absolute;bottom:1px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:#a78bfa;display:block"></span>` : ''}</div>`;
+  const DAYS_FR = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  const MONTHS_FR = ['jan','fév','mar','avr','mai','jun','jul','aoû','sep','oct','nov','déc'];
+
+  let html = `<div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem">📅 Prochains rendez-vous</div>`;
+
+  if (upcoming.length === 0) {
+    html += `<div style="text-align:center;color:var(--muted);font-size:.8rem;padding:.75rem 0">Aucun RDV à venir ✌️</div>`;
+  } else {
+    upcoming.slice(0, 8).forEach(it => {
+      const d = it.date;
+      const dayLabel = d.toDateString() === now.toDateString() ? "Aujourd'hui" : `${DAYS_FR[d.getDay()]} ${d.getDate()} ${MONTHS_FR[d.getMonth()]}`;
+      const timeStr = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      const isToday = d.toDateString() === now.toDateString();
+      const color = it.type === 'meeting' ? 'var(--accent)' : 'var(--text2)';
+      const bg = it.type === 'meeting' ? 'var(--accent-soft)' : 'var(--surface)';
+      const icon = it.type === 'meeting' ? '📋' : '🔔';
+      html += `<div onclick="openDetail(${it.p.id})" style="
+        display:flex;align-items:center;gap:.5rem;padding:.45rem .5rem;border-radius:8px;
+        background:${bg};border-left:3px solid ${color};margin-bottom:.35rem;cursor:pointer;
+        ${isToday ? 'border-color:var(--accent);' : ''}
+      ">
+        <span style="font-size:.8rem">${icon}</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.75rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(it.p.name || '—')}</div>
+          <div style="font-size:.68rem;color:var(--muted)">${dayLabel}</div>
+        </div>
+        <div style="font-size:.75rem;font-weight:800;color:${color};flex-shrink:0">${timeStr}</div>
+      </div>`;
+    });
   }
-  html += `</div>`;
+
+  html += `<div style="text-align:center;margin-top:.5rem">
+    <button onclick="closeAgenda();switchView('calendrier')" style="background:var(--accent-soft);border:1px solid var(--accent-border);color:var(--accent);padding:.3rem .9rem;border-radius:7px;font-size:.72rem;font-weight:700;cursor:pointer">Voir le calendrier →</button>
+  </div>`;
+
   wrap.innerHTML = html;
-}
-
-function miniCalNav(dir) {
-  miniCalMonth = new Date(miniCalMonth.getFullYear(), miniCalMonth.getMonth() + dir, 1);
-  renderMiniCalendar();
-}
-
-function miniCalClickDay(d) {
-  // Navigate to rappels view and jump to full calendar at that month
-  calendarMonth = new Date(miniCalMonth.getFullYear(), miniCalMonth.getMonth(), 1);
-  closeAgenda();
-  switchView('rappels');
-  setTimeout(() => {
-    renderCalendar();
-    document.getElementById('agenda-calendar-wrap')?.scrollIntoView({ behavior: 'smooth' });
-  }, 200);
 }
 
 function openAgenda() {
