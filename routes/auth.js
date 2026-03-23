@@ -17,6 +17,14 @@ const authLimiter = rateLimit({
   message: { error: 'Trop de tentatives. Réessayez dans 15 minutes.' },
 });
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Trop de tentatives de connexion. Réessayez dans 15 minutes.' },
+});
+
 // POST /api/register (public, rate-limited)
 router.post('/register', authLimiter, async (req, res) => {
   const { email, password, referral_code } = req.body;
@@ -78,7 +86,7 @@ router.post('/register', authLimiter, async (req, res) => {
 });
 
 // POST /api/login (public, rate-limited)
-router.post('/login', authLimiter, async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || typeof email !== 'string' || !password || typeof password !== 'string') {
