@@ -47,7 +47,7 @@ app.use(helmet({
 }));
 
 // ── CORS ──
-const corsOrigins = process.env.CORS_ORIGINS || '*';
+const corsOrigins = process.env.CORS_ORIGINS || (isProd ? 'https://empire-leads.fr' : '*');
 app.use(cors({
   origin: corsOrigins === '*' ? '*' : corsOrigins.split(',').map(s => s.trim()),
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
