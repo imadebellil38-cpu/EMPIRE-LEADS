@@ -3,148 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ProspectHunter — Admin</title>
+  <title>Empire Leads — Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --bg: #FAFAF9; --surface: #F3F4F6; --card: #FFFFFF;
-      --border: #E5E7EB; --border2: #D1D5DB;
-      --accent: #F97316; --accent-soft: rgba(249,115,22,.08); --accent-border: rgba(249,115,22,.3); --glow: rgba(249,115,22,.2);
-      --emerald: #16A34A; --emerald2: rgba(22,163,74,.08);
-      --purple: #7C3AED; --purple-bg: rgba(124,58,237,.08); --purple-bd: rgba(124,58,237,.2);
-      --amber: #D97706; --amber2: rgba(217,119,6,.08);
-      --text: #111827; --text2: #4B5563; --muted: #9CA3AF;
-      --red-tx: #DC2626;
-    }
-    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; -webkit-font-smoothing: antialiased; }
-
-    header {
-      position: sticky; top: 0; z-index: 100; height: 64px;
-      background: rgba(255,255,255,.95); backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-      padding: 0 2rem; display: flex; align-items: center; gap: 1rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,.06);
-    }
-    .logo-text { font-size: 1.15rem; font-weight: 800; color: var(--text); }
-    .logo-text span { color: var(--accent); }
-    .badge { font-size: .68rem; font-weight: 600; background: rgba(220,38,38,.08); color: var(--red-tx); border: 1px solid rgba(220,38,38,.2); padding: 3px 10px; border-radius: 999px; }
-    .header-right { margin-left: auto; display: flex; gap: 1rem; align-items: center; }
-    .header-right a { color: var(--accent); text-decoration: none; font-size: .85rem; font-weight: 600; }
-    .header-right a:hover { color: #EA580C; }
-
-    main { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
-
-    .stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 2rem; }
-    .stat {
-      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
-      padding: 1.25rem; position: relative; overflow: hidden;
-      transition: border-color .15s, box-shadow .15s;
-      box-shadow: 0 1px 3px rgba(0,0,0,.04);
-    }
-    .stat:hover { border-color: var(--accent-border); box-shadow: 0 4px 16px var(--glow); }
-    .stat::after { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 2px; }
-    .stat:nth-child(1)::after { background: var(--accent); }
-    .stat:nth-child(2)::after { background: var(--emerald); }
-    .stat:nth-child(3)::after { background: var(--purple); }
-    .stat:nth-child(4)::after { background: var(--amber); }
-    .stat:nth-child(5)::after { background: var(--emerald); }
-    .stat-n { font-size: 2rem; font-weight: 900; line-height: 1; margin-bottom: .3rem; }
-    .stat:nth-child(1) .stat-n { color: var(--accent); }
-    .stat:nth-child(2) .stat-n { color: var(--emerald); }
-    .stat:nth-child(3) .stat-n { color: var(--purple); }
-    .stat:nth-child(4) .stat-n { color: var(--amber); }
-    .stat:nth-child(5) .stat-n { color: var(--emerald); }
-    .stat-l { font-size: .75rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
-
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
-    .card-title { font-size: .85rem; font-weight: 700; color: var(--accent); padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); text-transform: uppercase; letter-spacing: .06em; display: flex; align-items: center; gap: .5rem; }
-
-    table { width: 100%; border-collapse: collapse; }
-    th { padding: .8rem 1rem; text-align: left; font-size: .7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; background: var(--surface); border-bottom: 1px solid var(--border); }
-    td { padding: .8rem 1rem; font-size: .85rem; border-bottom: 1px solid var(--border); color: var(--text); }
-    tr:last-child td { border-bottom: none; }
-    tbody tr:hover td { background: var(--accent-soft); }
-
-    .plan-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: .7rem; font-weight: 700; text-transform: uppercase; }
-    .plan-free     { background: var(--surface); color: var(--muted); border: 1px solid var(--border2); }
-    .plan-trial    { background: var(--amber2); color: var(--amber); border: 1px solid rgba(217,119,6,.2); }
-    .plan-starter  { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent-border); }
-    .plan-pro      { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent-border); }
-    .plan-business { background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple-bd); }
-    .plan-legend   { background: var(--amber2); color: var(--amber); border: 1px solid rgba(217,119,6,.2); }
-    .plan-enterprise { background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple-bd); }
-
-    .btn-sm {
-      padding: 5px 12px; border-radius: 7px; font-size: .75rem; font-weight: 700;
-      cursor: pointer; border: 1px solid; font-family: inherit; transition: all .15s;
-    }
-    .btn-cyan { background: var(--accent-soft); border-color: var(--accent-border); color: var(--accent); }
-    .btn-cyan:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
-    .btn-emerald { background: var(--emerald2); border-color: rgba(22,163,74,.2); color: var(--emerald); }
-    .btn-emerald:hover { border-color: var(--emerald); background: var(--emerald); color: #fff; }
-    .btn-amber { background: var(--amber2); border-color: rgba(217,119,6,.2); color: var(--amber); }
-    .btn-amber:hover { border-color: var(--amber); }
-
-    .credits-input { width: 60px; background: var(--surface); border: 1px solid var(--border2); border-radius: 6px; padding: 4px 8px; color: var(--text); font-size: .85rem; text-align: center; outline: none; }
-    .credits-input:focus { border-color: var(--accent); }
-
-    select.plan-select { background: var(--surface); border: 1px solid var(--border2); border-radius: 6px; padding: 4px 8px; color: var(--text); font-size: .8rem; outline: none; cursor: pointer; }
-
-    /* ── Subscriptions ── */
-    .subs-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: .9rem; margin-bottom: 2rem; }
-    .sub-card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
-      padding: 1.1rem; position: relative; overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0,0,0,.04);
-    }
-    .sub-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
-    .sub-free::before    { background: var(--muted); }
-    .sub-trial::before   { background: var(--amber); }
-    .sub-starter::before { background: var(--accent); }
-    .sub-pro::before     { background: var(--accent); }
-    .sub-business::before{ background: var(--purple); }
-    .sub-legend::before  { background: var(--amber); }
-    .sub-name { font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:.5rem; }
-    .sub-count { font-size:1.8rem; font-weight:900; line-height:1; }
-    .sub-free .sub-count    { color: var(--muted); }
-    .sub-trial .sub-count   { color: var(--amber); }
-    .sub-starter .sub-count { color: var(--accent); }
-    .sub-pro .sub-count     { color: var(--accent); }
-    .sub-business .sub-count{ color: var(--purple); }
-    .sub-legend .sub-count  { color: var(--amber); }
-    .sub-label { font-size:.72rem; color:var(--muted); margin-top:.25rem; }
-    .sub-revenue { font-size:.78rem; font-weight:700; color:var(--emerald); margin-top:.4rem; }
-
-    /* ── Charts ── */
-    .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
-    .chart-box {
-      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
-      padding: 1.25rem 1.5rem; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.04);
-    }
-    .chart-label { font-size: .8rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 1rem; }
-    .bar-chart { display: flex; align-items: flex-end; gap: 3px; height: 120px; }
-    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
-    .bar {
-      width: 100%; border-radius: 3px 3px 0 0; min-height: 2px;
-      transition: height .4s ease;
-    }
-    .bar-cyan { background: var(--accent); }
-    .bar-emerald { background: var(--emerald); }
-    .bar-date { font-size: .55rem; color: var(--muted); writing-mode: vertical-rl; transform: rotate(180deg); max-height: 40px; overflow: hidden; }
-
-    /* ── Top users ── */
-    .top-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
-
-    @media (max-width: 800px) {
-      .stats { grid-template-columns: repeat(2, 1fr); }
-      .charts-row, .top-row { grid-template-columns: 1fr; }
-    }
-  </style>
+  <link rel="stylesheet" href="/admin.css">
 </head>
 <body>
   <header>
-    <div class="logo-text">Prospect<span>Hunter</span></div>
+    <div class="logo-text">Empire<span>Leads</span></div>
     <span class="badge">ADMIN</span>
     <div class="header-right">
       <a href="/app">&#8592; Retour app</a>
@@ -152,25 +17,31 @@
   </header>
 
   <main>
-    <!-- KPIs -->
+    <!-- ── Dashboard Stats ── -->
     <div class="stats" id="stats">
-      <div class="stat"><div class="stat-n" id="s-users">-</div><div class="stat-l">Utilisateurs</div></div>
-      <div class="stat"><div class="stat-n" id="s-searches">-</div><div class="stat-l">Recherches</div></div>
-      <div class="stat"><div class="stat-n" id="s-prospects">-</div><div class="stat-l">Prospects</div></div>
-      <div class="stat"><div class="stat-n" id="s-pro">-</div><div class="stat-l">Abonnés Pro+</div></div>
-      <div class="stat"><div class="stat-n" id="s-mrr" style="color:var(--emerald)">-</div><div class="stat-l">MRR (EUR)</div></div>
-      <div class="stat"><div class="stat-n" id="s-logins" style="color:var(--amber)">-</div><div class="stat-l">Connexions aujourd'hui</div></div>
-    </div>
-
-    <!-- Abonnements & Crédits -->
-    <div class="card" style="margin-bottom:1.5rem">
-      <div class="card-title">💳 Abonnements & Crédits</div>
-      <div class="subs-grid" id="subs-grid" style="padding:1rem">
-        <!-- rempli par JS -->
+      <div class="stat">
+        <div class="stat-n" id="s-users">-</div>
+        <div class="stat-l">Utilisateurs</div>
+      </div>
+      <div class="stat">
+        <div class="stat-n" id="s-credits-used">-</div>
+        <div class="stat-l">Credits utilises</div>
+      </div>
+      <div class="stat">
+        <div class="stat-n" id="s-prospects">-</div>
+        <div class="stat-l">Prospects generes</div>
+      </div>
+      <div class="stat">
+        <div class="stat-n" id="s-searches">-</div>
+        <div class="stat-l">Recherches</div>
+      </div>
+      <div class="stat">
+        <div class="stat-n" id="s-mrr">-</div>
+        <div class="stat-l">MRR (EUR)</div>
       </div>
     </div>
 
-    <!-- Charts -->
+    <!-- ── Charts ── -->
     <div class="charts-row">
       <div class="chart-box">
         <div class="chart-label">Inscriptions / jour (30j)</div>
@@ -182,7 +53,106 @@
       </div>
     </div>
 
-    <!-- Top users -->
+    <!-- ── Create Account ── -->
+    <div class="card">
+      <div class="card-title">+ Creer un compte</div>
+      <div class="create-form" id="create-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email *</label>
+            <input type="email" id="new-email" placeholder="user@example.com">
+          </div>
+          <div class="form-group">
+            <label>Mot de passe *</label>
+            <input type="text" id="new-password" placeholder="Min 6 caracteres">
+          </div>
+          <div class="form-group">
+            <label>Nom</label>
+            <input type="text" id="new-display-name" placeholder="Nom d'affichage">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Plan</label>
+            <select id="new-plan">
+              <option value="free">Free (5 cr.)</option>
+              <option value="trial">Trial (20 cr.)</option>
+              <option value="starter">Starter (100 cr.)</option>
+              <option value="pro" selected>Pro (500 cr.)</option>
+              <option value="business">Business (2000 cr.)</option>
+              <option value="legend">Legend (3000 cr.)</option>
+              <option value="enterprise">Enterprise (500 cr.)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Credits</label>
+            <input type="number" id="new-credits" value="500" min="0">
+          </div>
+          <div class="form-group">
+            <label>Theme URL</label>
+            <input type="text" id="new-theme" placeholder="manga, naruto...">
+          </div>
+          <div class="form-group">
+            <label>Admin ?</label>
+            <select id="new-is-admin">
+              <option value="0">Non</option>
+              <option value="1">Oui</option>
+            </select>
+          </div>
+          <div class="form-group" style="align-self:flex-end">
+            <button class="btn-create" onclick="createUser()">Creer le compte</button>
+          </div>
+        </div>
+        <div id="create-msg" class="create-msg"></div>
+      </div>
+    </div>
+
+    <!-- ── User Management Table ── -->
+    <div class="card">
+      <div class="card-title">Gestion des utilisateurs</div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Nom</th>
+              <th>Credits</th>
+              <th>Plan</th>
+              <th>Theme</th>
+              <th>Dernier login</th>
+              <th>Inscrit le</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Live Activity ── -->
+    <div class="live-row">
+      <div class="card">
+        <div class="card-title"><span class="live-dot"></span> Recherches recentes</div>
+        <table>
+          <thead>
+            <tr><th>Email</th><th>Niche</th><th>Pays</th><th>Resultats</th><th>Date</th></tr>
+          </thead>
+          <tbody id="searches-body"></tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="live-dot"></span> Connexions recentes</div>
+        <table>
+          <thead>
+            <tr><th>Email</th><th>Plan</th><th>IP</th><th>Date</th></tr>
+          </thead>
+          <tbody id="connections-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Top Users ── -->
     <div class="top-row">
       <div class="card">
         <div class="card-title">Top 10 — Par recherches</div>
@@ -199,235 +169,9 @@
         </table>
       </div>
     </div>
-
-    <!-- Users table -->
-    <div class="card">
-      <div class="card-title">Utilisateurs</div>
-      <table>
-        <thead>
-          <tr><th>#</th><th>Email</th><th>Plan</th><th>Credits</th><th>Recherches</th><th>Prospects</th><th>Inscrit le</th><th>Actions</th></tr>
-        </thead>
-        <tbody id="users-body"></tbody>
-      </table>
-    </div>
-
-    <!-- Connexions récentes -->
-    <div class="card">
-      <div class="card-title">🔐 Connexions récentes</div>
-      <table>
-        <thead>
-          <tr><th>Email</th><th>Plan</th><th>IP</th><th>Date</th></tr>
-        </thead>
-        <tbody id="connections-body"></tbody>
-      </table>
-    </div>
-
-    <!-- Recent searches -->
-    <div class="card">
-      <div class="card-title">Recherches recentes</div>
-      <table>
-        <thead>
-          <tr><th>Email</th><th>Niche</th><th>Pays</th><th>Resultats</th><th>Date</th></tr>
-        </thead>
-        <tbody id="searches-body"></tbody>
-      </table>
-    </div>
   </main>
 
-<script>
-const token = localStorage.getItem('ph_token');
-if (!token) window.location.href = '/login';
-
-const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
-
-async function loadAll() {
-  try {
-    const [statsRes, usersRes, searchesRes, revenueRes, dailyRes, topRes, connRes] = await Promise.all([
-      fetch('/api/admin/stats', { headers }),
-      fetch('/api/admin/users', { headers }),
-      fetch('/api/admin/searches', { headers }),
-      fetch('/api/admin/stats/revenue', { headers }),
-      fetch('/api/admin/stats/daily', { headers }),
-      fetch('/api/admin/stats/top-users', { headers }),
-      fetch('/api/admin/connections', { headers }),
-    ]);
-
-    if (statsRes.status === 403 || usersRes.status === 403 || connRes.status === 403) {
-      alert('Accès refusé. Vous devez être administrateur.');
-      window.location.href = '/';
-      return;
-    }
-
-    const stats = await statsRes.json();
-    const users = await usersRes.json();
-    const searches = await searchesRes.json();
-    const revenue = await revenueRes.json();
-    const daily = await dailyRes.json();
-    const top = await topRes.json();
-    const connections = await connRes.json();
-
-    // KPIs
-    document.getElementById('s-users').textContent = stats.totalUsers;
-    document.getElementById('s-searches').textContent = stats.totalSearches;
-    document.getElementById('s-prospects').textContent = stats.totalProspects;
-    const proPlus = (stats.planCounts || []).filter(p => p.plan !== 'free').reduce((a, b) => a + b.c, 0);
-    document.getElementById('s-pro').textContent = proPlus;
-    document.getElementById('s-mrr').textContent = revenue.mrr + ' €';
-
-    // Subscriptions grid
-    const PLAN_INFO = {
-      free:     { label:'Gratuit',   credits:5,    price:0,   cls:'sub-free' },
-      trial:    { label:'Trial',     credits:20,   price:0,   cls:'sub-trial' },
-      starter:  { label:'Starter',   credits:100,  price:40,  cls:'sub-starter' },
-      pro:      { label:'Pro',       credits:500,  price:100, cls:'sub-pro' },
-      business: { label:'Business',  credits:2000, price:300, cls:'sub-business' },
-      legend:   { label:'Légende',   credits:3000, price:445, cls:'sub-legend' },
-    };
-    const planMap = {};
-    (stats.planCounts || []).forEach(p => { planMap[p.plan] = p.c; });
-    const totalCreditsPerPlan = {};
-    users.forEach(u => { totalCreditsPerPlan[u.plan] = (totalCreditsPerPlan[u.plan] || 0) + u.credits; });
-
-    document.getElementById('subs-grid').innerHTML = Object.entries(PLAN_INFO).map(([key, info]) => {
-      const count = planMap[key] || 0;
-      const credits = totalCreditsPerPlan[key] || 0;
-      const rev = info.price > 0 ? `+${(info.price * count).toLocaleString('fr-FR')} €` : 'Gratuit';
-      return `<div class="sub-card ${info.cls}">
-        <div class="sub-name">${info.label}</div>
-        <div class="sub-count">${count}</div>
-        <div class="sub-label">utilisateur${count>1?'s':''}</div>
-        <div class="sub-label">${info.credits} cr./plan · ${credits} cr. total</div>
-        <div class="sub-revenue">${rev}</div>
-      </div>`;
-    }).join('');
-
-    const todayStr = new Date().toISOString().slice(0, 10);
-    const loginsToday = connections.filter(c => c.created_at.slice(0,10) === todayStr).length;
-    document.getElementById('s-logins').textContent = loginsToday;
-
-    // Connections table
-    document.getElementById('connections-body').innerHTML = connections.slice(0,50).map(c => {
-      let ip = '—';
-      try { ip = JSON.parse(c.details).ip || '—'; } catch(_) {}
-      return `<tr>
-        <td style="font-weight:600">${c.email}</td>
-        <td><span class="plan-badge plan-${c.plan}">${c.plan}</span></td>
-        <td style="color:var(--muted);font-size:.8rem">${ip}</td>
-        <td style="color:var(--muted);font-size:.8rem">${new Date(c.created_at).toLocaleString('fr-FR')}</td>
-      </tr>`;
-    }).join('') || '<tr><td colspan="4" style="color:var(--muted);text-align:center">Aucune connexion enregistrée.</td></tr>';
-
-    // Charts
-    renderChart('chart-registrations', daily.registrations, 'bar-cyan');
-    renderChart('chart-searches', daily.searches, 'bar-emerald');
-
-    // Top users
-    renderTopTable('top-searches', top.bySearches);
-    renderTopTable('top-prospects', top.byProspects);
-
-    // Users table
-    document.getElementById('users-body').innerHTML = users.map(u => `
-      <tr>
-        <td style="color:var(--muted)">${u.id}</td>
-        <td style="font-weight:600">${u.email}</td>
-        <td>
-          <select class="plan-select" onchange="changePlan(${u.id}, this.value)">
-            <option value="free"     ${u.plan==='free'?'selected':''}>Free (5 cr.)</option>
-            <option value="trial"    ${u.plan==='trial'?'selected':''}>Trial (20 cr.)</option>
-            <option value="starter"  ${u.plan==='starter'?'selected':''}>Starter — 40€</option>
-            <option value="pro"      ${u.plan==='pro'?'selected':''}>Pro — 100€</option>
-            <option value="business" ${u.plan==='business'?'selected':''}>Business — 300€</option>
-            <option value="legend"   ${u.plan==='legend'?'selected':''}>Legend — 445€</option>
-          </select>
-        </td>
-        <td>
-          <input class="credits-input" type="number" value="${u.credits}" id="credits-${u.id}" min="0">
-          <button class="btn-sm btn-cyan" onclick="setCredits(${u.id})">OK</button>
-        </td>
-        <td>${u.total_searches}</td>
-        <td>${u.total_prospects}</td>
-        <td style="color:var(--muted);font-size:.8rem">${new Date(u.created_at).toLocaleDateString('fr-FR')}</td>
-        <td>
-          <button class="btn-sm ${u.is_admin ? 'btn-amber' : 'btn-emerald'}" onclick="toggleAdmin(${u.id}, ${u.is_admin ? 0 : 1})">
-            ${u.is_admin ? 'Retirer admin' : 'Rendre admin'}
-          </button>
-        </td>
-      </tr>
-    `).join('');
-
-    // Searches table
-    document.getElementById('searches-body').innerHTML = searches.slice(0, 50).map(s => `
-      <tr>
-        <td style="font-weight:600">${s.email}</td>
-        <td>${s.niche}</td>
-        <td>${(s.country||'').toUpperCase()}</td>
-        <td>${s.results_count}</td>
-        <td style="color:var(--muted);font-size:.8rem">${new Date(s.created_at).toLocaleString('fr-FR')}</td>
-      </tr>
-    `).join('');
-
-  } catch (err) {
-    console.error(err);
-    alert('Erreur lors du chargement.');
-  }
-}
-
-function renderChart(containerId, data, barClass) {
-  const container = document.getElementById(containerId);
-  if (!data || data.length === 0) {
-    container.innerHTML = '<span style="color:var(--muted);font-size:.8rem">Pas de données</span>';
-    return;
-  }
-  const max = Math.max(...data.map(d => d.count), 1);
-  container.innerHTML = data.map(d => {
-    const pct = (d.count / max) * 100;
-    const day = d.day.slice(5); // MM-DD
-    return `<div class="bar-col">
-      <div class="bar ${barClass}" style="height:${Math.max(pct, 2)}%" title="${d.day}: ${d.count}"></div>
-      <span class="bar-date">${day}</span>
-    </div>`;
-  }).join('');
-}
-
-function renderTopTable(containerId, data) {
-  const container = document.getElementById(containerId);
-  if (!data || data.length === 0) {
-    container.innerHTML = '<tr><td colspan="3" style="color:var(--muted);text-align:center">Aucune donnée</td></tr>';
-    return;
-  }
-  container.innerHTML = data.map(u => `
-    <tr>
-      <td style="font-weight:600">${u.email}</td>
-      <td><span class="plan-badge plan-${u.plan}">${u.plan}</span></td>
-      <td style="font-weight:700">${u.total}</td>
-    </tr>
-  `).join('');
-}
-
-async function setCredits(userId) {
-  const val = parseInt(document.getElementById('credits-' + userId).value);
-  if (isNaN(val) || val < 0) return;
-  await fetch('/api/admin/users/' + userId + '/credits', {
-    method: 'PUT', headers, body: JSON.stringify({ credits: val }),
-  });
-  loadAll();
-}
-
-async function changePlan(userId, plan) {
-  await fetch('/api/admin/users/' + userId + '/plan', {
-    method: 'PUT', headers, body: JSON.stringify({ plan }),
-  });
-  loadAll();
-}
-
-async function toggleAdmin(userId, isAdmin) {
-  await fetch('/api/admin/users/' + userId + '/admin', {
-    method: 'PUT', headers, body: JSON.stringify({ is_admin: isAdmin }),
-  });
-  loadAll();
-}
-
-loadAll();
-</script>
+  <script src="/sanitize.js"></script>
+  <script src="/admin.js"></script>
 </body>
 </html>

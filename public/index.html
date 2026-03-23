@@ -2,13 +2,31 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0f0f1a">
-  <title>ProspectHunter — Pipeline CRM</title>
+  <title>Empire Leads — Pipeline CRM de Prospection B2B</title>
+  <meta name="description" content="Gerez votre pipeline de prospection B2B avec Empire Leads. CRM 6 etapes, pitch IA, rappels et agenda pour closer vos leads B2B efficacement.">
+  <meta name="keywords" content="Empire Leads, CRM prospection, pipeline CRM, prospection B2B, leads B2B, pitch IA, cold call CRM">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="https://empireleads.fr/app">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Empire Leads — Pipeline CRM de Prospection B2B">
+  <meta property="og:description" content="Gerez votre pipeline de prospection B2B avec Empire Leads. CRM 6 etapes, pitch IA, rappels et agenda.">
+  <meta property="og:url" content="https://empireleads.fr/app">
+  <meta property="og:site_name" content="Empire Leads">
+  <meta property="og:image" content="https://empireleads.fr/og-image.png">
+  <meta property="og:locale" content="fr_FR">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Empire Leads — Pipeline CRM de Prospection B2B">
+  <meta name="twitter:description" content="CRM pipeline 6 etapes pour la prospection B2B. Pitch IA, rappels, agenda.">
+  <meta name="twitter:image" content="https://empireleads.fr/og-image.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/shared.css?v=1">
   <link rel="stylesheet" href="/style.css?v=53">
@@ -18,8 +36,7 @@
 <!-- ── HEADER ── -->
 <header>
   <div class="logo">
-    <span class="logo-icon">🎯</span>
-    <span class="logo-text">Prospect<em>Hunter</em></span>
+    <span class="logo-text">EMPIRE<em>LEADS</em></span>
   </div>
 
   <nav class="app-nav">
@@ -48,17 +65,29 @@
 
   <div class="header-right">
     <button class="btn-theme-toggle" id="btn-theme-toggle" onclick="toggleTheme()" title="Mode jour/nuit">🌙</button>
+    <!-- Bouton thème personnalisé — desktop only -->
+    <a id="btn-theme-perso" href="#" style="display:none"
+       class="btn-theme-perso hdr-desktop-only">🎨 Mon thème</a>
     <div class="credits-badge" id="credits-badge">
       <span>💳</span>
       <span id="hstat-total">0</span>
-      <span>crédits</span>
+      <span class="credits-label">crédits</span>
     </div>
-    <a class="plan-badge-link" id="plan-badge-link" href="/pricing" title="Changer d'abonnement">
+    <a class="plan-badge-link hdr-desktop-only" id="plan-badge-link" href="/pricing" title="Changer d'abonnement">
       <span id="plan-badge-label">free</span>
       <span class="plan-badge-upgrade">Abonnement ↗</span>
     </a>
-    <span class="user-email" id="user-email-display"></span>
-    <button class="hdr-btn hdr-btn-logout" onclick="logout()">Déconnexion</button>
+    <span class="user-email hdr-desktop-only" id="user-email-display"></span>
+    <button class="hdr-btn hdr-btn-logout hdr-desktop-only" onclick="logout()">Déconnexion</button>
+    <!-- Mobile : menu ⋯ -->
+    <div class="hdr-menu-wrap hdr-mobile-only">
+      <button class="hdr-menu-btn" onclick="toggleHdrMenu(this)">⋯</button>
+      <div class="hdr-dropdown" id="hdr-dropdown" style="display:none">
+        <a href="/pricing" class="hdr-drop-item">📦 Abonnement</a>
+        <a id="btn-theme-perso-mobile" href="#" class="hdr-drop-item" style="display:none">🎨 Mon thème perso</a>
+        <button class="hdr-drop-item" onclick="logout()">🚪 Déconnexion</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -330,10 +359,10 @@
 <!-- ══════════════════════════════════════
      VIEW : CALENDRIER
 ══════════════════════════════════════ -->
-<main id="view-calendrier" style="display:none;background:#f1f5f9;min-height:100vh">
-  <div style="background:#fff;border-radius:16px;padding:1.5rem;box-shadow:0 1px 8px rgba(0,0,0,.07)">
+<main id="view-calendrier" style="display:none" class="view-calendrier-wrap">
+  <div class="wcal-container">
     <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
-      <h1 style="font-size:1.3rem;font-weight:800;color:#111827;margin:0">📅 Calendrier</h1>
+      <h1 class="wcal-page-title">📅 Calendrier</h1>
     </div>
     <div id="agenda-calendar"></div>
   </div>
@@ -605,6 +634,24 @@
           <button class="attempt-result-chip" data-val="negative"   onclick="selectAttemptChip('result',this)">❌ Négatif</button>
         </div>
         <input class="crm-inp" id="attempt-note" type="text" placeholder="Note optionnelle…" style="margin-top:.5rem" />
+
+        <!-- Voice recorder -->
+        <div class="voice-recorder" id="voice-recorder">
+          <button class="voice-rec-btn" id="voice-rec-btn" onclick="toggleVoiceRec()">
+            <span class="voice-rec-icon" id="voice-rec-icon">🎙️</span>
+            <span id="voice-rec-label">Note vocale</span>
+          </button>
+          <div class="voice-rec-active" id="voice-rec-active" style="display:none">
+            <div class="voice-rec-pulse" id="voice-rec-pulse"></div>
+            <span class="voice-rec-timer" id="voice-rec-timer">0:00</span>
+            <button class="voice-rec-stop" onclick="stopVoiceRec()">⏹️ Stop</button>
+          </div>
+          <div class="voice-rec-preview" id="voice-rec-preview" style="display:none">
+            <audio id="voice-rec-audio" controls style="width:100%;height:36px"></audio>
+            <button class="voice-rec-delete" onclick="deleteVoiceRec()">🗑️</button>
+          </div>
+        </div>
+
         <button class="btn-primary attempt-log-btn" onclick="logAttempt()" style="margin-top:.5rem;width:100%">✅ Logger</button>
       </div>
 
@@ -793,15 +840,26 @@
 </nav>
 
 <!-- ── APP JS ── -->
+<script src="/sanitize.js"></script>
 <script src="/app.js?v=52"></script>
 <script>
 // ── Theme toggle ──
 (function() {
   const saved = localStorage.getItem('ph_theme');
-  if (saved === 'dark') { document.documentElement.setAttribute('data-theme', 'dark'); }
-  else { document.documentElement.removeAttribute('data-theme'); }
+  if (saved === 'light') { document.documentElement.removeAttribute('data-theme'); }
+  else { document.documentElement.setAttribute('data-theme', 'dark'); }
   updateThemeBtn();
 })();
+
+function toggleHdrMenu(btn) {
+  const dd = document.getElementById('hdr-dropdown');
+  const open = dd.style.display !== 'none';
+  dd.style.display = open ? 'none' : 'block';
+  if (!open) {
+    const close = (e) => { if (!btn.closest('.hdr-menu-wrap').contains(e.target)) { dd.style.display='none'; document.removeEventListener('click', close); } };
+    setTimeout(() => document.addEventListener('click', close), 10);
+  }
+}
 
 function toggleTheme() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';

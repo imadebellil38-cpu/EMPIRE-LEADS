@@ -101,7 +101,7 @@ function showToast(msg, type = 'info', duration = 3500) {
   const icons = { success: '✓', error: '✗', info: 'ℹ', warn: '⚠' };
   const t = document.createElement('div');
   t.className = `toast toast-${type === 'warn' ? 'info' : type}`;
-  t.innerHTML = `<span class="toast-icon">${icons[type] || icons.info}</span><span>${msg}</span>`;
+  t.innerHTML = `<span class="toast-icon">${icons[type] || icons.info}</span><span>${esc(msg)}</span>`;
   c.appendChild(t);
   setTimeout(() => {
     t.classList.add('out');
@@ -153,7 +153,7 @@ async function init() {
     if (meData && meData.user) {
       const u = meData.user;
       const emailEl = document.getElementById('user-email-display');
-      if (emailEl) emailEl.textContent = u.email;
+      if (emailEl) emailEl.textContent = u.display_name || u.email;
       userCredits = u.credits || 0;
       updateProspectsSlider();
       // Update plan badge
@@ -161,6 +161,16 @@ async function init() {
       const planCredits = document.getElementById('plan-badge-credits');
       if (planLabel) planLabel.textContent = u.plan || 'free';
       if (planCredits) planCredits.textContent = (u.credits || 0) + ' cr';
+      // Bouton thème personnalisé — toggle CSS theme
+      if (u.theme_url) {
+        window._userTheme = u.theme_url;
+        const btn = document.getElementById('btn-theme-perso');
+        const btnM = document.getElementById('btn-theme-perso-mobile');
+        if (btn) { btn.classList.add('theme-btn-visible'); btn.onclick = (e) => { e.preventDefault(); toggleCustomTheme(); }; }
+        if (btnM) { btnM.style.display = 'block'; btnM.onclick = (e) => { e.preventDefault(); toggleCustomTheme(); }; }
+        // Restore if previously active
+        if (localStorage.getItem('custom_theme_active') === '1') applyCustomTheme(u.theme_url);
+      }
     }
   } catch (e) {}
 
@@ -534,7 +544,7 @@ function renderTable(prospects) {
       : '';
 
     const callLink = p.phone
-      ? `<a class="btn-call-big" href="tel:${escAttr(p.phone)}">📞 Appeler</a>`
+      ? `<button class="btn-call-big" onclick="callProspect(${p.id})">📞 Appeler</button>`
       : `<span class="btn-call-big btn-call-disabled">Pas de tél.</span>`;
 
     const dateChip = buildDateChip(p);
@@ -566,7 +576,7 @@ function renderTable(prospects) {
       <td class="td-phone">
         <div class="phone-cell">
           ${p.phone
-            ? `<a class="phone-call-link" href="tel:${escAttr(p.phone)}" title="Appuyer pour appeler"><span>📞 ${esc(p.phone)}</span></a>`
+            ? `<button class="phone-call-link" onclick="callProspect(${p.id})" title="Appuyer pour appeler"><span>📞 ${esc(p.phone)}</span></button>`
             : `<span class="phone-text">—</span>`
           }
           ${phoneCopy}
@@ -750,7 +760,7 @@ function renderCards(prospects) {
     const mapsUrl   = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
 
     const callBtnMobile = p.phone
-      ? `<a class="card-call-btn-mobile" href="tel:${escAttr(p.phone)}">📞 Appeler</a>`
+      ? `<button class="card-call-btn-mobile" onclick="callProspect(${p.id})">📞 Appeler</button>`
       : '';
 
     const swipeActions = buildSwipeActions(p);
@@ -761,18 +771,22 @@ function renderCards(prospects) {
       <div class="card-swipe-actions">${swipeActions}</div>
       <div class="card-inner">
         ${stageBadge}
+        <div class="stage-journey" id="journey-${p.id}"></div>
         <div class="card-name">${esc(p.name || '—')}</div>
         ${address ? `<div class="card-address">${esc(address)}</div>` : ''}
         <div class="card-meta-line">${metaLine}${dateChip}</div>
         <div class="card-links-row">
           <button class="card-link-btn" onclick="openDetail(${p.id})">📋 Fiche</button>
-          <a class="card-link-btn" href="${escAttr(mapsUrl)}" target="_blank" rel="noopener">📍 Google Maps</a>
+          <a class="card-link-btn" href="${escAttr(mapsUrl)}" target="_blank" rel="noopener">📍 Maps</a>
+          <button class="card-link-btn" onclick="openDetail(${p.id});document.querySelector('[data-tab=contact]')?.click()">📞 Historique</button>
         </div>
         <div class="card-actions">${actions}</div>
         ${callBtnMobile}
         ${p.notes ? `<div class="card-notes-row"><button class="notes-peek-btn" onclick="toggleNotesPreview('c${p.id}', this)">📝 Notes</button><div class="notes-preview" id="notes-preview-c${p.id}" style="display:none">${esc(p.notes)}</div></div>` : ''}
       </div>
     `;
+    // Load stage journey
+    _loadStageJourney(p.id);
     wrap.appendChild(card);
     addSwipeHandler(card);
   });
@@ -791,6 +805,16 @@ let _stageTargetStage  = null;
 
 let _dealTargetId = null;
 let _dealType = ''; let _dealRec = '';
+
+function _restoreCard(id) {
+  const cardEl = document.getElementById('pcard-' + id);
+  if (cardEl) {
+    cardEl.style.opacity = '';
+    cardEl.style.transform = '';
+    cardEl.style.pointerEvents = '';
+    cardEl.style.transition = '';
+  }
+}
 
 function moveStage(id, stage) {
   // Fade-out immédiat de la carte pour éviter l'effet "bouton collé" iOS
@@ -847,6 +871,7 @@ function setDateShortcut(daysFromNow) {
 
 function closeStageModal() {
   document.getElementById('stage-modal-overlay').style.display = 'none';
+  if (_stageTargetId) _restoreCard(_stageTargetId);
   _stageTargetId = null; _stageTargetStage = null;
 }
 
@@ -894,6 +919,7 @@ function onObjInput(input) {
 
 function closeObjectionModal() {
   document.getElementById('objection-overlay').style.display = 'none';
+  if (_objectionTargetId) _restoreCard(_objectionTargetId);
   _objectionTargetId = null;
 }
 
@@ -964,6 +990,7 @@ function selectDealChip(group, btn, val) {
 }
 function closeDealModal() {
   document.getElementById('deal-modal-overlay').style.display = 'none';
+  if (_dealTargetId) _restoreCard(_dealTargetId);
   _dealTargetId = null;
 }
 function confirmDeal() {
@@ -986,17 +1013,221 @@ function selectAttemptChip(group, btn) {
   else _attemptResult = btn.dataset.val;
 }
 
+// ── Voice recorder state ──
+let _voiceMediaRecorder = null;
+let _voiceChunks = [];
+let _voiceBlob = null;
+let _voiceBase64 = '';
+let _voiceDuration = 0;
+let _voiceTimerInterval = null;
+let _voiceStartTime = 0;
+// Per-prospect voice storage (survives navigation between prospects)
+const _voiceStore = {}; // { prospectId: { blob, base64, duration } }
+
+// ── Call recorder state ──
+let _callRec = { active: false, prospectId: null, stream: null, recorder: null, chunks: [], startTime: 0, timerInterval: null };
+
+async function toggleVoiceRec() {
+  if (_voiceMediaRecorder && _voiceMediaRecorder.state === 'recording') {
+    stopVoiceRec(); return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    _voiceChunks = [];
+    _voiceMediaRecorder = new MediaRecorder(stream, { mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm' });
+    _voiceMediaRecorder.ondataavailable = e => { if (e.data.size > 0) _voiceChunks.push(e.data); };
+    _voiceMediaRecorder.onstop = () => {
+      stream.getTracks().forEach(t => t.stop());
+      _voiceBlob = new Blob(_voiceChunks, { type: 'audio/webm' });
+      _voiceDuration = Math.round((Date.now() - _voiceStartTime) / 1000);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        _voiceBase64 = reader.result;
+        const audioEl = document.getElementById('voice-rec-audio');
+        audioEl.src = URL.createObjectURL(_voiceBlob);
+        document.getElementById('voice-rec-preview').style.display = 'flex';
+      };
+      reader.readAsDataURL(_voiceBlob);
+    };
+    _voiceMediaRecorder.start(250);
+    _voiceStartTime = Date.now();
+    document.getElementById('voice-rec-btn').style.display = 'none';
+    document.getElementById('voice-rec-active').style.display = 'flex';
+    _voiceTimerInterval = setInterval(() => {
+      const secs = Math.round((Date.now() - _voiceStartTime) / 1000);
+      const m = Math.floor(secs / 60), s = secs % 60;
+      document.getElementById('voice-rec-timer').textContent = `${m}:${String(s).padStart(2,'0')}`;
+      if (secs >= 120) stopVoiceRec(); // Max 2 min
+    }, 500);
+  } catch (err) {
+    showToast('Micro non disponible — autorise l\'accès', 'error');
+  }
+}
+
+function stopVoiceRec() {
+  if (_voiceMediaRecorder && _voiceMediaRecorder.state === 'recording') _voiceMediaRecorder.stop();
+  clearInterval(_voiceTimerInterval);
+  document.getElementById('voice-rec-active').style.display = 'none';
+  document.getElementById('voice-rec-btn').style.display = 'flex';
+}
+
+function deleteVoiceRec() {
+  // Also remove from per-prospect store
+  if (currentProspect && _voiceStore[currentProspect.id]) delete _voiceStore[currentProspect.id];
+  _voiceBlob = null; _voiceBase64 = ''; _voiceDuration = 0;
+  const preview = document.getElementById('voice-rec-preview');
+  if (preview) preview.style.display = 'none';
+  const audio = document.getElementById('voice-rec-audio');
+  if (audio) audio.src = '';
+}
+
+function _saveVoiceToStore() {
+  if (currentProspect && _voiceBase64) {
+    _voiceStore[currentProspect.id] = { blob: _voiceBlob, base64: _voiceBase64, duration: _voiceDuration };
+  }
+}
+
+function _restoreVoiceFromStore(prospectId) {
+  _voiceBlob = null; _voiceBase64 = ''; _voiceDuration = 0;
+  const preview = document.getElementById('voice-rec-preview');
+  const audio = document.getElementById('voice-rec-audio');
+  if (_voiceStore[prospectId]) {
+    const s = _voiceStore[prospectId];
+    _voiceBlob = s.blob; _voiceBase64 = s.base64; _voiceDuration = s.duration;
+    if (audio) audio.src = s.blob ? URL.createObjectURL(s.blob) : '';
+    if (preview) preview.style.display = 'flex';
+  } else {
+    if (preview) preview.style.display = 'none';
+    if (audio) audio.src = '';
+  }
+}
+
+/* ─────────────────────────────────────────
+   CALL RECORDER — record call via speakerphone
+───────────────────────────────────────── */
+async function callProspect(id) {
+  const p = allProspects.find(x => x.id === id);
+  if (!p || !p.phone) return;
+
+  // Store which prospect we're calling so we can open their CRM after
+  _callRec.prospectId = id;
+
+  // Dial synchronously (works on iOS)
+  _dialSync(p.phone);
+
+  // Listen for when user returns from the phone app
+  _callRec._returnHandler = function() {
+    if (document.visibilityState === 'visible') {
+      document.removeEventListener('visibilitychange', _callRec._returnHandler);
+      // Auto-open this prospect's CRM tab with voice recorder ready
+      setTimeout(() => {
+        openDetail(id);
+        switchModalTab('crm');
+        showToast('📞 Appel terminé — enregistre une note vocale', 'info');
+      }, 300);
+    }
+  };
+  document.addEventListener('visibilitychange', _callRec._returnHandler);
+}
+
+// Synchronous tel: navigation via hidden anchor (preserves iOS user gesture context)
+function _dialSync(phone) {
+  const a = document.createElement('a');
+  a.href = `tel:${phone}`;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+function _onCallVisibilityChange() {
+  if (document.visibilityState === 'visible' && _callRec.active) {
+    // User returned to the app — show a toast reminder but DON'T auto-stop
+    // The user must click the Stop button manually when the call is truly over
+    const secs = Math.round((Date.now() - _callRec.startTime) / 1000);
+    if (secs < 3) return; // Ignore quick bounces (iOS dialer preview)
+    showToast('📞 Appel en cours — appuie sur Stop quand tu raccroches', 'info');
+  }
+}
+
+function _stopCallRec() {
+  if (!_callRec.active) return;
+  clearInterval(_callRec.timerInterval);
+  try { if (_callRec.recorder && _callRec.recorder.state === 'recording') _callRec.recorder.stop(); } catch (e) {}
+  try { _callRec.stream.getTracks().forEach(t => t.stop()); } catch (e) {}
+  _hideCallRecIndicator();
+}
+
+function stopCallRecEarly() {
+  document.removeEventListener('visibilitychange', _onCallVisibilityChange);
+  _stopCallRec();
+}
+
+function _onCallRecordStop() {
+  const { chunks, startTime, prospectId } = _callRec;
+  _callRec.active = false;
+
+  if (!chunks.length) return;
+
+  const blob = new Blob(chunks, { type: 'audio/webm' });
+  const duration = Math.round((Date.now() - startTime) / 1000);
+
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    // Pre-load into voice recorder state so logAttempt() picks it up
+    _voiceBase64 = reader.result;
+    _voiceDuration = duration;
+    _voiceBlob = blob;
+
+    // Open the prospect's CRM tab with audio pre-loaded
+    openDetail(prospectId);
+    setTimeout(() => {
+      switchModalTab('crm');
+      const audioEl = document.getElementById('voice-rec-audio');
+      if (audioEl) {
+        audioEl.src = URL.createObjectURL(blob);
+        const preview = document.getElementById('voice-rec-preview');
+        if (preview) preview.style.display = 'flex';
+      }
+      const m = Math.floor(duration / 60), s = duration % 60;
+      showToast(`📞 Appel enregistré (${m}:${String(s).padStart(2, '0')}) — loggue le contact`, 'success');
+    }, 150);
+  };
+  reader.readAsDataURL(blob);
+}
+
+function _showCallRecIndicator(name) {
+  let el = document.getElementById('call-rec-indicator');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'call-rec-indicator';
+    document.body.appendChild(el);
+  }
+  el.innerHTML = `
+    <span class="call-rec-dot"></span>
+    <span class="call-rec-info">🎙️ Enregistrement · <b>${esc(name)}</b> · <span id="call-rec-timer">0:00</span></span>
+    <button class="call-rec-stop-btn" onclick="stopCallRecEarly()">⏹️ Stop</button>
+  `;
+  el.style.display = 'flex';
+}
+
+function _hideCallRecIndicator() {
+  const el = document.getElementById('call-rec-indicator');
+  if (el) el.style.display = 'none';
+}
+
 async function logAttempt() {
   if (!currentProspect) return;
   if (!_attemptType)   return showToast('Choisis un type de contact', 'error');
   if (!_attemptResult) return showToast('Choisis un résultat', 'error');
   const note = document.getElementById('attempt-note').value.trim();
-  const res = await apiPost(`/api/prospects/${currentProspect.id}/attempts`, {
-    attempt_type: _attemptType, result: _attemptResult, note
-  });
+  const body = { attempt_type: _attemptType, result: _attemptResult, note };
+  if (_voiceBase64) { body.audio_data = _voiceBase64; body.audio_duration = _voiceDuration; }
+  const res = await apiPost(`/api/prospects/${currentProspect.id}/attempts`, body);
   if (!res || res.error) return showToast(res?.error || 'Erreur', 'error');
   const lastResult = _attemptResult;
   document.getElementById('attempt-note').value = '';
+  deleteVoiceRec();
   _attemptType = ''; _attemptResult = '';
   document.querySelectorAll('.attempt-type-chip,.attempt-result-chip').forEach(c => c.classList.remove('chip-selected'));
   showToast('Contact loggué ✅', 'success');
@@ -1022,15 +1253,58 @@ async function loadAttempts(prospectId) {
   if (!attempts || !attempts.length) {
     el.innerHTML = '<div class="activity-empty">Aucun contact loggué.</div>'; return;
   }
-  el.innerHTML = attempts.map(a => {
+  const callCount = attempts.filter(a => a.attempt_type === 'call').length;
+  const totalDuration = attempts.reduce((sum, a) => sum + (a.audio_duration || 0), 0);
+  const totalMin = Math.floor(totalDuration / 60), totalSec = totalDuration % 60;
+
+  let headerHtml = `<div class="attempt-stats">
+    <span>📊 ${attempts.length} contact${attempts.length > 1 ? 's' : ''}</span>
+    ${callCount ? `<span>📞 ${callCount} appel${callCount > 1 ? 's' : ''}</span>` : ''}
+    ${totalDuration ? `<span>⏱️ ${totalMin}:${String(totalSec).padStart(2,'0')} total</span>` : ''}
+  </div>`;
+
+  el.innerHTML = headerHtml + attempts.map(a => {
     const d = new Date(a.created_at);
     const when = d.toLocaleDateString('fr-FR', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+    const durLabel = a.audio_duration ? ` · ${Math.floor(a.audio_duration/60)}:${String(a.audio_duration%60).padStart(2,'0')}` : '';
+    const audioHtml = a.audio_data ? `<div class="attempt-audio"><audio src="${a.audio_data}" controls preload="none" style="width:100%;height:32px"></audio><span class="attempt-audio-dur">${a.audio_duration}s</span></div>` : '';
     return `<div class="attempt-row">
       <span class="attempt-icon">${TYPE_ICON[a.attempt_type] || '📞'}</span>
-      <span class="attempt-info"><strong>${RESULT_LABEL[a.result] || a.result}</strong>${a.note ? ` — <em>${esc(a.note)}</em>` : ''}</span>
+      <span class="attempt-info"><strong>${RESULT_LABEL[a.result] || a.result}</strong>${durLabel}${a.note ? ` — <em>${esc(a.note)}</em>` : ''}${audioHtml}</span>
       <span class="attempt-date">${when}</span>
     </div>`;
   }).join('');
+}
+
+async function _loadStageJourney(prospectId) {
+  const el = document.getElementById(`journey-${prospectId}`);
+  if (!el) return;
+  try {
+    const data = await apiGet(`/api/prospects/${prospectId}/stage-history`);
+    if (!data || !data.history || data.history.length === 0) {
+      el.style.display = 'none'; return;
+    }
+    // Build unique ordered stages: first stage → ... → current
+    const stages = [data.history[0].from_stage];
+    data.history.forEach(h => {
+      if (stages[stages.length - 1] !== h.to_stage) stages.push(h.to_stage);
+    });
+    const MINI_LABEL = {
+      cold_call: '📞', to_recall: '🔄', no_answer: '📵',
+      meeting_to_set: '📅', meeting_confirmed: '✅', closed: '💰', refused: '❌'
+    };
+    const MINI_NAME = {
+      cold_call: 'Appel', to_recall: 'Rappel', no_answer: 'Pas rép.',
+      meeting_to_set: 'RDV', meeting_confirmed: 'Confirmé', closed: 'Closé', refused: 'Refusé'
+    };
+    el.innerHTML = stages.map((s, i) => {
+      const isLast = i === stages.length - 1;
+      return `<span class="journey-step ${isLast ? 'journey-current' : ''}">${MINI_LABEL[s] || ''} ${MINI_NAME[s] || s}</span>${!isLast ? '<span class="journey-arrow">→</span>' : ''}`;
+    }).join('');
+    el.style.display = 'flex';
+  } catch (_) {
+    el.style.display = 'none';
+  }
 }
 
 function toggleNotesPreview(id, btn) {
@@ -1075,7 +1349,13 @@ function copyPhone(phone, event) {
 function openDetail(id) {
   const p = allProspects.find(x => x.id === id);
   if (!p) return;
+
+  // Save current prospect's voice recording before switching
+  _saveVoiceToStore();
   currentProspect = p;
+
+  // Restore voice recording for this prospect (if any)
+  _restoreVoiceFromStore(id);
 
   document.getElementById('detail-name').textContent = p.name || '—';
   document.getElementById('detail-meta').textContent =
@@ -1096,7 +1376,7 @@ function openDetail(id) {
   if (savedEl) savedEl.style.display = 'none';
 
   switchModalTab('info');
-  loadAttempts(p.id); // charge l'historique des contacts
+  loadAttempts(p.id);
 
   const overlay = document.getElementById('detail-overlay');
   if (overlay) overlay.classList.add('open');
@@ -1592,7 +1872,7 @@ function initSwipeToClose() {
     modal.addEventListener('touchend', e => {
       const dy = e.changedTouches[0].clientY - startY;
       modal.style.transition = 'transform .25s ease, opacity .25s ease';
-      if (dy > 90) {
+      if (dy > 130 && modal.scrollTop <= 0) {
         modal.style.transform = 'translateY(100%)';
         modal.style.opacity = '0';
         setTimeout(() => {
@@ -1669,7 +1949,7 @@ function updateProspectsSlider() {
   const slider = document.getElementById('prospects-slider');
   if (!slider) return;
   const multiplier = scanMode === 'both' ? 2 : 1;
-  const maxAllowed = Math.min(100, Math.max(1, Math.floor((userCredits || 100) / multiplier)));
+  const maxAllowed = Math.min(100, Math.max(0, Math.floor(userCredits / multiplier)));
   slider.max = maxAllowed;
   if (parseInt(slider.value) > maxAllowed) slider.value = maxAllowed;
   const val = parseInt(slider.value);
@@ -1698,6 +1978,13 @@ function toggleScanPanel() {
    LAUNCH SCAN
 ───────────────────────────────────────── */
 async function launchScan() {
+  // Block if no credits
+  if (userCredits <= 0) {
+    showToast('Plus de crédits ! Passe à un plan supérieur.', 'error');
+    window.location.href = '/pricing';
+    return;
+  }
+
   const niche = document.getElementById('scan-niche').value.trim();
 
   if (!niche) {
@@ -1740,6 +2027,11 @@ async function launchScan() {
     if (fillBar) fillBar.style.width = '100%';
 
     if (!res.ok) {
+      if (data.upgrade) {
+        showToast('Plus de crédits ! Passe à un plan supérieur.', 'error');
+        window.location.href = '/pricing';
+        return;
+      }
       showToast(data.error || 'Erreur lors du scan', 'error');
       return;
     }
@@ -1747,6 +2039,14 @@ async function launchScan() {
     const count = data.count || (data.prospects && data.prospects.length) || 0;
     if (statusText) statusText.textContent = `✅ ${count} prospects ajoutés !`;
     showToast(`🎯 ${count} prospects ajoutés en Cold Call`, 'success', 4000);
+
+    // Update local credit count from server response
+    if (typeof data.credits === 'number') {
+      userCredits = data.credits;
+      const planCredits = document.getElementById('plan-badge-credits');
+      if (planCredits) planCredits.textContent = userCredits + ' cr';
+      updateProspectsSlider();
+    }
 
     await loadProspects();
     switchTab('cold_call');
@@ -1937,7 +2237,7 @@ async function loadRappels() {
 
   // Browser notification
   if (overdueList.length > 0 && Notification.permission === 'granted') {
-    new Notification('🔔 ProspectHunter', {
+    new Notification('🔔 Empire Leads', {
       body: `${overdueList.length} rappel(s)/RDV prévu(s) aujourd'hui !`,
       icon: '/favicon.ico'
     });
@@ -2366,7 +2666,7 @@ async function loadAnalyse() {
         const pct = Math.round((r.count / objData.total) * 100);
         const w   = Math.round((r.count / maxObj) * 100);
         return `<div class="obj-report-row">
-          <span class="obj-report-label">${r.objection}</span>
+          <span class="obj-report-label">${esc(r.objection)}</span>
           <div class="pbar-track"><div class="pbar-fill pbar-refused" style="width:${w}%"></div></div>
           <span class="obj-report-count">${r.count} <small>(${pct}%)</small></span>
         </div>`;
@@ -2802,6 +3102,126 @@ async function loadProspectQuotes(prospectId) {
 
 function fmtEur(n) {
   return (parseFloat(n)||0).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' €';
+}
+
+/* ─────────────────────────────────────────
+   CUSTOM THEMES
+───────────────────────────────────────── */
+const THEMES = {
+  naruto: {
+    accent: '#FF6B00', accentHover: '#FF8C00', accentLight: 'rgba(255,107,0,.12)',
+    accentSoft: 'rgba(255,107,0,.08)', accentBorder: 'rgba(255,107,0,.35)',
+    quotes: ['Believe it! 🍥', 'Dattebayo!', 'Je ne reviens jamais sur ma parole!', 'Le vrai pouvoir, c\'est de protéger ceux qu\'on aime', 'Shadow Clone Jutsu! 🌀', 'Rasengan! ⚡'],
+    label: '🍥 Naruto'
+  },
+  manga: {
+    accent: '#8B5CF6', accentHover: '#A78BFA', accentLight: 'rgba(139,92,246,.12)',
+    accentSoft: 'rgba(139,92,246,.08)', accentBorder: 'rgba(139,92,246,.35)',
+    quotes: ['Plus Ultra! 💥', 'Omae wa mou shindeiru', 'Tatakae! ⚔️', 'Je deviendrai le roi des pirates! 🏴‍☠️', 'Bankai! 🗡️', 'Kamehameha! 🔥'],
+    label: '🎌 Manga'
+  },
+  goggins: {
+    accent: '#DC2626', accentHover: '#EF4444', accentLight: 'rgba(220,38,38,.12)',
+    accentSoft: 'rgba(220,38,38,.08)', accentBorder: 'rgba(220,38,38,.35)',
+    quotes: ['STAY HARD! 💪', 'Who\'s gonna carry the boats?!', 'Callous your mind!', 'You don\'t know me, son!', 'Never finished! 🔥', 'Embrace the suck!'],
+    label: '💪 Goggins'
+  },
+  candy: {
+    accent: '#EC4899', accentHover: '#F472B6', accentLight: 'rgba(236,72,153,.12)',
+    accentSoft: 'rgba(236,72,153,.08)', accentBorder: 'rgba(236,72,153,.35)',
+    quotes: ['Sweet! 🍬', 'Sugar Rush! 🍭', 'Yum! 🍩', 'Power Up! ⭐', 'Wahoo! 🎉', 'Let\'s Go! 🚀'],
+    label: '🍬 Candy'
+  },
+  wolf: {
+    accent: '#3B82F6', accentHover: '#60A5FA', accentLight: 'rgba(59,130,246,.12)',
+    accentSoft: 'rgba(59,130,246,.08)', accentBorder: 'rgba(59,130,246,.35)',
+    quotes: ['Sell me this pen! 🖊️', 'The show goes on! 💵', 'Wolf Mode! 🐺', 'Close the deal!', 'Grind! 💰', 'Let\'s hustle! 🔥'],
+    label: '🐺 Wolf'
+  }
+};
+
+let _customThemeActive = false;
+let _quoteInterval = null;
+
+function toggleCustomTheme() {
+  if (_customThemeActive) {
+    removeCustomTheme();
+  } else {
+    applyCustomTheme(window._userTheme);
+  }
+}
+
+function applyCustomTheme(themeId) {
+  const t = THEMES[themeId];
+  if (!t) return;
+  _customThemeActive = true;
+  localStorage.setItem('custom_theme_active', '1');
+  document.documentElement.setAttribute('data-custom-theme', themeId);
+
+  // Override CSS variables
+  const r = document.documentElement.style;
+  r.setProperty('--accent', t.accent);
+  r.setProperty('--accent-hover', t.accentHover);
+  r.setProperty('--accent-light', t.accentLight);
+  r.setProperty('--accent-soft', t.accentSoft);
+  r.setProperty('--accent-border', t.accentBorder);
+
+  // Update button text
+  const btn = document.getElementById('btn-theme-perso');
+  if (btn) btn.innerHTML = '✨ ' + t.label;
+
+  // Show rotating quotes
+  _startQuotes(t.quotes);
+
+  showToast(t.label + ' activé!', 'success');
+}
+
+function removeCustomTheme() {
+  _customThemeActive = false;
+  localStorage.setItem('custom_theme_active', '0');
+  document.documentElement.removeAttribute('data-custom-theme');
+
+  // Reset CSS variables
+  const r = document.documentElement.style;
+  ['--accent','--accent-hover','--accent-light','--accent-soft','--accent-border'].forEach(v => r.removeProperty(v));
+
+  // Reset button
+  const btn = document.getElementById('btn-theme-perso');
+  if (btn) btn.innerHTML = '🎨 Mon thème';
+
+  // Stop quotes
+  _stopQuotes();
+
+  showToast('Thème par défaut restauré', 'info');
+}
+
+function _startQuotes(quotes) {
+  _stopQuotes();
+  // Create floating quote element
+  let el = document.getElementById('theme-quote-float');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'theme-quote-float';
+    el.className = 'theme-quote-float';
+    document.body.appendChild(el);
+  }
+  el.style.display = 'block';
+  let idx = 0;
+  const show = () => {
+    el.textContent = quotes[idx % quotes.length];
+    el.classList.remove('theme-quote-in');
+    void el.offsetWidth;
+    el.classList.add('theme-quote-in');
+    idx++;
+  };
+  show();
+  _quoteInterval = setInterval(show, 6000);
+}
+
+function _stopQuotes() {
+  if (_quoteInterval) { clearInterval(_quoteInterval); _quoteInterval = null; }
+  const el = document.getElementById('theme-quote-float');
+  if (el) el.style.display = 'none';
 }
 
 /* ─────────────────────────────────────────
