@@ -61,8 +61,8 @@ describe('POST /api/register', () => {
     expect(res.status).toBe(200);
     expect(res.body.token).toBeDefined();
     expect(res.body.user.email).toBe('test@example.com');
-    expect(res.body.user.plan).toBe('trial');
-    expect(res.body.user.credits).toBe(20);
+    expect(res.body.user.plan).toBe('free');
+    expect(res.body.user.credits).toBe(0);
   });
 
   test('should reject duplicate email', async () => {
@@ -222,5 +222,66 @@ describe('GET /api/me', () => {
     const res = await request(app).get('/api/me');
 
     expect(res.status).toBe(401);
+  });
+
+  test('should reject with invalid token', async () => {
+    const res = await request(app)
+      .get('/api/me')
+      .set('Authorization', 'Bearer not.a.valid.jwt.token');
+
+    expect(res.status).toBe(401);
+  });
+
+  test('should reject with malformed Authorization header', async () => {
+    const res = await request(app)
+      .get('/api/me')
+      .set('Authorization', 'notbearer sometoken');
+
+    expect(res.status).toBe(401);
+  });
+});
+
+describe('Referral bonus', () => {
+  test('should award +5 credits to referrer and new user on valid referral code', async () => {
+    // Register the referrer first
+    const referrerRes = await request(app)
+      .post('/api/register')
+      .send({ email: 'referrer@test.com', password: 'password123' });
+
+    expect(referrerRes.status).toBe(200);
+    const referrerToken = referrerRes.body.token;
+
+    // Get referrer's referral_code from /api/me
+    const meRes = await request(app)
+      .get('/api/me')
+      .set('Authorization', `Bearer ${referrerToken}`);
+    expect(meRes.status).toBe(200);
+
+    // Look up the referral code directly from the db
+    const referralCode = mockDb.prepare('SELECT referral_code FROM users WHERE email = ?').get('referrer@test.com')?.referral_code;
+    expect(referralCode).toBeDefined();
+
+    // Register a new user with the referral code
+    const newUserRes = await request(app)
+      .post('/api/register')
+      .send({ email: 'newbie@test.com', password: 'password123', referral_code: referralCode });
+
+    expect(newUserRes.status).toBe(200);
+
+    // Verify credits were awarded
+    const referrer = mockDb.prepare('SELECT credits FROM users WHERE email = ?').get('referrer@test.com');
+    const newbie = mockDb.prepare('SELECT credits FROM users WHERE email = ?').get('newbie@test.com');
+    expect(referrer.credits).toBe(5);  // referrer gets +5 (started at 0)
+    expect(newbie.credits).toBe(5);    // new user gets +5 (started at 0)
+  });
+
+  test('should not award credits for invalid referral code', async () => {
+    const res = await request(app)
+      .post('/api/register')
+      .send({ email: 'new@test.com', password: 'password123', referral_code: 'invalidcode' });
+
+    expect(res.status).toBe(200); // still registers successfully
+    const user = mockDb.prepare('SELECT credits FROM users WHERE email = ?').get('new@test.com');
+    expect(user.credits).toBe(0); // no bonus
   });
 });
