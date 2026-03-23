@@ -33,7 +33,16 @@ app.use((req, res, next) => {
 
 // ── Security headers ──
 app.use(helmet({
-  contentSecurityPolicy: false, // Allow inline scripts for SPA
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https://api.anthropic.com", "https://maps.googleapis.com"],
+    },
+  },
   crossOriginEmbedderPolicy: false,
 }));
 
@@ -49,7 +58,7 @@ app.use(cors({
 app.use(compression());
 
 // ── Body parser ──
-app.use(express.json({ limit: '2mb' }));
+app.use(express.json({ limit: '5mb' }));
 
 // ── Global rate limiter (100 req / 15 min per IP) ──
 const globalLimiter = rateLimit({
@@ -72,6 +81,25 @@ const searchLimiter = rateLimit({
 
 // ── Health check ──
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
+// ── QR Code access page ──
+app.get('/qr', async (req, res) => {
+  const QRCode = require('qrcode');
+  const os = require('os');
+  const nets = os.networkInterfaces();
+  let localIP = '127.0.0.1';
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]) {
+      if (net.family === 'IPv4' && !net.internal) { localIP = net.address; break; }
+    }
+  }
+  const url = `http://${localIP}:${PORT}/app`;
+  const qrSvg = await QRCode.toString(url, { type: 'svg', width: 220, margin: 2 });
+  res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>QR Code</title>
+  <style>body{font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#111;color:#fff;gap:1rem}
+  .qr{background:#fff;padding:16px;border-radius:16px}.url{font-size:.85rem;color:#f97316;word-break:break-all;text-align:center;max-width:280px}</style></head>
+  <body><h2 style="margin:0">📱 Scanner pour ouvrir l'app</h2><div class="qr">${qrSvg}</div><div class="url">${url}</div></body></html>`);
+});
 
 // === Pages (BEFORE static so they take priority) ===
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'landing.html')));
@@ -119,7 +147,7 @@ app.use((err, req, res, next) => {
 const http = require('http');
 const server = http.createServer(app);
 server.listen(PORT, () => {
-  console.log(`\x1b[36m⚡ ProspectHunter SaaS\x1b[0m démarré sur \x1b[4mhttp://localhost:${PORT}\x1b[0m`);
+  console.log(`\x1b[36m⚡ Prospecto SaaS\x1b[0m démarré sur \x1b[4mhttp://localhost:${PORT}\x1b[0m`);
   console.log(`   Mode: ${isProd ? 'production' : 'development'} | Rate limit: ${process.env.RATE_LIMIT_MAX_REQUESTS || 100} req/15min`);
 });
 server.on('error', (err) => {
