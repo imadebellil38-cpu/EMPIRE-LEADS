@@ -121,6 +121,12 @@ app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'adm
 app.get('/pricing', (req, res) => res.sendFile(path.join(__dirname, 'public', 'pricing.html')));
 app.get('/instagram-finder', (req, res) => res.sendFile(path.join(__dirname, 'public', 'instagram-finder.html')));
 
+// ── ig-finder.js with CORS (for bookmarklet loader) ──
+app.get('/ig-finder.js', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.sendFile(path.join(__dirname, 'public', 'ig-finder.js'));
+});
+
 // ── Static files (CSS, JS, images) ──
 app.use(express.static(path.join(__dirname, 'public'), {
   maxAge: isProd ? '1d' : 0,
