@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Instagram Finder — Empire Leads</title>
+<style>
+/* ── Reset & Base ── */
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;
+  --bg2:#111118;
+  --bg3:#1a1a24;
+  --bg4:#222230;
+  --border:#2a2a38;
+  --text:#e0e0f0;
+  --text2:#9090a8;
+  --text3:#5a5a70;
+  --ig:#E1306C;
+  --ig2:#F77737;
+  --green:#00d084;
+  --accent:#7c3aed;
+  --radius:12px;
+  --shadow:0 8px 32px rgba(0,0,0,.4);
+}
+html{font-size:16px;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* ── Header ── */
+.header{
+  background:linear-gradient(180deg,rgba(17,17,24,.98) 0%,rgba(10,10,15,.95) 100%);
+  border-bottom:1px solid var(--border);
+  padding:14px 20px;
+  display:flex;align-items:center;gap:16px;
+  position:sticky;top:0;z-index:100;
+  backdrop-filter:blur(12px);
+}
+.header-logo{
+  font-size:18px;font-weight:900;letter-spacing:-.5px;
+  background:linear-gradient(135deg,#fff,#aaa);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  white-space:nowrap;
+}
+.header-logo em{
+  background:linear-gradient(135deg,var(--ig),var(--ig2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  font-style:normal;
+}
+.header-title{
+  flex:1;
+  font-size:17px;font-weight:700;
+  background:linear-gradient(135deg,var(--ig),var(--ig2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.back-link{
+  font-size:13px;color:var(--text2);text-decoration:none;
+  padding:7px 12px;border:1px solid var(--border);border-radius:8px;
+  white-space:nowrap;transition:all .2s;
+  display:flex;align-items:center;gap:5px;
+}
+.back-link:hover{color:var(--text);border-color:var(--text3)}
+
+/* ── Main container ── */
+.container{max-width:1000px;margin:0 auto;padding:24px 16px 80px}
+
+/* ── How it works ── */
+.how-section{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:24px;margin-bottom:24px;
+}
+.how-section h2{font-size:16px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px}
+.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:600px){.steps-grid{grid-template-columns:1fr}}
+.step-card{
+  background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  padding:16px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;
+}
+.step-num{
+  width:30px;height:30px;border-radius:50%;
+  background:linear-gradient(135deg,var(--ig),var(--ig2));
+  color:#fff;font-weight:700;font-size:14px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.step-title{font-size:14px;font-weight:600;color:var(--text)}
+.step-desc{font-size:13px;color:var(--text2);line-height:1.5}
+.open-ig-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:8px 14px;background:linear-gradient(135deg,var(--ig),var(--ig2));
+  color:#fff;font-size:13px;font-weight:600;border-radius:8px;
+  text-decoration:none;border:none;cursor:pointer;margin-top:4px;
+  transition:opacity .2s;
+}
+.open-ig-btn:hover{opacity:.85}
+.how-note{
+  margin-top:16px;padding:12px 16px;
+  background:rgba(225,48,108,.08);border:1px solid rgba(225,48,108,.2);
+  border-radius:8px;font-size:13px;color:var(--text2);line-height:1.5;
+}
+.how-note strong{color:var(--ig)}
+
+/* ── Bookmarklet section ── */
+.bm-section{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:24px;margin-bottom:24px;
+}
+.bm-section h2{font-size:16px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.bm-subtitle{font-size:13px;color:var(--text3);margin-bottom:20px}
+.bm-methods{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:560px){.bm-methods{grid-template-columns:1fr}}
+.bm-method{
+  background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:18px;
+}
+.bm-method-title{
+  font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;
+  letter-spacing:.05em;margin-bottom:12px;display:flex;align-items:center;gap:6px;
+}
+.bm-method-title .badge{
+  background:var(--bg4);color:var(--text3);font-size:10px;padding:2px 7px;
+  border-radius:20px;text-transform:none;letter-spacing:0;font-weight:600;
+}
+.bm-drag-hint{font-size:12px;color:var(--text3);margin-bottom:10px}
+.bm-btn{
+  display:inline-block;padding:13px 22px;
+  background:linear-gradient(135deg,var(--ig),var(--ig2));
+  color:#fff;font-size:16px;font-weight:700;border-radius:10px;
+  text-decoration:none;cursor:grab;transition:transform .2s,box-shadow .2s;
+  box-shadow:0 4px 16px rgba(225,48,108,.3);
+  user-select:none;
+}
+.bm-btn:hover{transform:scale(1.04);box-shadow:0 6px 22px rgba(225,48,108,.4)}
+.bm-btn:active{cursor:grabbing}
+.copy-bm-btn{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 18px;background:var(--bg4);border:1px solid var(--border);
+  color:var(--text);font-size:14px;font-weight:600;border-radius:10px;
+  cursor:pointer;transition:all .2s;width:100%;justify-content:center;
+}
+.copy-bm-btn:hover{border-color:var(--ig);color:var(--ig)}
+.copy-bm-btn.copied{border-color:var(--green);color:var(--green)}
+.mobile-paste-hint{
+  font-size:12px;color:var(--text3);margin-top:10px;line-height:1.6;
+}
+.mobile-paste-hint ol{padding-left:18px;margin-top:4px}
+.mobile-paste-hint li{margin-bottom:3px}
+
+/* ── Search section ── */
+.search-section{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:24px;margin-bottom:24px;
+}
+.search-section h2{
+  font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;
+  background:linear-gradient(135deg,var(--ig),var(--ig2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  display:inline-block;
+}
+.search-note{font-size:13px;color:var(--text3);margin-bottom:18px}
+
+/* Niche row */
+.niche-row{display:flex;gap:10px;margin-bottom:14px;align-items:stretch}
+.niche-input{
+  flex:1;min-width:0;padding:14px 16px;
+  background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;
+  color:var(--text);font-size:15px;outline:none;transition:border .2s;
+}
+.niche-input:focus{border-color:var(--ig)}
+.niche-input::placeholder{color:var(--text3)}
+.voice-btn{
+  width:48px;height:auto;min-height:48px;
+  border-radius:10px;border:1.5px solid var(--ig);
+  background:rgba(225,48,108,.1);color:var(--ig);
+  font-size:20px;cursor:pointer;transition:all .2s;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+.voice-btn:hover{background:rgba(225,48,108,.2)}
+.voice-btn.listening{background:var(--ig);color:#fff;animation:pulse .6s infinite alternate}
+@keyframes pulse{from{box-shadow:0 0 0 0 rgba(225,48,108,.4)}to{box-shadow:0 0 0 8px rgba(225,48,108,0)}}
+
+/* Filters */
+.filters-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.filter-group{display:flex;flex-direction:column;gap:5px;min-width:0}
+.filter-label{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.filter-input{
+  padding:10px 12px;background:var(--bg3);border:1.5px solid var(--border);
+  border-radius:8px;color:var(--text);font-size:14px;outline:none;
+  transition:border .2s;width:100%;
+}
+.filter-input:focus{border-color:var(--ig)}
+.filter-input option{background:var(--bg3)}
+.fg-min{flex:0 0 110px}
+.fg-max{flex:0 0 110px}
+.fg-count{flex:0 0 90px}
+.fg-type{flex:1;min-width:130px}
+.fg-sort{flex:1;min-width:150px}
+@media(max-width:480px){.fg-type,.fg-sort{flex:0 0 calc(50% - 5px)}.fg-min,.fg-max,.fg-count{flex:0 0 calc(33% - 7px)}}
+
+/* Action buttons */
+.action-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.search-btn{
+  flex:1;min-width:140px;padding:14px 24px;
+  background:linear-gradient(135deg,var(--ig),var(--ig2));
+  color:#fff;font-size:16px;font-weight:700;border:none;border-radius:10px;
+  cursor:pointer;transition:opacity .2s;
+  box-shadow:0 4px 16px rgba(225,48,108,.3);
+}
+.search-btn:hover{opacity:.9}
+.search-btn:disabled{opacity:.5;cursor:not-allowed}
+.stop-btn{
+  padding:14px 20px;background:var(--bg4);border:1.5px solid #ff4444;
+  color:#ff4444;font-size:15px;font-weight:600;border-radius:10px;
+  cursor:pointer;transition:all .2s;display:none;
+}
+.stop-btn:hover{background:rgba(255,68,68,.1)}
+.export-btn{
+  padding:14px 20px;background:var(--bg4);border:1.5px solid var(--green);
+  color:var(--green);font-size:15px;font-weight:600;border-radius:10px;
+  cursor:pointer;transition:all .2s;display:none;
+}
+.export-btn:hover{background:rgba(0,208,132,.1)}
+
+/* ── Progress ── */
+.progress-wrap{margin-top:14px;display:none}
+.progress-bar{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.progress-fill{
+  height:100%;width:0;
+  background:linear-gradient(90deg,var(--ig),var(--ig2));
+  transition:width .4s ease;border-radius:2px;
+}
+.status-text{font-size:13px;color:var(--text2);margin-top:8px;min-height:20px}
+
+/* ── Stats row ── */
+.stats-row{
+  display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;
+}
+.stat-card{
+  flex:1;min-width:120px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:10px;padding:12px 16px;
+}
+.stat-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.stat-val{font-size:22px;font-weight:700;color:var(--text)}
+.stat-val.ig-color{color:var(--ig)}
+
+/* ── Results table ── */
+.results-section{display:none}
+.table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;min-width:580px}
+thead tr{background:var(--bg3)}
+th{
+  padding:11px 14px;text-align:left;font-size:11px;
+  color:var(--text3);text-transform:uppercase;letter-spacing:.06em;
+  white-space:nowrap;user-select:none;
+}
+th.sortable{cursor:pointer;transition:color .2s}
+th.sortable:hover{color:var(--ig)}
+th.sorted{color:var(--ig)}
+th .sort-arrow{font-size:10px;margin-left:3px;opacity:.7}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+td{padding:10px 14px;font-size:14px;vertical-align:middle}
+.td-rank{color:var(--text3);font-size:12px;width:36px}
+.profile-link{
+  color:var(--ig);font-weight:600;text-decoration:none;font-size:14px;
+  transition:opacity .2s;
+}
+.profile-link:hover{opacity:.8}
+.profile-badge{
+  display:inline-block;font-size:10px;padding:1px 6px;
+  border-radius:20px;background:var(--bg4);color:var(--text3);
+  margin-left:4px;font-weight:500;
+}
+.profile-badge.verified{background:rgba(0,149,246,.15);color:#0095f6}
+.profile-badge.biz{background:rgba(255,215,0,.1);color:#ffd700}
+.profile-name{font-size:12px;color:var(--text3);margin-top:2px}
+.td-followers{color:var(--ig);font-weight:700;white-space:nowrap}
+.td-bio{font-size:12px;color:var(--text2);max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ext-link{color:var(--text3);font-size:12px;text-decoration:none;transition:color .2s}
+.ext-link:hover{color:var(--ig)}
+
+/* ── Empty / error states ── */
+.empty-state{
+  text-align:center;padding:50px 20px;color:var(--text3);
+}
+.empty-icon{font-size:40px;margin-bottom:12px}
+.empty-text{font-size:15px}
+
+/* ── Mobile tweaks ── */
+@media(max-width:480px){
+  .container{padding:16px 12px 60px}
+  .how-section,.bm-section,.search-section{padding:16px}
+  .header-logo{font-size:15px}
+  .header-title{font-size:15px}
+  th,td{padding:8px 10px}
+  .td-bio{max-width:120px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="header">
+  <div class="header-logo">EMPIRE<em>LEADS</em></div>
+  <div class="header-title">📷 Instagram Finder</div>
+  <a class="back-link" href="/app">← App</a>
+</header>
+
+<!-- ── MAIN ── -->
+<div class="container">
+
+  <!-- HOW IT WORKS -->
+  <div class="how-section">
+    <h2>Comment ça marche</h2>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-title">Ouvre Instagram</div>
+        <div class="step-desc">L'outil utilise ta session Instagram — connecte-toi d'abord.</div>
+        <a class="open-ig-btn" href="https://www.instagram.com" target="_blank" rel="noopener">
+          📷 Ouvrir Instagram
+        </a>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-title">Active le bookmarklet</div>
+        <div class="step-desc">Glisse le bouton "IG Finder" dans ta barre de favoris, puis clique dessus sur instagram.com.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-title">Exporte en CSV</div>
+        <div class="step-desc">Lance ta recherche par niche, filtre les résultats, exporte en CSV en 1 clic.</div>
+      </div>
+    </div>
+    <div class="how-note">
+      <strong>Aucune API externe.</strong> L'outil interroge Instagram directement depuis ton navigateur, avec ta session. Gratuit, illimité, sans clé API.
+    </div>
+  </div>
+
+  <!-- BOOKMARKLET SECTION -->
+  <div class="bm-section">
+    <h2>Installer le bookmarklet</h2>
+    <p class="bm-subtitle">Deux méthodes selon ton appareil</p>
+    <div class="bm-methods">
+
+      <!-- Desktop -->
+      <div class="bm-method">
+        <div class="bm-method-title">
+          🖥️ Desktop <span class="badge">Chrome / Firefox / Safari</span>
+        </div>
+        <p class="bm-drag-hint">Glisse ce bouton dans ta barre de favoris :</p>
+        <a id="bm-link" class="bm-btn" href="#BOOKMARKLET_PLACEHOLDER#">📷 IG Finder</a>
+        <p class="bm-drag-hint" style="margin-top:10px;font-size:11px">
+          Puis va sur instagram.com et clique le favori "IG Finder".
+        </p>
+      </div>
+
+      <!-- Mobile -->
+      <div class="bm-method">
+        <div class="bm-method-title">
+          📱 Mobile <span class="badge">iOS / Android</span>
+        </div>
+        <button class="copy-bm-btn" id="copy-bm-btn" onclick="copyBookmarklet()">
+          <span>📋</span> <span id="copy-bm-text">Copier le code bookmarklet</span>
+        </button>
+        <div class="mobile-paste-hint">
+          <ol>
+            <li>Copie le code ci-dessus</li>
+            <li>Va sur <strong>instagram.com</strong> dans Safari / Chrome</li>
+            <li>Appuie sur la barre d'adresse</li>
+            <li>Colle le code et valide</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEARCH SECTION (preview / reference) -->
+  <div class="search-section">
+    <h2>Aperçu de l'outil</h2>
+    <p class="search-note">L'interface ci-dessous s'affiche en overlay sur instagram.com quand tu cliques le bookmarklet.</p>
+
+    <!-- Niche input -->
+    <div class="niche-row">
+      <input
+        class="niche-input"
+        id="preview-niche"
+        type="text"
+        placeholder="monteur video, coach sportif, magasin manga..."
+        autocomplete="off"
+        spellcheck="false"
+        readonly
+      >
+      <button class="voice-btn" title="Recherche vocale (disponible dans le bookmarklet)" disabled>🎤</button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-row">
+      <div class="filter-group fg-min">
+        <label class="filter-label">Min abonnés</label>
+        <input class="filter-input" type="number" value="0" placeholder="0" disabled>
+      </div>
+      <div class="filter-group fg-max">
+        <label class="filter-label">Max abonnés</label>
+        <input class="filter-input" type="number" value="100000" placeholder="100000" disabled>
+      </div>
+      <div class="filter-group fg-count">
+        <label class="filter-label">Résultats</label>
+        <input class="filter-input" type="number" value="50" placeholder="50" disabled>
+      </div>
+      <div class="filter-group fg-type">
+        <label class="filter-label">Type de compte</label>
+        <select class="filter-input" disabled>
+          <option>Tous</option>
+          <option>Vérifiés seulement</option>
+          <option>Comptes Business</option>
+        </select>
+      </div>
+      <div class="filter-group fg-sort">
+        <label class="filter-label">Trier par</label>
+        <select class="filter-input" disabled>
+          <option>Abonnés (desc)</option>
+          <option>Abonnés (asc)</option>
+          <option>Pertinence</option>
+          <option>Nom</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="action-row">
+      <button class="search-btn" disabled>🔍 Rechercher</button>
+      <button class="stop-btn">⏹ Stop</button>
+      <button class="export-btn">⬇ Export CSV</button>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="status-text" id="status-text"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row" style="margin-top:18px">
+      <div class="stat-card">
+        <div class="stat-label">Total trouvé</div>
+        <div class="stat-val ig-color" id="stat-total">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Après filtres</div>
+        <div class="stat-val" id="stat-filtered">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Moy. abonnés</div>
+        <div class="stat-val" id="stat-avg">—</div>
+      </div>
+    </div>
+
+    <!-- Results table placeholder -->
+    <div class="results-section" id="results-section">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="td-rank">#</th>
+              <th class="sortable sorted">Profil <span class="sort-arrow">↓</span></th>
+              <th class="sortable">Abonnés <span class="sort-arrow"></span></th>
+              <th>Bio</th>
+              <th>Lien</th>
+            </tr>
+          </thead>
+          <tbody id="results-body">
+            <tr>
+              <td colspan="5">
+                <div class="empty-state">
+                  <div class="empty-icon">📷</div>
+                  <div class="empty-text">Lance une recherche depuis le bookmarklet sur instagram.com</div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ── Build the full bookmarklet code ──
+var BOOKMARKLET_CODE = (function(){
+  /* The entire bookmarklet is self-contained in this string */
+  var code = `(function(){
+if(!location.hostname.includes('instagram.com')){alert('Ouvre ce bookmarklet sur instagram.com');return;}
+if(document.getElementById('igf-overlay')){document.getElementById('igf-overlay').remove();return;}
+
+// ── Build overlay ──
+var ov=document.createElement('div');
+ov.id='igf-overlay';
+ov.style.cssText='position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.96);overflow-y:auto;font-family:-apple-system,BlinkMacSystemFont,sans-serif;';
+
+ov.innerHTML=\`
+<div style="max-width:960px;margin:0 auto;padding:16px">
+<!-- Header -->
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #2a2a38">
+  <div>
+    <div style="font-size:20px;font-weight:800;letter-spacing:-.5px">
+      <span style="background:linear-gradient(135deg,#E1306C,#F77737);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Instagram</span>
+      <span style="color:#e0e0f0"> Finder</span>
+    </div>
+    <div style="font-size:11px;color:#5a5a70;margin-top:2px">Empire Leads — aucune API, 0 coût</div>
+  </div>
+  <button id="igf-close" style="background:none;border:1px solid #2a2a38;color:#9090a8;font-size:22px;cursor:pointer;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:all .2s">&times;</button>
+</div>
+
+<!-- Niche row -->
+<div style="display:flex;gap:8px;margin-bottom:12px;align-items:stretch">
+  <input id="igf-niche" placeholder="monteur video, coach sportif, magasin manga..."
+    style="flex:1;min-width:0;padding:13px 15px;background:#111118;border:1.5px solid #2a2a38;border-radius:10px;color:#e0e0f0;font-size:15px;outline:none">
+  <button id="igf-voice" title="Recherche vocale"
+    style="width:46px;min-height:46px;border-radius:10px;border:1.5px solid #E1306C;background:rgba(225,48,108,.1);color:#E1306C;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">🎤</button>
+</div>
+
+<!-- Filters -->
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <label style="font-size:10px;color:#5a5a70;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Min abonnés</label>
+    <input id="igf-min" type="number" value="0" style="width:100px;padding:9px 11px;background:#111118;border:1.5px solid #2a2a38;border-radius:8px;color:#e0e0f0;font-size:14px;outline:none">
+  </div>
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <label style="font-size:10px;color:#5a5a70;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Max abonnés</label>
+    <input id="igf-max" type="number" value="100000" style="width:110px;padding:9px 11px;background:#111118;border:1.5px solid #2a2a38;border-radius:8px;color:#e0e0f0;font-size:14px;outline:none">
+  </div>
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <label style="font-size:10px;color:#5a5a70;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Résultats</label>
+    <input id="igf-count" type="number" value="50" style="width:80px;padding:9px 11px;background:#111118;border:1.5px solid #2a2a38;border-radius:8px;color:#e0e0f0;font-size:14px;outline:none">
+  </div>
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <label style="font-size:10px;color:#5a5a70;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Type</label>
+    <select id="igf-type" style="padding:9px 11px;background:#111118;border:1.5px solid #2a2a38;border-radius:8px;color:#e0e0f0;font-size:13px;outline:none;cursor:pointer">
+      <option value="all">Tous</option>
+      <option value="verified">Vérifiés</option>
+      <option value="biz">Business</option>
+    </select>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:4px">
+    <label style="font-size:10px;color:#5a5a70;text-transform:uppercase;letter-spacing:.05em;font-weight:600">Trier par</label>
+    <select id="igf-sort" style="padding:9px 11px;background:#111118;border:1.5px solid #2a2a38;border-radius:8px;color:#e0e0f0;font-size:13px;outline:none;cursor:pointer">
+      <option value="followers_desc">Abonnés ↓</option>
+      <option value="followers_asc">Abonnés ↑</option>
+      <option value="relevance">Pertinence</option>
+      <option value="name">Nom A-Z</option>
+    </select>
+  </div>
+</div>
+
+<!-- Action buttons -->
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+  <button id="igf-go" style="flex:1;min-width:140px;padding:13px 22px;background:linear-gradient(135deg,#E1306C,#F77737);color:#fff;font-size:15px;font-weight:700;border:none;border-radius:10px;cursor:pointer;box-shadow:0 4px 14px rgba(225,48,108,.35)">
+    🔍 Rechercher
+  </button>
+  <button id="igf-stop" style="padding:13px 18px;background:#1a1a24;border:1.5px solid #ff4444;color:#ff4444;font-size:14px;font-weight:600;border-radius:10px;cursor:pointer;display:none">
+    ⏹ Stop
+  </button>
+  <button id="igf-csv" style="padding:13px 18px;background:#1a1a24;border:1.5px solid #00d084;color:#00d084;font-size:14px;font-weight:600;border-radius:10px;cursor:pointer;display:none">
+    ⬇ Export CSV
+  </button>
+</div>
+
+<!-- Progress -->
+<div id="igf-prog-wrap" style="margin-bottom:12px;display:none">
+  <div style="height:4px;background:#1a1a24;border-radius:2px;overflow:hidden">
+    <div id="igf-bar" style="height:100%;width:0;background:linear-gradient(90deg,#E1306C,#F77737);transition:width .4s ease;border-radius:2px"></div>
+  </div>
+  <div id="igf-status" style="font-size:13px;color:#9090a8;margin-top:6px;min-height:18px"></div>
+</div>
+
+<!-- Stats -->
+<div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+  <div style="flex:1;min-width:110px;background:#111118;border:1px solid #2a2a38;border-radius:10px;padding:10px 14px">
+    <div style="font-size:10px;color:#5a5a70;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Total trouvé</div>
+    <div id="igf-stat-total" style="font-size:20px;font-weight:700;color:#E1306C">0</div>
+  </div>
+  <div style="flex:1;min-width:110px;background:#111118;border:1px solid #2a2a38;border-radius:10px;padding:10px 14px">
+    <div style="font-size:10px;color:#5a5a70;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Après filtres</div>
+    <div id="igf-stat-filt" style="font-size:20px;font-weight:700;color:#e0e0f0">0</div>
+  </div>
+  <div style="flex:1;min-width:110px;background:#111118;border:1px solid #2a2a38;border-radius:10px;padding:10px 14px">
+    <div style="font-size:10px;color:#5a5a70;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Moy. abonnés</div>
+    <div id="igf-stat-avg" style="font-size:20px;font-weight:700;color:#e0e0f0">0</div>
+  </div>
+</div>
+
+<!-- Table -->
+<div style="overflow-x:auto;border-radius:10px;border:1px solid #2a2a38">
+  <table id="igf-table" style="width:100%;border-collapse:collapse;min-width:580px">
+    <thead>
+      <tr style="background:#111118">
+        <th style="padding:10px 12px;text-align:left;font-size:10px;color:#5a5a70;text-transform:uppercase;letter-spacing:.06em;width:36px">#</th>
+        <th id="igf-th-profile" style="padding:10px 12px;text-align:left;font-size:10px;color:#5a5a70;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;white-space:nowrap">Profil</th>
+        <th id="igf-th-followers" style="padding:10px 12px;text-align:left;font-size:10px;color:#E1306C;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;white-space:nowrap">Abonnés ↓</th>
+        <th style="padding:10px 12px;text-align:left;font-size:10px;color:#5a5a70;text-transform:uppercase;letter-spacing:.06em">Bio</th>
+        <th style="padding:10px 12px;text-align:left;font-size:10px;color:#5a5a70;text-transform:uppercase;letter-spacing:.06em">Lien</th>
+      </tr>
+    </thead>
+    <tbody id="igf-body"></tbody>
+  </table>
+</div>
+</div>
+\`;
+
+document.body.appendChild(ov);
+document.getElementById('igf-close').onclick=function(){ov.remove()};
+
+// ── State ──
+var results=[];
+var enrichedCount=0;
+var searching=false;
+var sortKey='followers_desc';
+
+// ── Utils ──
+function igfetch(url){
+  return fetch(url,{headers:{'X-IG-App-ID':'936619743392459','X-Requested-With':'XMLHttpRequest'},credentials:'include'}).then(function(r){
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return r.json();
+  });
+}
+function setStatus(m){var el=document.getElementById('igf-status');if(el)el.textContent=m;}
+function setProgress(p){
+  var w=document.getElementById('igf-prog-wrap');
+  var b=document.getElementById('igf-bar');
+  if(w)w.style.display='block';
+  if(b)b.style.width=Math.min(100,p)+'%';
+}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms);})}
+function fmtNum(n){return n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?(n/1000).toFixed(1)+'k':String(n);}
+
+function applySort(arr){
+  var s=document.getElementById('igf-sort');
+  var key=s?s.value:sortKey;
+  var copy=arr.slice();
+  if(key==='followers_desc')copy.sort(function(a,b){return b.followers-a.followers});
+  else if(key==='followers_asc')copy.sort(function(a,b){return a.followers-b.followers});
+  else if(key==='name')copy.sort(function(a,b){return(a.name||a.username).localeCompare(b.name||b.username)});
+  return copy;
+}
+
+function applyFilters(arr){
+  var minF=parseInt(document.getElementById('igf-min').value)||0;
+  var maxF=parseInt(document.getElementById('igf-max').value)||9999999;
+  var type=document.getElementById('igf-type').value;
+  return arr.filter(function(p){
+    if(p.followers<minF||p.followers>maxF)return false;
+    if(type==='verified'&&!p.verified)return false;
+    if(type==='biz'&&!p.biz)return false;
+    return true;
+  });
+}
+
+function updateStats(filtered){
+  document.getElementById('igf-stat-total').textContent=enrichedCount;
+  document.getElementById('igf-stat-filt').textContent=filtered.length;
+  var avg=filtered.length?Math.round(filtered.reduce(function(s,p){return s+p.followers},0)/filtered.length):0;
+  document.getElementById('igf-stat-avg').textContent=fmtNum(avg);
+}
+
+function render(){
+  var filtered=applyFilters(results);
+  var sorted=applySort(filtered);
+  updateStats(filtered);
+  var b=document.getElementById('igf-body');
+  if(!b)return;
+  b.innerHTML='';
+  if(sorted.length===0){
+    b.innerHTML='<tr><td colspan="5" style="padding:40px;text-align:center;color:#5a5a70;font-size:14px">Aucun résultat — essaie d\'élargir les filtres</td></tr>';
+    return;
+  }
+  sorted.forEach(function(p,i){
+    var tr=document.createElement('tr');
+    tr.style.cssText='border-bottom:1px solid #1a1a24;transition:background .15s';
+    tr.onmouseenter=function(){tr.style.background='rgba(255,255,255,.025)'};
+    tr.onmouseleave=function(){tr.style.background=''};
+    var badges='';
+    if(p.verified)badges+='<span style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:20px;background:rgba(0,149,246,.15);color:#0095f6;margin-left:4px">✓ Vérifié</span>';
+    if(p.biz)badges+='<span style="display:inline-block;font-size:9px;padding:1px 5px;border-radius:20px;background:rgba(255,215,0,.1);color:#ffd700;margin-left:4px">Pro</span>';
+    tr.innerHTML=
+      '<td style="padding:9px 12px;color:#5a5a70;font-size:12px">'+(i+1)+'</td>'+
+      '<td style="padding:9px 12px">'+
+        '<a href="https://www.instagram.com/'+p.username+'/" target="_blank" style="color:#E1306C;font-weight:600;text-decoration:none;font-size:14px">@'+p.username+'</a>'+
+        badges+
+        '<div style="font-size:11px;color:#5a5a70;margin-top:2px">'+escHtml(p.name)+'</div>'+
+      '</td>'+
+      '<td style="padding:9px 12px;color:#E1306C;font-weight:700;font-size:14px;white-space:nowrap">'+fmtNum(p.followers)+'</td>'+
+      '<td style="padding:9px 12px;font-size:12px;color:#9090a8;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+escHtml(p.bio)+'">'+escHtml(p.bio)+'</td>'+
+      '<td style="padding:9px 12px">'+(p.extUrl?'<a href="'+escHtml(p.extUrl)+'" target="_blank" style="color:#9090a8;font-size:12px;text-decoration:none">Site ↗</a>':'')+'</td>';
+    b.appendChild(tr);
+  });
+}
+
+function escHtml(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Sort headers ──
+document.getElementById('igf-th-followers').onclick=function(){
+  var s=document.getElementById('igf-sort');
+  if(s.value==='followers_desc')s.value='followers_asc';
+  else s.value='followers_desc';
+  this.textContent=s.value==='followers_desc'?'Abonnés ↓':'Abonnés ↑';
+  this.style.color='#E1306C';
+  render();
+};
+document.getElementById('igf-th-profile').onclick=function(){
+  document.getElementById('igf-sort').value='name';
+  render();
+};
+
+// ── Voice input ──
+document.getElementById('igf-voice').onclick=function(){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){alert('Reconnaissance vocale non disponible sur ce navigateur');return;}
+  var btn=this;
+  var r=new SR();
+  r.lang='fr-FR';
+  r.interimResults=false;
+  r.maxAlternatives=1;
+  r.onstart=function(){btn.style.background='#E1306C';btn.style.color='#fff';btn.textContent='🔴';};
+  r.onresult=function(e){
+    var t=e.results[0][0].transcript;
+    document.getElementById('igf-niche').value=t;
+    setStatus('Vocal: "'+t+'"');
+  };
+  r.onerror=function(e){setStatus('Erreur micro: '+e.error);};
+  r.onend=function(){btn.style.background='rgba(225,48,108,.1)';btn.style.color='#E1306C';btn.textContent='🎤';};
+  r.start();
+};
+
+// ── Search ──
+document.getElementById('igf-go').onclick=async function(){
+  var niche=document.getElementById('igf-niche').value.trim();
+  if(!niche){document.getElementById('igf-niche').focus();return;}
+  if(searching)return;
+
+  searching=true;
+  results=[];
+  enrichedCount=0;
+  var maxR=Math.max(1,Math.min(200,parseInt(document.getElementById('igf-count').value)||50));
+
+  document.getElementById('igf-stop').style.display='block';
+  document.getElementById('igf-csv').style.display='none';
+  document.getElementById('igf-go').disabled=true;
+  document.getElementById('igf-go').style.opacity='.5';
+  render();
+
+  // Build query variants
+  var queries=[niche];
+  var words=niche.split(/\\s+/);
+  if(words.length>1)queries.push(words.join(''));
+  var cities=['paris','lyon','marseille','bordeaux','lille','toulouse','nantes','nice','montpellier','strasbourg','rennes','grenoble','dijon','rouen','caen'];
+  cities.forEach(function(c){queries.push(niche+' '+c);});
+  [' freelance',' pro',' studio',' agency',' formation',' officiel',' créateur',' creator'].forEach(function(s){queries.push(niche+s);});
+
+  var seen=new Set();
+
+  for(var qi=0;qi<queries.length;qi++){
+    if(!searching||enrichedCount>=maxR)break;
+    var q=queries[qi];
+    setStatus('Recherche: "'+q+'" ('+enrichedCount+'/'+maxR+')...');
+    setProgress((qi/queries.length)*25);
+
+    try{
+      var d=await igfetch('https://www.instagram.com/api/v1/web/search/topsearch/?context=blended&query='+encodeURIComponent(q)+'&include_reel=false');
+      var users=(d.users||[]);
+      for(var ui=0;ui<users.length;ui++){
+        if(!searching||enrichedCount>=maxR)break;
+        var un=(users[ui].user||{}).username;
+        if(!un||seen.has(un))continue;
+        seen.add(un);
+        setStatus('Profil '+(enrichedCount+1)+'/'+maxR+': @'+un+'...');
+        setProgress(25+(enrichedCount/maxR)*72);
+        try{
+          var pd=await igfetch('https://www.instagram.com/api/v1/users/web_profile_info/?username='+encodeURIComponent(un));
+          var usr=pd&&pd.data&&pd.data.user;
+          if(!usr)continue;
+          enrichedCount++;
+          var followers=usr.edge_followed_by?usr.edge_followed_by.count:0;
+          results.push({
+            username:un,
+            name:usr.full_name||'',
+            followers:followers,
+            following:usr.edge_follow?usr.edge_follow.count:0,
+            posts:usr.edge_owner_to_timeline_media?usr.edge_owner_to_timeline_media.count:0,
+            bio:(usr.biography||'').substring(0,150),
+            extUrl:usr.external_url||'',
+            biz:!!usr.is_business_account,
+            cat:usr.business_category_name||'',
+            verified:!!usr.is_verified,
+          });
+          render();
+        }catch(e2){/* profile fetch failed */}
+        await sleep(350);
+      }
+    }catch(e){setStatus('Erreur requête: '+e.message);}
+    await sleep(500);
+  }
+
+  searching=false;
+  document.getElementById('igf-stop').style.display='none';
+  document.getElementById('igf-go').disabled=false;
+  document.getElementById('igf-go').style.opacity='1';
+  setProgress(100);
+  var finalFiltered=applyFilters(results);
+  setStatus('Terminé — '+enrichedCount+' profils analysés, '+finalFiltered.length+' après filtres');
+  if(results.length>0)document.getElementById('igf-csv').style.display='block';
+};
+
+// ── Stop ──
+document.getElementById('igf-stop').onclick=function(){searching=false;setStatus('Arrêté.');};
+
+// ── CSV Export ──
+document.getElementById('igf-csv').onclick=function(){
+  var filtered=applyFilters(results);
+  var sorted=applySort(filtered);
+  var BOM='\\uFEFF';
+  var lines=['Username,Nom,Abonnés,Following,Posts,Bio,Business,Catégorie,URL externe,Instagram'];
+  sorted.forEach(function(p){
+    function q(s){return '"'+(String(s||'')).replace(/"/g,'""').replace(/\\n/g,' ')+'"';}
+    lines.push([q(p.username),q(p.name),p.followers,p.following,p.posts,q(p.bio),(p.biz?'Oui':'Non'),q(p.cat),q(p.extUrl),'https://www.instagram.com/'+p.username+'/'].join(','));
+  });
+  var blob=new Blob([BOM+lines.join('\\n')],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='instagram_'+document.getElementById('igf-niche').value.replace(/[^a-z0-9]/gi,'_').toLowerCase()+'_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+};
+
+// ── Enter key ──
+document.getElementById('igf-niche').addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('igf-go').click();});
+
+// ── Sort change ──
+document.getElementById('igf-sort').onchange=function(){render();};
+document.getElementById('igf-type').onchange=function(){render();};
+})();`;
+  return 'javascript:'+encodeURIComponent(code);
+})();
+
+// ── Set bookmarklet href ──
+(function(){
+  var bm=document.getElementById('bm-link');
+  if(bm)bm.href=BOOKMARKLET_CODE;
+})();
+
+// ── Copy to clipboard ──
+function copyBookmarklet(){
+  var text=BOOKMARKLET_CODE;
+  var btn=document.getElementById('copy-bm-btn');
+  var lbl=document.getElementById('copy-bm-text');
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){
+      if(lbl)lbl.textContent='Code copié !';
+      if(btn)btn.classList.add('copied');
+      setTimeout(function(){if(lbl)lbl.textContent='Copier le code bookmarklet';if(btn)btn.classList.remove('copied');},2500);
+    }).catch(function(){fallbackCopy(text,btn,lbl);});
+  } else {
+    fallbackCopy(text,btn,lbl);
+  }
+}
+function fallbackCopy(text,btn,lbl){
+  var ta=document.createElement('textarea');
+  ta.value=text;ta.style.cssText='position:fixed;opacity:0;top:-9999px';
+  document.body.appendChild(ta);ta.select();
+  try{
+    document.execCommand('copy');
+    if(lbl)lbl.textContent='Code copié !';
+    if(btn)btn.classList.add('copied');
+    setTimeout(function(){if(lbl)lbl.textContent='Copier le code bookmarklet';if(btn)btn.classList.remove('copied');},2500);
+  }catch(e){
+    if(lbl)lbl.textContent='Copie manuelle : Ctrl+C';
+  }
+  document.body.removeChild(ta);
+}
+</script>
+</body>
+</html>
