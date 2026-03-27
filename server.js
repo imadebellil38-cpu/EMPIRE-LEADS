@@ -40,19 +40,23 @@ app.use((req, res, next) => {
 });
 
 // ── Security headers ──
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com"],
-      imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "https://api.anthropic.com", "https://maps.googleapis.com"],
+// CSP: relaxed for instagram-finder (needs inline script for bookmarklet)
+app.use((req, res, next) => {
+  const isIgFinder = req.path === '/instagram-finder';
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: isIgFinder ? ["'self'", "'unsafe-inline'"] : ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", "https:"],
+        connectSrc: ["'self'", "https://api.anthropic.com", "https://maps.googleapis.com"],
+      },
     },
-  },
-  crossOriginEmbedderPolicy: false,
-}));
+    crossOriginEmbedderPolicy: false,
+  })(req, res, next);
+});
 
 // ── CORS ──
 const corsOrigins = process.env.CORS_ORIGINS || (isProd ? 'https://empire-leads.fr' : '*');
@@ -115,6 +119,7 @@ app.get('/app', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.get('/pricing', (req, res) => res.sendFile(path.join(__dirname, 'public', 'pricing.html')));
+app.get('/instagram-finder', (req, res) => res.sendFile(path.join(__dirname, 'public', 'instagram-finder.html')));
 
 // ── Static files (CSS, JS, images) ──
 app.use(express.static(path.join(__dirname, 'public'), {
