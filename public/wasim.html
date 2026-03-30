@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍬 WASIM EDITION — Liste de Prospection</title>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --purple: #7C3AED;
+    --pink: #EC4899;
+    --yellow: #FBBF24;
+    --cyan: #06B6D4;
+    --dark: #0a0a0a;
+    --card-bg: #111111;
+    --card-border: #1e1e1e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark);
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ===== CANVAS ===== */
+  #particles-canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ===== FLOATING CANDY SHAPES ===== */
+  .candy-shapes {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+  }
+  .candy-shape {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.12;
+    animation: floatShape linear infinite;
+  }
+  @keyframes floatShape {
+    0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.15; }
+    90% { opacity: 0.12; }
+    100% { transform: translateY(-20vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ===== FLOATING WORDS ===== */
+  .floating-words {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 2;
+    overflow: hidden;
+  }
+  .fw {
+    position: absolute;
+    font-family: 'Bangers', cursive;
+    font-size: 1.4rem;
+    letter-spacing: 2px;
+    opacity: 0;
+    animation: floatWord linear infinite;
+    text-shadow: 0 0 10px currentColor;
+  }
+  @keyframes floatWord {
+    0% { transform: translateY(105vh) rotate(-10deg); opacity: 0; }
+    5% { opacity: 0.6; }
+    80% { opacity: 0.4; }
+    100% { transform: translateY(-10vh) rotate(10deg); opacity: 0; }
+  }
+
+  /* ===== MAIN WRAPPER ===== */
+  .wrapper {
+    position: relative;
+    z-index: 10;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 16px 60px;
+  }
+
+  /* ===== HERO ===== */
+  .hero {
+    text-align: center;
+    padding: 50px 20px 30px;
+    position: relative;
+  }
+
+  .badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--purple), var(--pink), var(--yellow));
+    color: #fff;
+    font-family: 'Bangers', cursive;
+    font-size: 1.3rem;
+    letter-spacing: 3px;
+    padding: 8px 28px;
+    border-radius: 999px;
+    margin-bottom: 22px;
+    box-shadow: 0 0 30px rgba(236,72,153,0.6), 0 0 60px rgba(124,58,237,0.4);
+    animation: badgePulse 2s ease-in-out infinite;
+  }
+  @keyframes badgePulse {
+    0%,100% { box-shadow: 0 0 30px rgba(236,72,153,0.6), 0 0 60px rgba(124,58,237,0.4); }
+    50% { box-shadow: 0 0 50px rgba(236,72,153,0.9), 0 0 90px rgba(124,58,237,0.7); }
+  }
+
+  .hero h1 {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(3.5rem, 10vw, 7rem);
+    letter-spacing: 6px;
+    line-height: 1;
+    color: #fff;
+    text-shadow: 4px 4px 0 var(--purple), 8px 8px 0 rgba(124,58,237,0.3);
+    margin-bottom: 14px;
+  }
+  .hero h1 span {
+    color: var(--pink);
+    text-shadow: 4px 4px 0 #be185d, 8px 8px 0 rgba(236,72,153,0.3);
+    display: inline-block;
+    animation: wobble 2s ease-in-out infinite;
+  }
+  @keyframes wobble {
+    0%,100% { transform: rotate(-2deg); }
+    50% { transform: rotate(2deg); }
+  }
+
+  .hero-sub {
+    font-size: 1.1rem;
+    color: #a78bfa;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+  }
+  .hero-tagline {
+    font-family: 'Bangers', cursive;
+    font-size: 1.6rem;
+    letter-spacing: 2px;
+    color: var(--yellow);
+    text-shadow: 2px 2px 0 rgba(251,191,36,0.3);
+    margin-bottom: 28px;
+  }
+
+  /* ===== STATS BAR ===== */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+  .stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 999px;
+    padding: 8px 20px;
+    font-weight: 800;
+    font-size: 0.95rem;
+  }
+  .stat-pill .num {
+    font-family: 'Bangers', cursive;
+    font-size: 1.4rem;
+    letter-spacing: 1px;
+  }
+  .stat-pill.purple .num { color: var(--purple); text-shadow: 0 0 10px var(--purple); }
+  .stat-pill.pink .num { color: var(--pink); text-shadow: 0 0 10px var(--pink); }
+  .stat-pill.yellow .num { color: var(--yellow); text-shadow: 0 0 10px var(--yellow); }
+  .stat-pill.cyan .num { color: var(--cyan); text-shadow: 0 0 10px var(--cyan); }
+
+  /* ===== SVG CHARACTERS ===== */
+  .characters {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+  }
+  .char-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    animation: charBounce ease-in-out infinite;
+  }
+  .char-wrap:nth-child(1) { animation-duration: 2.2s; animation-delay: 0s; }
+  .char-wrap:nth-child(2) { animation-duration: 1.8s; animation-delay: 0.3s; }
+  .char-wrap:nth-child(3) { animation-duration: 2.5s; animation-delay: 0.6s; }
+  @keyframes charBounce {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  .char-label {
+    font-family: 'Bangers', cursive;
+    font-size: 0.9rem;
+    letter-spacing: 1px;
+    color: #a78bfa;
+  }
+
+  /* ===== RAINBOW PANEL ===== */
+  .rainbow-panel {
+    position: relative;
+    background: var(--card-bg);
+    border-radius: 18px;
+    padding: 2px;
+    margin-bottom: 22px;
+    background: linear-gradient(135deg, var(--purple), var(--pink), var(--yellow), var(--cyan), var(--purple));
+    background-size: 400% 400%;
+    animation: rainbowShift 4s linear infinite;
+  }
+  @keyframes rainbowShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .rainbow-panel-inner {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 20px;
+  }
+
+  /* ===== SEARCH & FILTERS ===== */
+  .controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .search-box {
+    position: relative;
+  }
+  .search-box input {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 2px solid var(--purple);
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 12px 48px 12px 18px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-box input::placeholder { color: #6b6b8a; }
+  .search-box input:focus {
+    border-color: var(--pink);
+    box-shadow: 0 0 20px rgba(236,72,153,0.3);
+  }
+  .search-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    pointer-events: none;
+  }
+
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .filter-btn {
+    background: rgba(255,255,255,0.06);
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 999px;
+    color: #ccc;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+    padding: 6px 16px;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(124,58,237,0.5);
+    transform: translateY(-1px);
+  }
+  .filter-btn[data-temp="hot"].active { background: #ef4444; border-color: #ef4444; box-shadow: 0 0 15px rgba(239,68,68,0.5); }
+  .filter-btn[data-temp="warm"].active { background: var(--yellow); border-color: var(--yellow); color: #000; box-shadow: 0 0 15px rgba(251,191,36,0.5); }
+  .filter-btn[data-temp="mild"].active { background: var(--cyan); border-color: var(--cyan); color: #000; box-shadow: 0 0 15px rgba(6,182,212,0.5); }
+  .filter-btn[data-temp="cold"].active { background: #3b82f6; border-color: #3b82f6; box-shadow: 0 0 15px rgba(59,130,246,0.5); }
+
+  /* ===== RESULTS COUNT ===== */
+  .results-count {
+    font-family: 'Bangers', cursive;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    color: #a78bfa;
+    margin-bottom: 14px;
+    padding: 0 2px;
+  }
+
+  /* ===== PROSPECT CARDS ===== */
+  .prospects-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .prospect-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    border-left-width: 5px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .prospect-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 25px rgba(0,0,0,0.5);
+  }
+  .prospect-card[data-temp="hot"] { border-left-color: #ef4444; }
+  .prospect-card[data-temp="hot"]:hover { box-shadow: -2px 4px 20px rgba(239,68,68,0.2), 2px 4px 25px rgba(0,0,0,0.5); }
+  .prospect-card[data-temp="warm"] { border-left-color: var(--yellow); }
+  .prospect-card[data-temp="warm"]:hover { box-shadow: -2px 4px 20px rgba(251,191,36,0.2), 2px 4px 25px rgba(0,0,0,0.5); }
+  .prospect-card[data-temp="mild"] { border-left-color: var(--cyan); }
+  .prospect-card[data-temp="mild"]:hover { box-shadow: -2px 4px 20px rgba(6,182,212,0.2), 2px 4px 25px rgba(0,0,0,0.5); }
+  .prospect-card[data-temp="cold"] { border-left-color: #3b82f6; }
+  .prospect-card[data-temp="cold"]:hover { box-shadow: -2px 4px 20px rgba(59,130,246,0.2), 2px 4px 25px rgba(0,0,0,0.5); }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .card-name {
+    font-weight: 800;
+    font-size: 1rem;
+    color: #fff;
+    line-height: 1.3;
+  }
+  .temp-badge {
+    font-family: 'Bangers', cursive;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  [data-temp="hot"] .temp-badge { background: rgba(239,68,68,0.2); color: #fca5a5; border: 1px solid rgba(239,68,68,0.4); }
+  [data-temp="warm"] .temp-badge { background: rgba(251,191,36,0.15); color: #fde68a; border: 1px solid rgba(251,191,36,0.4); }
+  [data-temp="mild"] .temp-badge { background: rgba(6,182,212,0.15); color: #a5f3fc; border: 1px solid rgba(6,182,212,0.4); }
+  [data-temp="cold"] .temp-badge { background: rgba(59,130,246,0.15); color: #bfdbfe; border: 1px solid rgba(59,130,246,0.4); }
+
+  .card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 0.82rem;
+    color: #888;
+  }
+  .card-meta span { display: flex; align-items: center; gap: 4px; }
+  .card-category { color: #a78bfa; font-weight: 700; }
+  .card-city { color: #67e8f9; }
+  .card-phone { color: #fde68a; font-weight: 700; }
+
+  .card-note {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: #666;
+    font-style: italic;
+  }
+
+  /* ===== CANDY CLICK ANIMATION ===== */
+  .candy-pop {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    font-family: 'Bangers', cursive;
+    font-size: 1.6rem;
+    letter-spacing: 2px;
+    animation: candyPop 0.8s ease-out forwards;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    white-space: nowrap;
+  }
+  @keyframes candyPop {
+    0% { transform: translate(-50%, -50%) scale(0.5) rotate(-10deg); opacity: 1; }
+    50% { transform: translate(-50%, -80%) scale(1.3) rotate(5deg); opacity: 1; }
+    100% { transform: translate(-50%, -130%) scale(1) rotate(-5deg); opacity: 0; }
+  }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #111; }
+  ::-webkit-scrollbar-thumb { background: var(--purple); border-radius: 3px; }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    text-align: center;
+    padding: 30px 0 10px;
+    font-size: 0.85rem;
+    color: #444;
+  }
+  .footer span { color: var(--pink); }
+</style>
+</head>
+<body>
+
+<canvas id="particles-canvas"></canvas>
+
+<!-- Floating candy shapes -->
+<div class="candy-shapes" id="candy-shapes"></div>
+
+<!-- Floating words -->
+<div class="floating-words" id="floating-words"></div>
+
+<div class="wrapper">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="badge">🍬 WASIM EDITION 🍭</div>
+    <h1>WASIM <span>POWER</span></h1>
+    <p class="hero-sub">Liste de prospection — Commerce &amp; Services</p>
+    <p class="hero-tagline">60 prospects. Mode sucré activé. 🍩</p>
+
+    <div class="stats-bar">
+      <div class="stat-pill purple">
+        <span class="num">60</span>
+        <span>Prospects</span>
+      </div>
+      <div class="stat-pill pink">
+        <span class="num">15</span>
+        <span>🔥 Chauds</span>
+      </div>
+      <div class="stat-pill yellow">
+        <span class="num">25</span>
+        <span>☀️ Tièdes</span>
+      </div>
+      <div class="stat-pill cyan">
+        <span class="num">12</span>
+        <span>❄️ Doux</span>
+      </div>
+      <div class="stat-pill purple">
+        <span class="num">250</span>
+        <span>Crédits 💎</span>
+      </div>
+    </div>
+
+    <!-- SVG CHARACTERS -->
+    <div class="characters">
+      <!-- Lollipop Person -->
+      <div class="char-wrap">
+        <svg width="80" height="110" viewBox="0 0 80 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Lollipop head -->
+          <circle cx="40" cy="26" r="24" fill="#EC4899"/>
+          <circle cx="40" cy="26" r="24" fill="url(#lolliGrad)" opacity="0.7"/>
+          <!-- Swirl lines -->
+          <path d="M40 6 Q55 16 45 26 Q35 36 40 46" stroke="#fff" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
+          <path d="M20 18 Q28 10 40 14" stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.5"/>
+          <!-- Eyes -->
+          <circle cx="33" cy="23" r="4" fill="#fff"/>
+          <circle cx="47" cy="23" r="4" fill="#fff"/>
+          <circle cx="34" cy="24" r="2" fill="#1a1a2e"/>
+          <circle cx="48" cy="24" r="2" fill="#1a1a2e"/>
+          <!-- Smile -->
+          <path d="M33 32 Q40 38 47 32" stroke="#fff" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <!-- Stick -->
+          <rect x="37" y="48" width="6" height="30" rx="3" fill="#FBBF24"/>
+          <!-- Legs -->
+          <path d="M34 78 L28 98" stroke="#7C3AED" stroke-width="5" stroke-linecap="round"/>
+          <path d="M46 78 L52 98" stroke="#7C3AED" stroke-width="5" stroke-linecap="round"/>
+          <!-- Shoes -->
+          <ellipse cx="26" cy="100" rx="7" ry="4" fill="#EC4899"/>
+          <ellipse cx="54" cy="100" rx="7" ry="4" fill="#EC4899"/>
+          <!-- Arms -->
+          <path d="M38 58 L22 68" stroke="#7C3AED" stroke-width="5" stroke-linecap="round"/>
+          <path d="M42 58 L58 68" stroke="#7C3AED" stroke-width="5" stroke-linecap="round"/>
+          <defs>
+            <radialGradient id="lolliGrad" cx="30%" cy="30%">
+              <stop offset="0%" stop-color="#fff" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+        </svg>
+        <span class="char-label">CANDY KID</span>
+      </div>
+
+      <!-- Ice cream character -->
+      <div class="char-wrap">
+        <svg width="80" height="110" viewBox="0 0 80 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Cone body -->
+          <polygon points="40,100 18,52 62,52" fill="#FBBF24"/>
+          <line x1="30" y1="52" x2="25" y2="80" stroke="#e8a500" stroke-width="1.5" opacity="0.6"/>
+          <line x1="40" y1="52" x2="35" y2="85" stroke="#e8a500" stroke-width="1.5" opacity="0.6"/>
+          <line x1="50" y1="52" x2="45" y2="80" stroke="#e8a500" stroke-width="1.5" opacity="0.6"/>
+          <!-- Pink scoop -->
+          <ellipse cx="40" cy="46" rx="20" ry="14" fill="#EC4899"/>
+          <!-- White scoop -->
+          <ellipse cx="40" cy="33" rx="17" ry="13" fill="#f9fafb"/>
+          <!-- Purple scoop -->
+          <ellipse cx="40" cy="22" rx="14" ry="11" fill="#7C3AED"/>
+          <!-- Cherry on top -->
+          <circle cx="40" cy="10" r="6" fill="#ef4444"/>
+          <path d="M40 10 Q45 4 50 6" stroke="#22c55e" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- Face on pink scoop -->
+          <circle cx="34" cy="45" r="3" fill="#fff"/>
+          <circle cx="46" cy="45" r="3" fill="#fff"/>
+          <circle cx="35" cy="46" r="1.5" fill="#1a1a2e"/>
+          <circle cx="47" cy="46" r="1.5" fill="#1a1a2e"/>
+          <path d="M35 51 Q40 55 45 51" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <!-- Sprinkles -->
+          <line x1="28" y1="38" x2="32" y2="34" stroke="#FBBF24" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="48" y1="36" x2="52" y2="40" stroke="#06B6D4" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="35" y1="30" x2="39" y2="26" stroke="#EC4899" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <span class="char-label">ICE CREAM</span>
+      </div>
+
+      <!-- Star candy character -->
+      <div class="char-wrap">
+        <svg width="80" height="110" viewBox="0 0 80 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Star body -->
+          <polygon points="40,4 47,26 70,26 52,40 59,62 40,48 21,62 28,40 10,26 33,26" fill="#FBBF24"/>
+          <polygon points="40,10 45,27 65,27 50,38 56,58 40,46 24,58 30,38 15,27 35,27" fill="#fde68a" opacity="0.5"/>
+          <!-- Face -->
+          <circle cx="34" cy="30" r="3.5" fill="#fff"/>
+          <circle cx="46" cy="30" r="3.5" fill="#fff"/>
+          <circle cx="35" cy="31" r="2" fill="#1a1a2e"/>
+          <circle cx="47" cy="31" r="2" fill="#1a1a2e"/>
+          <path d="M34 38 Q40 43 46 38" stroke="#7C3AED" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <!-- Rosy cheeks -->
+          <circle cx="29" cy="35" r="4" fill="#EC4899" opacity="0.4"/>
+          <circle cx="51" cy="35" r="4" fill="#EC4899" opacity="0.4"/>
+          <!-- Legs -->
+          <path d="M34 62 L28 90" stroke="#FBBF24" stroke-width="5" stroke-linecap="round"/>
+          <path d="M46 62 L52 90" stroke="#FBBF24" stroke-width="5" stroke-linecap="round"/>
+          <!-- Shoes -->
+          <ellipse cx="26" cy="92" rx="8" ry="4.5" fill="#7C3AED"/>
+          <ellipse cx="54" cy="92" rx="8" ry="4.5" fill="#7C3AED"/>
+          <!-- Arms -->
+          <path d="M20 28 L10 42" stroke="#FBBF24" stroke-width="5" stroke-linecap="round"/>
+          <path d="M60 28 L70 42" stroke="#FBBF24" stroke-width="5" stroke-linecap="round"/>
+          <!-- Stars around -->
+          <text x="4" y="20" font-size="10" fill="#EC4899">✦</text>
+          <text x="64" y="18" font-size="8" fill="#06B6D4">✦</text>
+          <text x="2" y="55" font-size="7" fill="#7C3AED">★</text>
+          <text x="68" y="50" font-size="9" fill="#EC4899">★</text>
+        </svg>
+        <span class="char-label">STAR POWER</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTROLS -->
+  <div class="rainbow-panel">
+    <div class="rainbow-panel-inner">
+      <div class="controls">
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="🔍 Chercher un prospect, une ville, un secteur..." />
+          <span class="search-icon">🍬</span>
+        </div>
+        <div class="filter-row">
+          <button class="filter-btn active" data-temp="all">🌈 Tous (60)</button>
+          <button class="filter-btn" data-temp="hot">🔥 Chauds (15)</button>
+          <button class="filter-btn" data-temp="warm">☀️ Tièdes (25)</button>
+          <button class="filter-btn" data-temp="mild">🧊 Doux (12)</button>
+          <button class="filter-btn" data-temp="cold">❄️ Froids (8)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results-count" id="resultsCount">✨ 60 prospects affichés</div>
+
+  <!-- PROSPECT CARDS -->
+  <div class="prospects-grid" id="prospectsGrid"></div>
+
+  <div class="footer">Made with <span>♥</span> for WASIM — Sucré &amp; Puissant 🍭
+  </div>
+</div>
+
+<script>
+// ===== PROSPECT DATA =====
+const prospects = [
+  // HOT (15)
+  { id:1, name:"Beauté Dorée", category:"Salon de beauté", city:"Paris 11e", phone:"01 43 55 78 12", temp:"hot", note:"Pas de site, très active sur Instagram" },
+  { id:2, name:"Nail Art by Sofia", category:"Bar à ongles", city:"Lyon 3e", phone:"04 72 34 56 89", temp:"hot", note:"Demande de devis reçue, rappeler vite" },
+  { id:3, name:"Fleurs & Passion", category:"Fleuriste", city:"Marseille 6e", phone:"04 91 22 45 67", temp:"hot", note:"Concurrence sans site dans la zone" },
+  { id:4, name:"Bijoux Yasmine", category:"Bijouterie", city:"Toulouse", phone:"05 61 23 67 34", temp:"hot", note:"Ouverte depuis 3 mois, cherche de la visibilité" },
+  { id:5, name:"La P'tite Boutique", category:"Cadeaux & Déco", city:"Bordeaux", phone:"05 57 88 34 12", temp:"hot", note:"Propriétaire très enthousiaste au téléphone" },
+  { id:6, name:"Happy Pets", category:"Animalerie", city:"Nantes", phone:"02 40 67 89 45", temp:"hot", note:"Grand magasin, budget confirmé" },
+  { id:7, name:"Style & Mode", category:"Prêt-à-porter", city:"Strasbourg", phone:"03 88 45 23 67", temp:"hot", note:"Cherche à développer les ventes en ligne" },
+  { id:8, name:"Le Cocon Déco", category:"Décoration intérieure", city:"Rennes", phone:"02 99 34 78 56", temp:"hot", note:"Rendez-vous fixé la semaine prochaine" },
+  { id:9, name:"Chez Sana Esthétique", category:"Institut beauté", city:"Montpellier", phone:"04 67 45 23 89", temp:"hot", note:"Nouvelle adresse, cherche clients" },
+  { id:10, name:"Les Délices Sucrés", category:"Pâtisserie / Confiserie", city:"Lille", phone:"03 20 78 34 56", temp:"hot", note:"Veut un site vitrine urgent" },
+  { id:11, name:"Atelier des Sens", category:"Spa & Bien-être", city:"Nice", phone:"04 93 56 78 23", temp:"hot", note:"Budget conséquent, décideur disponible" },
+  { id:12, name:"Tendance Homme", category:"Barbershop", city:"Grenoble", phone:"04 76 23 89 45", temp:"hot", note:"2 salons, veut une présence unifiée" },
+  { id:13, name:"Magic Nails Studio", category:"Bar à ongles", city:"Toulouse", phone:"05 61 78 45 23", temp:"hot", note:"Flux client fort, pas de réservation en ligne" },
+  { id:14, name:"La Vitrine Chic", category:"Vêtements femme", city:"Lyon 6e", phone:"04 72 89 34 67", temp:"hot", note:"Veut lancer collection printemps en ligne" },
+  { id:15, name:"Petits Trésors", category:"Jouets & Cadeaux enfants", city:"Paris 15e", phone:"01 56 78 23 45", temp:"hot", note:"Proche école, traffic local important" },
+
+  // WARM (25)
+  { id:16, name:"Madame Fleur", category:"Fleuriste", city:"Bordeaux", phone:"05 56 34 78 12", temp:"warm", note:"Intéressée mais compare les offres" },
+  { id:17, name:"Couleurs & Styles", category:"Salon de coiffure", city:"Marseille 13e", phone:"04 91 67 45 23", temp:"warm", note:"Pas de site, 8 ans d'expérience" },
+  { id:18, name:"L'Antre des Bijoux", category:"Bijouterie fantaisie", city:"Paris 18e", phone:"01 42 34 89 67", temp:"warm", note:"A regardé nos pages, à relancer" },
+  { id:19, name:"Féline & Co.", category:"Animalerie chats", city:"Nantes", phone:"02 51 23 67 89", temp:"warm", note:"Boutique spécialisée, niche forte" },
+  { id:20, name:"Maison Lumière", category:"Luminaires & Déco", city:"Strasbourg", phone:"03 88 67 45 12", temp:"warm", note:"A demandé une plaquette tarifaire" },
+  { id:21, name:"Rose & Bohème", category:"Accessoires mode", city:"Rennes", phone:"02 99 56 23 78", temp:"warm", note:"Boutique tendance, communauté Instagram solide" },
+  { id:22, name:"Le Paradis des Plantes", category:"Jardinerie / Fleuriste", city:"Montpellier", phone:"04 67 89 34 45", temp:"warm", note:"Saison printemps, timing parfait" },
+  { id:23, name:"Glam Beauty Center", category:"Institut beauté", city:"Grenoble", phone:"04 76 45 78 23", temp:"warm", note:"Nouvelle gérante, veut moderniser" },
+  { id:24, name:"Boutique Évasion", category:"Vêtements voyage & loisirs", city:"Lille", phone:"03 20 89 56 34", temp:"warm", note:"Ouverture d'un 2e point de vente prévu" },
+  { id:25, name:"Le Vestiaire Chic", category:"Dépôt-vente vêtements", city:"Nice", phone:"04 93 23 67 89", temp:"warm", note:"Concept original, veut site + réservation" },
+  { id:26, name:"Sweet Paws", category:"Toilettage & Animalerie", city:"Toulouse", phone:"05 62 34 56 78", temp:"warm", note:"A déjà été approché par un concurrent" },
+  { id:27, name:"La Cave à Parfums", category:"Parfumerie", city:"Lyon 2e", phone:"04 72 56 23 89", temp:"warm", note:"Haut de gamme, cherche image premium" },
+  { id:28, name:"Cozy Home", category:"Décoration & Textile maison", city:"Paris 12e", phone:"01 43 89 56 23", temp:"warm", note:"Réponse positive, manque de temps" },
+  { id:29, name:"L'Atelier du Bijou", category:"Bijoux artisanaux", city:"Bordeaux", phone:"05 57 45 23 67", temp:"warm", note:"Créatrice passionnée, peu de budget mais motivée" },
+  { id:30, name:"Espace Zen & Yoga", category:"Studio bien-être", city:"Marseille 8e", phone:"04 91 34 67 23", temp:"warm", note:"Cherche réservation en ligne" },
+  { id:31, name:"Frivolités", category:"Lingerie & Maillots", city:"Nantes", phone:"02 40 45 89 67", temp:"warm", note:"Saisonnalité estivale, bonne fenêtre" },
+  { id:32, name:"Bébé Chéri", category:"Puériculture & Mode bébé", city:"Strasbourg", phone:"03 88 23 67 45", temp:"warm", note:"Niche famille, peu de concurrents en ligne" },
+  { id:33, name:"L'Herberie", category:"Herboristerie & Cosmétiques bio", city:"Grenoble", phone:"04 76 67 34 89", temp:"warm", note:"Tendance bio forte dans la zone" },
+  { id:34, name:"Vintage Dreams", category:"Friperie & Vintage", city:"Paris 20e", phone:"01 47 89 34 56", temp:"warm", note:"Clientèle jeune, actif sur TikTok" },
+  { id:35, name:"La Cordonnerie Moderne", category:"Cordonnerie & Maroquinerie", city:"Rennes", phone:"02 99 78 56 34", temp:"warm", note:"Artisan, souhaite fidéliser la clientèle" },
+  { id:36, name:"Plumes & Paillettes", category:"Déguisements & Costumes", city:"Montpellier", phone:"04 67 23 89 56", temp:"warm", note:"Location + vente, avant-fêtes idéal" },
+  { id:37, name:"Tatami Sport", category:"Articles de sport & Kimonos", city:"Lyon 1er", phone:"04 72 78 45 23", temp:"warm", note:"Club partenaire, veut boutique en ligne" },
+  { id:38, name:"Les Bougies de Lucie", category:"Bougies artisanales", city:"Bordeaux", phone:"05 57 23 89 45", temp:"warm", note:"Très fort potentiel e-commerce" },
+  { id:39, name:"Photo Emotion", category:"Studio photo & Encadrement", city:"Lille", phone:"03 20 34 56 78", temp:"warm", note:"Cherche clientèle en ligne" },
+  { id:40, name:"Le Souk Moderne", category:"Artisanat & Décoration orientale", city:"Paris 10e", phone:"01 42 78 67 34", temp:"warm", note:"Touristes + locaux, énorme potentiel" },
+
+  // MILD (12)
+  { id:41, name:"Aquarelle Studio", category:"Cours de peinture", city:"Nice", phone:"04 93 45 23 67", temp:"mild", note:"Propriétaire hésitante, 2e contact" },
+  { id:42, name:"Le Gant Blanc", category:"Nettoyage textile & retouches", city:"Toulouse", phone:"05 61 89 34 23", temp:"mild", note:"Activité saisonnière, à relancer en automne" },
+  { id:43, name:"Saveurs du Monde", category:"Épicerie fine & Traiteur", city:"Marseille 5e", phone:"04 91 56 23 78", temp:"mild", note:"Concept fort mais propriétaire peu disponible" },
+  { id:44, name:"Créations Céramiques", category:"Atelier céramique", city:"Strasbourg", phone:"03 88 89 56 23", temp:"mild", note:"Artisane, budget limité" },
+  { id:45, name:"La Ruche des Jouets", category:"Jouets pédagogiques", city:"Rennes", phone:"02 99 45 67 89", temp:"mild", note:"Réponse en attente depuis 2 semaines" },
+  { id:46, name:"Beauté Nomade", category:"Maquillage & Coiffure événementiel", city:"Grenoble", phone:"04 76 89 23 56", temp:"mild", note:"Auto-entrepreneuse, croissance lente" },
+  { id:47, name:"Galerie des Cadres", category:"Encadrement & Art", city:"Lyon 4e", phone:"04 72 23 89 67", temp:"mild", note:"Intéressé mais délai long de décision" },
+  { id:48, name:"L'Atelier Couture", category:"Retouches & Couture sur mesure", city:"Bordeaux", phone:"05 56 67 34 89", temp:"mild", note:"Vieille clientèle, résistant au numérique" },
+  { id:49, name:"Papeterie Créative", category:"Papeterie & Fournitures art", city:"Nantes", phone:"02 40 23 89 56", temp:"mild", note:"Petite structure, peur du coût" },
+  { id:50, name:"Fée des Fleurs", category:"Fleuriste événementiel", city:"Paris 9e", phone:"01 48 67 23 89", temp:"mild", note:"Spécialiste mariages, hors saison" },
+  { id:51, name:"Le Chapelier Fou", category:"Chapellerie & Accessoires", city:"Montpellier", phone:"04 67 56 89 23", temp:"mild", note:"Boutique atypique, communauté fidèle" },
+  { id:52, name:"Studio Pilates Zen", category:"Studio pilates", city:"Lille", phone:"03 20 45 67 23", temp:"mild", note:"Cherche solution tout-en-un" },
+
+  // COLD (8)
+  { id:53, name:"Horlogerie Precision", category:"Horlogerie & Bijouterie", city:"Paris 8e", phone:"01 45 67 89 23", temp:"cold", note:"Établissement ancien, peu intéressé" },
+  { id:54, name:"La Quincaillerie du Coin", category:"Quincaillerie", city:"Lyon 8e", phone:"04 72 34 67 89", temp:"cold", note:"Propriétaire âgé, pas dans la cible" },
+  { id:55, name:"Garage des Arts", category:"Galerie d'art", city:"Marseille 2e", phone:"04 91 78 56 23", temp:"cold", note:"Budget inexistant pour le moment" },
+  { id:56, name:"Boucherie Artisanale Renard", category:"Boucherie", city:"Toulouse", phone:"05 61 45 67 89", temp:"cold", note:"Pas convaincu de l'utilité d'un site" },
+  { id:57, name:"Librairie des Mots", category:"Librairie indépendante", city:"Bordeaux", phone:"05 56 78 45 23", temp:"cold", note:"Attaché au modèle traditionnel" },
+  { id:58, name:"Kiosque Presse Martin", category:"Presse & Tabac", city:"Nantes", phone:"02 40 89 56 23", temp:"cold", note:"Pas de besoin identifié" },
+  { id:59, name:"Épicerie Fine Bertrand", category:"Épicerie de quartier", city:"Strasbourg", phone:"03 88 34 89 56", temp:"cold", note:"Clientèle locale suffisante selon lui" },
+  { id:60, name:"Boulangerie des Alpilles", category:"Boulangerie artisanale", city:"Grenoble", phone:"04 76 56 23 89", temp:"cold", note:"Pas de temps pour s'en occuper" },
+];
+
+const candyWords = ["SWEET!", "BOOM!", "YUM!", "WAHOO!", "SUGAR RUSH!", "LETS GO!", "POWER UP!", "ZOOOM!", "YUMMY!", "WOW!", "YEAH!", "SUPER!"];
+const wordColors = ["#EC4899","#FBBF24","#06B6D4","#7C3AED","#f97316","#a78bfa","#34d399"];
+
+// ===== FLOATING WORDS =====
+function spawnFloatingWords() {
+  const container = document.getElementById('floating-words');
+  candyWords.forEach((word, i) => {
+    const el = document.createElement('div');
+    el.className = 'fw';
+    el.textContent = word;
+    el.style.left = (5 + Math.random() * 85) + '%';
+    el.style.color = wordColors[i % wordColors.length];
+    const dur = 8 + Math.random() * 12;
+    const delay = Math.random() * 15;
+    el.style.animation = `floatWord ${dur}s ${delay}s linear infinite`;
+    container.appendChild(el);
+  });
+}
+
+// ===== FLOATING CANDY SHAPES =====
+function spawnCandyShapes() {
+  const container = document.getElementById('candy-shapes');
+  const shapes = ['circle','heart','star'];
+  const colors = ['#EC4899','#FBBF24','#06B6D4','#7C3AED','#f97316','#34d399','#a78bfa'];
+  for (let i = 0; i < 25; i++) {
+    const div = document.createElement('div');
+    const size = 20 + Math.random() * 60;
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    div.style.width = size + 'px';
+    div.style.height = size + 'px';
+    div.style.left = Math.random() * 100 + '%';
+    div.style.background = color;
+    const dur = 12 + Math.random() * 20;
+    const delay = Math.random() * 20;
+    div.style.animation = `floatShape ${dur}s ${delay}s linear infinite`;
+    const shapeType = shapes[Math.floor(Math.random() * shapes.length)];
+    if (shapeType === 'circle') {
+      div.style.borderRadius = '50%';
+    } else if (shapeType === 'heart') {
+      div.style.transform = 'rotate(45deg)';
+      div.style.borderRadius = '0 0 50% 0';
+      div.style.clipPath = 'polygon(50% 0%, 100% 30%, 100% 70%, 50% 100%, 0% 70%, 0% 30%)';
+    } else {
+      div.style.clipPath = 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)';
+      div.style.borderRadius = '0';
+    }
+    container.appendChild(div);
+  }
+}
+
+// ===== CANVAS PARTICLES =====
+function initParticles() {
+  const canvas = document.getElementById('particles-canvas');
+  const ctx = canvas.getContext('2d');
+  let W = canvas.width = window.innerWidth;
+  let H = canvas.height = window.innerHeight;
+  window.addEventListener('resize', () => { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; });
+
+  const particleColors = ['#EC4899','#FBBF24','#06B6D4','#7C3AED','#f97316','#a78bfa','#34d399','#fb7185'];
+  const particles = [];
+  for (let i = 0; i < 80; i++) {
+    particles.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: 1.5 + Math.random() * 3.5,
+      dx: (Math.random() - 0.5) * 0.6,
+      dy: -0.2 - Math.random() * 0.5,
+      color: particleColors[Math.floor(Math.random() * particleColors.length)],
+      alpha: 0.3 + Math.random() * 0.5,
+    });
+  }
+
+  function animate() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.fill();
+      ctx.restore();
+      p.x += p.dx;
+      p.y += p.dy;
+      if (p.y < -10) { p.y = H + 10; p.x = Math.random() * W; }
+      if (p.x < -10) p.x = W + 10;
+      if (p.x > W + 10) p.x = -10;
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+// ===== CANDY POP ANIMATION =====
+const clickWords = ["🍬 SWEET!", "💥 BOOM!", "🍭 YUM!", "⚡ WAHOO!", "🍩 SUGAR RUSH!", "🚀 LETS GO!", "⭐ POWER UP!", "🎯 TARGET!", "💫 CONTACT!", "🔥 CHAUD!"];
+const clickColors = ["#EC4899","#FBBF24","#06B6D4","#7C3AED","#f97316","#a78bfa"];
+
+function showCandyPop(x, y) {
+  const pop = document.createElement('div');
+  pop.className = 'candy-pop';
+  pop.textContent = clickWords[Math.floor(Math.random() * clickWords.length)];
+  pop.style.left = x + 'px';
+  pop.style.top = y + 'px';
+  pop.style.color = clickColors[Math.floor(Math.random() * clickColors.length)];
+  document.body.appendChild(pop);
+  setTimeout(() => pop.remove(), 900);
+}
+
+// ===== RENDER CARDS =====
+function getTempLabel(temp) {
+  const labels = { hot: '🔥 CHAUD', warm: '☀️ TIÈDE', mild: '🧊 DOUX', cold: '❄️ FROID' };
+  return labels[temp] || temp;
+}
+
+function renderCards(data) {
+  const grid = document.getElementById('prospectsGrid');
+  const count = document.getElementById('resultsCount');
+  grid.innerHTML = '';
+
+  if (data.length === 0) {
+    grid.innerHTML = '<div style="text-align:center;padding:40px;color:#666;font-family:Bangers,cursive;font-size:1.5rem;letter-spacing:2px;">😢 AUCUN PROSPECT TROUVÉ...</div>';
+    count.textContent = '0 prospects affichés';
+    return;
+  }
+
+  count.textContent = `✨ ${data.length} prospect${data.length > 1 ? 's' : ''} affiché${data.length > 1 ? 's' : ''}`;
+
+  data.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'prospect-card';
+    card.dataset.temp = p.temp;
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-name">${p.name}</div>
+        <div class="temp-badge">${getTempLabel(p.temp)}</div>
+      </div>
+      <div class="card-meta">
+        <span class="card-category">🏪 ${p.category}</span>
+        <span class="card-city">📍 ${p.city}</span>
+        <span class="card-phone">📞 ${p.phone}</span>
+      </div>
+      ${p.note ? `<div class="card-note">💬 ${p.note}</div>` : ''}
+    `;
+    card.addEventListener('click', (e) => {
+      showCandyPop(e.clientX, e.clientY);
+    });
+    grid.appendChild(card);
+  });
+}
+
+// ===== FILTER & SEARCH =====
+let currentFilter = 'all';
+let currentSearch = '';
+
+function applyFilters() {
+  let data = prospects;
+  if (currentFilter !== 'all') {
+    data = data.filter(p => p.temp === currentFilter);
+  }
+  if (currentSearch.trim()) {
+    const q = currentSearch.toLowerCase();
+    data = data.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      p.category.toLowerCase().includes(q) ||
+      p.city.toLowerCase().includes(q) ||
+      p.phone.includes(q) ||
+      (p.note && p.note.toLowerCase().includes(q))
+    );
+  }
+  renderCards(data);
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.temp;
+    applyFilters();
+  });
+});
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  currentSearch = e.target.value;
+  applyFilters();
+});
+
+// ===== INIT =====
+spawnFloatingWords();
+spawnCandyShapes();
+initParticles();
+renderCards(prospects);
+</script>
+</body>
+</html>

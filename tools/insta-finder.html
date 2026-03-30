@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Instagram Finder - Empire Leads</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #e0e0e0; min-height: 100vh; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+  h1 { text-align: center; margin: 20px 0; font-size: 28px; }
+  h1 span { color: #E1306C; }
+  .search-box { background: #1a1a1a; border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+  .row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .field { flex: 1; min-width: 200px; }
+  .field label { display: block; font-size: 12px; color: #888; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
+  input, select { width: 100%; padding: 12px 16px; border: 1px solid #333; border-radius: 10px; background: #111; color: #fff; font-size: 15px; outline: none; transition: border-color .2s; }
+  input:focus { border-color: #E1306C; }
+  .btn { padding: 12px 24px; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all .2s; }
+  .btn-primary { background: linear-gradient(135deg, #E1306C, #F77737); color: #fff; }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(225,48,108,.4); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  .btn-secondary { background: #222; color: #fff; border: 1px solid #333; }
+  .btn-secondary:hover { background: #333; }
+  .btn-voice { background: #222; color: #E1306C; border: 2px solid #E1306C; border-radius: 50%; width: 48px; height: 48px; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+  .btn-voice.recording { background: #E1306C; color: #fff; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(225,48,108,.4); } 50% { box-shadow: 0 0 0 10px rgba(225,48,108,0); } }
+  .actions { display: flex; gap: 10px; align-items: center; }
+  .progress-bar { height: 4px; background: #222; border-radius: 2px; margin: 10px 0; overflow: hidden; display: none; }
+  .progress-bar .fill { height: 100%; background: linear-gradient(90deg, #E1306C, #F77737); transition: width .3s; }
+  .status { text-align: center; color: #888; font-size: 14px; margin: 10px 0; min-height: 20px; }
+  .stats { display: flex; gap: 20px; justify-content: center; margin: 15px 0; }
+  .stat { text-align: center; }
+  .stat .num { font-size: 24px; font-weight: 700; color: #E1306C; }
+  .stat .label { font-size: 11px; color: #666; text-transform: uppercase; }
+  table { width: 100%; border-collapse: collapse; background: #1a1a1a; border-radius: 12px; overflow: hidden; }
+  th { background: #222; padding: 12px 16px; text-align: left; font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; position: sticky; top: 0; cursor: pointer; }
+  th:hover { color: #E1306C; }
+  td { padding: 10px 16px; border-bottom: 1px solid #222; font-size: 14px; }
+  tr:hover td { background: #222; }
+  .profile-link { color: #E1306C; text-decoration: none; font-weight: 600; }
+  .profile-link:hover { text-decoration: underline; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+  .badge-verified { background: #1DA1F2; color: #fff; }
+  .badge-followers { background: #333; color: #ccc; }
+  .voice-text { background: #111; border: 1px dashed #E1306C; border-radius: 10px; padding: 12px; margin: 10px 0; font-style: italic; color: #E1306C; display: none; }
+  .empty { text-align: center; padding: 60px 20px; color: #555; }
+  .empty .icon { font-size: 48px; margin-bottom: 10px; }
+  #results-container { max-height: 600px; overflow-y: auto; border-radius: 12px; }
+  .tag { display: inline-block; background: #222; color: #aaa; padding: 2px 8px; border-radius: 8px; font-size: 11px; margin: 1px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1><span>Instagram</span> Finder</h1>
+
+  <div class="search-box">
+    <div class="row">
+      <div class="field" style="flex:2">
+        <label>Niche / Mot-clé</label>
+        <input type="text" id="niche" placeholder="monteur video, magasin manga, coach sportif..." autofocus>
+      </div>
+      <div class="field">
+        <label>Abonnés min</label>
+        <input type="number" id="minFollowers" placeholder="500" value="0">
+      </div>
+      <div class="field">
+        <label>Abonnés max</label>
+        <input type="number" id="maxFollowers" placeholder="50000" value="100000">
+      </div>
+      <div class="field">
+        <label>Nombre de résultats</label>
+        <input type="number" id="maxResults" placeholder="50" value="50">
+      </div>
+    </div>
+    <div class="row">
+      <div class="field">
+        <label>Tri par</label>
+        <select id="sortBy">
+          <option value="followers_desc">Abonnés (plus au moins)</option>
+          <option value="followers_asc">Abonnés (moins au plus)</option>
+          <option value="relevance">Pertinence</option>
+          <option value="name">Nom A-Z</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Filtrer</label>
+        <select id="filterType">
+          <option value="all">Tous les profils</option>
+          <option value="verified">Vérifiés uniquement</option>
+          <option value="business">Comptes pro/business</option>
+        </select>
+      </div>
+    </div>
+    <div class="voice-text" id="voiceText"></div>
+    <div class="actions">
+      <button class="btn btn-primary" id="searchBtn" onclick="startSearch()">Rechercher</button>
+      <button class="btn btn-voice" id="voiceBtn" onclick="toggleVoice()" title="Recherche vocale">🎤</button>
+      <button class="btn btn-secondary" onclick="exportCSV()" id="exportBtn" style="display:none">📥 Export CSV</button>
+      <button class="btn btn-secondary" onclick="stopSearch()" id="stopBtn" style="display:none">⏹ Stop</button>
+    </div>
+  </div>
+
+  <div class="progress-bar" id="progressBar"><div class="fill" id="progressFill"></div></div>
+  <div class="status" id="status"></div>
+
+  <div class="stats" id="stats" style="display:none">
+    <div class="stat"><div class="num" id="statFound">0</div><div class="label">Trouvés</div></div>
+    <div class="stat"><div class="num" id="statFiltered">0</div><div class="label">Après filtres</div></div>
+    <div class="stat"><div class="num" id="statAvgFollowers">0</div><div class="label">Moy. abonnés</div></div>
+  </div>
+
+  <div id="results-container">
+    <div class="empty" id="emptyState">
+      <div class="icon">🔍</div>
+      <p>Tape une niche et lance la recherche.<br>Tu dois être connecté à Instagram dans ce navigateur.</p>
+    </div>
+    <table id="resultsTable" style="display:none">
+      <thead>
+        <tr>
+          <th onclick="sortTable('index')">#</th>
+          <th onclick="sortTable('username')">Profil</th>
+          <th onclick="sortTable('fullName')">Nom</th>
+          <th onclick="sortTable('followers')">Abonnés</th>
+          <th onclick="sortTable('bio')">Bio</th>
+          <th>Lien</th>
+        </tr>
+      </thead>
+      <tbody id="resultsBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+let allProfiles = [];
+let searching = false;
+let abortController = null;
+
+// ===== VOICE INPUT =====
+let recognition = null;
+function toggleVoice() {
+  const btn = document.getElementById('voiceBtn');
+  const voiceText = document.getElementById('voiceText');
+
+  if (recognition) {
+    recognition.stop();
+    recognition = null;
+    btn.classList.remove('recording');
+    return;
+  }
+
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    alert('Ton navigateur ne supporte pas la reconnaissance vocale.');
+    return;
+  }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = 'fr-FR';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+
+  btn.classList.add('recording');
+  voiceText.style.display = 'block';
+  voiceText.textContent = 'Parle...';
+
+  recognition.onresult = (e) => {
+    const text = e.results[0][0].transcript;
+    voiceText.textContent = text;
+    if (e.results[0].isFinal) {
+      parseVoiceCommand(text);
+      btn.classList.remove('recording');
+      recognition = null;
+    }
+  };
+
+  recognition.onerror = () => {
+    btn.classList.remove('recording');
+    voiceText.textContent = 'Erreur de reconnaissance.';
+    recognition = null;
+  };
+
+  recognition.onend = () => {
+    btn.classList.remove('recording');
+    recognition = null;
+  };
+
+  recognition.start();
+}
+
+function parseVoiceCommand(text) {
+  const lower = text.toLowerCase();
+
+  // Extract niche
+  const nichePatterns = [
+    /(?:cherche|trouve|recherche)\s+(?:des?\s+)?(?:moi\s+)?(.+?)(?:\s+(?:avec|qui|environ|autour|entre|minimum|maximum|au moins|moins de))/i,
+    /(?:cherche|trouve|recherche)\s+(?:des?\s+)?(?:moi\s+)?(.+)/i,
+  ];
+  for (const p of nichePatterns) {
+    const m = lower.match(p);
+    if (m) { document.getElementById('niche').value = m[1].trim(); break; }
+  }
+
+  // Extract follower count
+  const followerPatterns = [
+    /(\d[\d\s]*)\s*(?:abonnés|followers|abos)/i,
+    /environ\s+(\d[\d\s]*)/i,
+    /autour\s+de\s+(\d[\d\s]*)/i,
+    /entre\s+(\d[\d\s]*)\s+et\s+(\d[\d\s]*)/i,
+    /au\s+moins\s+(\d[\d\s]*)/i,
+    /moins\s+de\s+(\d[\d\s]*)/i,
+    /minimum\s+(\d[\d\s]*)/i,
+    /maximum\s+(\d[\d\s]*)/i,
+  ];
+
+  for (const p of followerPatterns) {
+    const m = lower.match(p);
+    if (m) {
+      const n1 = parseInt(m[1].replace(/\s/g, ''));
+      if (m[2]) {
+        document.getElementById('minFollowers').value = n1;
+        document.getElementById('maxFollowers').value = parseInt(m[2].replace(/\s/g, ''));
+      } else if (lower.includes('moins de') || lower.includes('maximum')) {
+        document.getElementById('maxFollowers').value = n1;
+      } else if (lower.includes('au moins') || lower.includes('minimum')) {
+        document.getElementById('minFollowers').value = n1;
+      } else {
+        // "environ X" -> X/2 to X*2
+        document.getElementById('minFollowers').value = Math.floor(n1 * 0.5);
+        document.getElementById('maxFollowers').value = Math.floor(n1 * 2);
+      }
+      break;
+    }
+  }
+
+  // Extract count
+  const countMatch = lower.match(/(\d+)\s*(?:profils?|résultats?|comptes?)/i) || lower.match(/trouve[^\d]*(\d+)/i);
+  if (countMatch) document.getElementById('maxResults').value = parseInt(countMatch[1]);
+
+  // Auto-start search
+  setTimeout(() => startSearch(), 500);
+}
+
+// ===== INSTAGRAM SEARCH =====
+async function igFetch(url) {
+  const res = await fetch(url, {
+    headers: {
+      'X-IG-App-ID': '936619743392459',
+      'X-Requested-With': 'XMLHttpRequest',
+    },
+    credentials: 'include',
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+async function searchIG(query) {
+  try {
+    const data = await igFetch(`https://www.instagram.com/api/v1/web/search/topsearch/?context=blended&query=${encodeURIComponent(query)}&include_reel=false`);
+    return (data.users || []).map(u => ({
+      username: u.user.username,
+      fullName: u.user.full_name || '',
+      profilePic: u.user.profile_pic_url || '',
+      isVerified: u.user.is_verified || false,
+      isPrivate: u.user.is_private || false,
+      followers: null, // need to fetch profile
+      bio: '',
+      _position: u.position || 999,
+    }));
+  } catch (e) {
+    console.error('Search error:', e);
+    return [];
+  }
+}
+
+async function getProfileInfo(username) {
+  try {
+    const data = await igFetch(`https://www.instagram.com/api/v1/users/web_profile_info/?username=${username}`);
+    const user = data.data?.user;
+    if (!user) return null;
+    return {
+      followers: user.edge_followed_by?.count || 0,
+      following: user.edge_follow?.count || 0,
+      posts: user.edge_owner_to_timeline_media?.count || 0,
+      bio: user.biography || '',
+      externalUrl: user.external_url || '',
+      isBusinessAccount: user.is_business_account || false,
+      businessCategory: user.business_category_name || '',
+      fullName: user.full_name || '',
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+function setStatus(msg) { document.getElementById('status').textContent = msg; }
+function setProgress(pct) {
+  document.getElementById('progressBar').style.display = 'block';
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+async function startSearch() {
+  const niche = document.getElementById('niche').value.trim();
+  if (!niche) return alert('Tape une niche !');
+
+  const minF = parseInt(document.getElementById('minFollowers').value) || 0;
+  const maxF = parseInt(document.getElementById('maxFollowers').value) || 999999999;
+  const maxResults = parseInt(document.getElementById('maxResults').value) || 50;
+  const filterType = document.getElementById('filterType').value;
+
+  searching = true;
+  allProfiles = [];
+  document.getElementById('searchBtn').disabled = true;
+  document.getElementById('stopBtn').style.display = '';
+  document.getElementById('exportBtn').style.display = 'none';
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('resultsTable').style.display = 'table';
+  document.getElementById('stats').style.display = 'flex';
+  document.getElementById('resultsBody').innerHTML = '';
+
+  // Generate search variations for more results
+  const queries = [niche];
+  const words = niche.split(/\s+/);
+  if (words.length > 1) {
+    queries.push(words.join(''));  // no spaces
+    queries.push(words.reverse().join(' ')); // reversed
+  }
+  // Add city variations
+  const cities = ['paris', 'lyon', 'marseille', 'bordeaux', 'lille', 'toulouse', 'nantes', 'strasbourg', 'nice', 'montpellier'];
+  for (const city of cities) {
+    queries.push(`${niche} ${city}`);
+  }
+  // Add synonyms/variations
+  queries.push(`${niche} freelance`);
+  queries.push(`${niche} professionnel`);
+  queries.push(`${niche} studio`);
+  queries.push(`${niche} agency`);
+
+  const seenUsernames = new Set();
+  let enriched = 0;
+  let totalSearched = 0;
+
+  for (const query of queries) {
+    if (!searching || allProfiles.length >= maxResults) break;
+
+    setStatus(`Recherche: "${query}"...`);
+    totalSearched++;
+    setProgress((totalSearched / queries.length) * 30);
+
+    const users = await searchIG(query);
+
+    for (const user of users) {
+      if (!searching || allProfiles.length >= maxResults) break;
+      if (seenUsernames.has(user.username)) continue;
+      seenUsernames.add(user.username);
+
+      // Enrich with profile data
+      setStatus(`Profil ${enriched + 1}: @${user.username}...`);
+      const info = await getProfileInfo(user.username);
+
+      if (info) {
+        user.followers = info.followers;
+        user.following = info.following;
+        user.posts = info.posts;
+        user.bio = info.bio;
+        user.externalUrl = info.externalUrl;
+        user.isBusinessAccount = info.isBusinessAccount;
+        user.businessCategory = info.businessCategory;
+        if (info.fullName) user.fullName = info.fullName;
+      }
+
+      enriched++;
+      setProgress(30 + (enriched / maxResults) * 70);
+
+      // Apply filters
+      const followers = user.followers || 0;
+      if (followers < minF || followers > maxF) continue;
+      if (filterType === 'verified' && !user.isVerified) continue;
+      if (filterType === 'business' && !user.isBusinessAccount) continue;
+
+      allProfiles.push(user);
+      renderResults();
+      updateStats();
+
+      // Rate limit: wait between profile fetches
+      await new Promise(r => setTimeout(r, 400));
+    }
+
+    // Wait between searches
+    await new Promise(r => setTimeout(r, 800));
+  }
+
+  searching = false;
+  document.getElementById('searchBtn').disabled = false;
+  document.getElementById('stopBtn').style.display = 'none';
+  if (allProfiles.length > 0) document.getElementById('exportBtn').style.display = '';
+  setStatus(`Terminé ! ${allProfiles.length} profils trouvés.`);
+  setProgress(100);
+  sortAndRender();
+}
+
+function stopSearch() {
+  searching = false;
+  document.getElementById('searchBtn').disabled = false;
+  document.getElementById('stopBtn').style.display = 'none';
+  if (allProfiles.length > 0) document.getElementById('exportBtn').style.display = '';
+  setStatus(`Arrêté. ${allProfiles.length} profils récupérés.`);
+}
+
+function formatFollowers(n) {
+  if (n == null) return '?';
+  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+  return n.toString();
+}
+
+function renderResults() {
+  const body = document.getElementById('resultsBody');
+  body.innerHTML = '';
+  allProfiles.forEach((p, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${i + 1}</td>
+      <td>
+        <a class="profile-link" href="https://instagram.com/${p.username}" target="_blank">@${p.username}</a>
+        ${p.isVerified ? '<span class="badge badge-verified">✓</span>' : ''}
+        ${p.isBusinessAccount ? '<span class="tag">Pro</span>' : ''}
+      </td>
+      <td>${esc(p.fullName)}</td>
+      <td><span class="badge badge-followers">${formatFollowers(p.followers)}</span></td>
+      <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(p.bio)}">${esc(p.bio?.substring(0, 80))}</td>
+      <td><a href="https://instagram.com/${p.username}" target="_blank" class="profile-link">Ouvrir</a></td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+function esc(s) { return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function updateStats() {
+  document.getElementById('statFound').textContent = allProfiles.length;
+  document.getElementById('statFiltered').textContent = allProfiles.length;
+  const avg = allProfiles.length > 0
+    ? Math.round(allProfiles.reduce((s, p) => s + (p.followers || 0), 0) / allProfiles.length)
+    : 0;
+  document.getElementById('statAvgFollowers').textContent = formatFollowers(avg);
+}
+
+function sortAndRender() {
+  const sortBy = document.getElementById('sortBy').value;
+  allProfiles.sort((a, b) => {
+    switch (sortBy) {
+      case 'followers_desc': return (b.followers || 0) - (a.followers || 0);
+      case 'followers_asc': return (a.followers || 0) - (b.followers || 0);
+      case 'relevance': return (a._position || 999) - (b._position || 999);
+      case 'name': return (a.fullName || '').localeCompare(b.fullName || '');
+      default: return 0;
+    }
+  });
+  renderResults();
+  updateStats();
+}
+
+function sortTable(col) {
+  // Toggle sort
+  const select = document.getElementById('sortBy');
+  switch (col) {
+    case 'followers':
+      select.value = select.value === 'followers_desc' ? 'followers_asc' : 'followers_desc';
+      break;
+    case 'username': case 'fullName': select.value = 'name'; break;
+    default: select.value = 'relevance';
+  }
+  sortAndRender();
+}
+
+function exportCSV() {
+  const lines = ['Username,Nom,Abonnés,Following,Posts,Bio,Business,Catégorie,URL Externe,Lien Instagram'];
+  allProfiles.forEach(p => {
+    const e = s => `"${(s || '').replace(/"/g, '""')}"`;
+    lines.push(`${e(p.username)},${e(p.fullName)},${p.followers || 0},${p.following || 0},${p.posts || 0},${e(p.bio)},${p.isBusinessAccount ? 'Oui' : 'Non'},${e(p.businessCategory)},${e(p.externalUrl)},https://instagram.com/${p.username}`);
+  });
+  const blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `instagram_${document.getElementById('niche').value.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+// Enter key starts search
+document.getElementById('niche').addEventListener('keydown', e => { if (e.key === 'Enter') startSearch(); });
+// Sort change re-renders
+document.getElementById('sortBy').addEventListener('change', sortAndRender);
+</script>
+</body>
+</html>

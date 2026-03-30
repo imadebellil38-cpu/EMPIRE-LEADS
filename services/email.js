@@ -4,7 +4,7 @@ const SMTP_HOST = process.env.SMTP_HOST || '';
 const SMTP_PORT = parseInt(process.env.SMTP_PORT, 10) || 587;
 const SMTP_USER = process.env.SMTP_USER || '';
 const SMTP_PASS = process.env.SMTP_PASS || '';
-const SMTP_FROM = process.env.SMTP_FROM || 'ProspectHunter <noreply@prospecthunter.fr>';
+const SMTP_FROM = process.env.SMTP_FROM || 'Empire Leads <noreply@empire-leads.fr>';
 
 let transporter = null;
 
@@ -43,7 +43,7 @@ async function sendResetEmail(to, token, appUrl) {
 
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:2rem;background:#061222;color:#ddeeff;border-radius:16px;">
-      <h2 style="color:#00c8f8;margin-bottom:1rem;">ProspectHunter</h2>
+      <h2 style="color:#00c8f8;margin-bottom:1rem;">Empire Leads</h2>
       <p>Vous avez demandé la réinitialisation de votre mot de passe.</p>
       <p>Cliquez sur le bouton ci-dessous (valable 1 heure) :</p>
       <div style="text-align:center;margin:2rem 0;">
@@ -52,7 +52,7 @@ async function sendResetEmail(to, token, appUrl) {
         </a>
       </div>
       <p style="font-size:13px;color:#7a9ab8;">Si vous n'avez pas fait cette demande, ignorez cet email.</p>
-      <p style="font-size:12px;color:#4a6a88;margin-top:2rem;">— L'équipe ProspectHunter</p>
+      <p style="font-size:12px;color:#4a6a88;margin-top:2rem;">— L'équipe Empire Leads</p>
     </div>
   `;
 
@@ -60,9 +60,9 @@ async function sendResetEmail(to, token, appUrl) {
     await transporter.sendMail({
       from: SMTP_FROM,
       to,
-      subject: 'Réinitialisation de votre mot de passe — ProspectHunter',
+      subject: 'Réinitialisation de votre mot de passe — Empire Leads',
       html,
-      text: `Réinitialisation de mot de passe ProspectHunter\n\nCliquez sur ce lien (valable 1h) :\n${resetLink}\n\nSi vous n'avez pas fait cette demande, ignorez cet email.`,
+      text: `Réinitialisation de mot de passe Empire Leads\n\nCliquez sur ce lien (valable 1h) :\n${resetLink}\n\nSi vous n'avez pas fait cette demande, ignorez cet email.`,
     });
     console.log(`[EMAIL] Reset email envoyé à ${to}`);
     return true;

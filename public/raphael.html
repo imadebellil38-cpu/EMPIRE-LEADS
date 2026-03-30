@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RAPHAEL — STAY HARD | Liste Prospection</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #0a0a0a;
+      --dark: #111111;
+      --card-bg: #161616;
+      --red: #DC2626;
+      --red-dark: #991b1b;
+      --gold: #F59E0B;
+      --gold-dark: #B45309;
+      --white: #f5f5f5;
+      --muted: #888;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── CANVAS PARTICLES ─────────────────────────────────────── */
+    #canvas-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ─── SPEED LINES ──────────────────────────────────────────── */
+    .speed-lines {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+      opacity: 0.06;
+    }
+    .speed-lines::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        92deg,
+        transparent,
+        transparent 18px,
+        var(--red) 18px,
+        var(--red) 19px
+      );
+      animation: speedShift 4s linear infinite;
+    }
+    .speed-lines::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        88deg,
+        transparent,
+        transparent 40px,
+        var(--gold) 40px,
+        var(--gold) 41px
+      );
+      animation: speedShift 7s linear infinite reverse;
+    }
+    @keyframes speedShift {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(60px); }
+    }
+
+    /* ─── PANEL BORDER ─────────────────────────────────────────── */
+    .panel-border {
+      position: fixed;
+      z-index: 1;
+      pointer-events: none;
+    }
+    .panel-border-top    { top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--red), var(--gold), var(--red)); box-shadow: 0 0 20px var(--red); }
+    .panel-border-bottom { bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--gold), var(--red), var(--gold)); box-shadow: 0 0 20px var(--gold); }
+    .panel-border-left   { top: 0; left: 0; bottom: 0; width: 4px; background: linear-gradient(180deg, var(--red), var(--gold)); box-shadow: 0 0 20px var(--red); }
+    .panel-border-right  { top: 0; right: 0; bottom: 0; width: 4px; background: linear-gradient(180deg, var(--gold), var(--red)); box-shadow: 0 0 20px var(--gold); }
+
+    /* ─── FLOATING WORDS ───────────────────────────────────────── */
+    .floating-word {
+      position: fixed;
+      font-family: 'Bangers', cursive;
+      font-size: clamp(11px, 1.5vw, 16px);
+      letter-spacing: 2px;
+      pointer-events: none;
+      z-index: 2;
+      animation: floatWord 12s ease-in-out infinite;
+      opacity: 0;
+      white-space: nowrap;
+    }
+    @keyframes floatWord {
+      0%   { opacity: 0; transform: translateY(20px) rotate(-2deg); }
+      15%  { opacity: 0.22; transform: translateY(0) rotate(1deg); }
+      85%  { opacity: 0.22; transform: translateY(-15px) rotate(-1deg); }
+      100% { opacity: 0; transform: translateY(-35px) rotate(2deg); }
+    }
+
+    /* ─── WRAPPER ──────────────────────────────────────────────── */
+    .wrapper {
+      position: relative;
+      z-index: 10;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+    }
+
+    /* ─── HERO ─────────────────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      padding: 60px 20px 40px;
+      position: relative;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: var(--red);
+      color: var(--white);
+      font-family: 'Bangers', cursive;
+      font-size: 18px;
+      letter-spacing: 3px;
+      padding: 8px 24px;
+      border-radius: 4px;
+      margin-bottom: 24px;
+      box-shadow: 0 0 30px rgba(220,38,38,.5);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 30px rgba(220,38,38,.5); }
+      50%       { box-shadow: 0 0 55px rgba(220,38,38,.85); }
+    }
+
+    .hero h1 {
+      font-family: 'Bangers', cursive;
+      font-size: clamp(52px, 10vw, 120px);
+      line-height: 1;
+      letter-spacing: 6px;
+      color: var(--white);
+      text-shadow: 4px 4px 0 var(--red-dark);
+      margin-bottom: 12px;
+    }
+    .hero h1 .accent { color: var(--red); }
+
+    .hero-sub {
+      font-size: clamp(14px, 2vw, 18px);
+      color: var(--muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .hero-quote {
+      display: inline-block;
+      border-left: 4px solid var(--gold);
+      padding: 10px 20px;
+      font-style: italic;
+      font-size: clamp(13px, 1.8vw, 17px);
+      color: var(--gold);
+      background: rgba(245,158,11,.07);
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 36px;
+    }
+    .hero-quote span { color: var(--white); font-weight: 700; font-style: normal; }
+
+    /* ─── SVG CHARACTERS ───────────────────────────────────────── */
+    .characters {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: clamp(20px, 5vw, 80px);
+      margin-bottom: 36px;
+    }
+    .char-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .char-label {
+      font-family: 'Bangers', cursive;
+      font-size: 13px;
+      letter-spacing: 2px;
+      color: var(--gold);
+    }
+    .char-wrap svg {
+      filter: drop-shadow(0 0 12px var(--red));
+      animation: charFloat 3.5s ease-in-out infinite;
+    }
+    .char-wrap:nth-child(2) svg { animation-delay: -.9s; }
+    .char-wrap:nth-child(3) svg { animation-delay: -1.8s; }
+    @keyframes charFloat {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-10px); }
+    }
+
+    /* ─── STATS BAR ────────────────────────────────────────────── */
+    .stats-bar {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .stat-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card-bg);
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .stat-chip .dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+    .stat-chip.hot   .dot { background: var(--red); box-shadow: 0 0 8px var(--red); }
+    .stat-chip.warm  .dot { background: var(--gold); box-shadow: 0 0 8px var(--gold); }
+    .stat-chip.mild  .dot { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+    .stat-chip.cold  .dot { background: #3b82f6; box-shadow: 0 0 8px #3b82f6; }
+    .stat-chip .num  { font-family: 'Bangers', cursive; font-size: 20px; color: var(--white); }
+    .stat-chip .lbl  { color: var(--muted); font-size: 12px; font-weight: 400; }
+
+    /* ─── CREDITS ──────────────────────────────────────────────── */
+    .credits-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--red-dark), var(--red));
+      border-radius: 50px;
+      padding: 8px 20px;
+      font-family: 'Bangers', cursive;
+      font-size: 18px;
+      letter-spacing: 2px;
+      box-shadow: 0 0 24px rgba(220,38,38,.4);
+      margin-bottom: 40px;
+    }
+
+    /* ─── SEARCH / FILTER ──────────────────────────────────────── */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    .search-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+    }
+    .search-wrap input {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid #DC2626;
+      border-radius: 8px;
+      padding: 12px 16px 12px 42px;
+      color: var(--white);
+      font-size: 14px;
+      outline: none;
+      transition: box-shadow .2s;
+    }
+    .search-wrap input:focus { box-shadow: 0 0 0 2px rgba(220,38,38,.4); }
+    .search-wrap input::placeholder { color: var(--muted); }
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--red);
+      font-size: 16px;
+    }
+    .filter-btn {
+      background: transparent;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 10px 18px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .2s;
+      letter-spacing: 1px;
+    }
+    .filter-btn:hover  { border-color: var(--red); color: var(--white); }
+    .filter-btn.active { background: var(--red); border-color: var(--red); color: var(--white); box-shadow: 0 0 16px rgba(220,38,38,.4); }
+
+    /* ─── RESULTS COUNT ────────────────────────────────────────── */
+    .results-count {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .results-count span { color: var(--gold); font-weight: 700; }
+
+    /* ─── GRID ─────────────────────────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    /* ─── CARD ─────────────────────────────────────────────────── */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid #222;
+      border-radius: 12px;
+      padding: 18px;
+      cursor: pointer;
+      transition: transform .2s, box-shadow .2s, border-color .2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .card.hot   { border-color: rgba(220,38,38,.35); }
+    .card.hot::before   { background: linear-gradient(90deg, var(--red), var(--gold)); box-shadow: 0 0 10px var(--red); }
+    .card.warm  { border-color: rgba(245,158,11,.35); }
+    .card.warm::before  { background: linear-gradient(90deg, var(--gold), var(--red)); }
+    .card.mild  { border-color: rgba(34,197,94,.35); }
+    .card.mild::before  { background: linear-gradient(90deg, #22c55e, #16a34a); }
+    .card.cold  { border-color: rgba(59,130,246,.35); }
+    .card.cold::before  { background: linear-gradient(90deg, #3b82f6, #1d4ed8); }
+
+    .card:hover { transform: translateY(-4px) scale(1.01); }
+    .card.hot:hover  { box-shadow: 0 8px 32px rgba(220,38,38,.3); border-color: var(--red); }
+    .card.warm:hover { box-shadow: 0 8px 32px rgba(245,158,11,.3); border-color: var(--gold); }
+    .card.mild:hover { box-shadow: 0 8px 32px rgba(34,197,94,.3); border-color: #22c55e; }
+    .card.cold:hover { box-shadow: 0 8px 32px rgba(59,130,246,.3); border-color: #3b82f6; }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .card-num {
+      font-family: 'Bangers', cursive;
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+    .temp-badge {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 3px 10px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .hot  .temp-badge { background: rgba(220,38,38,.2);  color: var(--red);  border: 1px solid rgba(220,38,38,.4); }
+    .warm .temp-badge { background: rgba(245,158,11,.15); color: var(--gold); border: 1px solid rgba(245,158,11,.4); }
+    .mild .temp-badge { background: rgba(34,197,94,.12);  color: #4ade80;     border: 1px solid rgba(34,197,94,.4); }
+    .cold .temp-badge { background: rgba(59,130,246,.12); color: #93c5fd;     border: 1px solid rgba(59,130,246,.4); }
+
+    .card-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+    .card-type {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .card-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .card-info-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #aaa;
+    }
+    .card-info-row .icon { color: var(--red); font-size: 11px; min-width: 14px; }
+    .card-info-row.gold-row .icon { color: var(--gold); }
+
+    /* ─── MOTIVATIONAL POPUP ───────────────────────────────────── */
+    .moto-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      z-index: 999;
+      font-family: 'Bangers', cursive;
+      font-size: clamp(32px, 8vw, 80px);
+      letter-spacing: 6px;
+      color: var(--white);
+      text-shadow: 4px 4px 0 var(--red), 0 0 40px var(--red);
+      pointer-events: none;
+      transition: transform .15s cubic-bezier(.175,.885,.32,1.275);
+      text-align: center;
+      white-space: nowrap;
+    }
+    .moto-popup.show {
+      transform: translate(-50%, -50%) scale(1);
+      animation: popAnim .7s forwards;
+    }
+    @keyframes popAnim {
+      0%   { transform: translate(-50%, -50%) scale(0) rotate(-5deg); opacity: 1; }
+      30%  { transform: translate(-50%, -50%) scale(1.1) rotate(1deg); opacity: 1; }
+      60%  { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1.05) rotate(0deg); opacity: 0; }
+    }
+
+    /* ─── EMPTY STATE ──────────────────────────────────────────── */
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty .big { font-family: 'Bangers', cursive; font-size: 48px; color: var(--red); display: block; }
+
+    /* ─── FOOTER ───────────────────────────────────────────────── */
+    .footer {
+      text-align: center;
+      margin-top: 60px;
+      padding: 24px;
+      border-top: 1px solid #1a1a1a;
+      font-size: 12px;
+      color: #444;
+      font-family: 'Bangers', cursive;
+      letter-spacing: 3px;
+    }
+
+    @media (max-width: 600px) {
+      .characters { gap: 12px; }
+      .controls { flex-direction: column; }
+      .search-wrap { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Canvas particles -->
+<canvas id="canvas-bg"></canvas>
+
+<!-- Speed lines -->
+<div class="speed-lines"></div>
+
+<!-- Panel borders -->
+<div class="panel-border panel-border-top"></div>
+<div class="panel-border panel-border-bottom"></div>
+<div class="panel-border panel-border-left"></div>
+<div class="panel-border panel-border-right"></div>
+
+<!-- Floating motivational words -->
+<div class="floating-word" style="top:12%;left:3%;color:#DC2626;animation-delay:0s;animation-duration:11s;">STAY HARD!</div>
+<div class="floating-word" style="top:28%;right:4%;color:#F59E0B;animation-delay:-3s;animation-duration:14s;">CALLOUS YOUR MIND!</div>
+<div class="floating-word" style="bottom:30%;left:2%;color:#DC2626;animation-delay:-6s;animation-duration:13s;">NEVER STOP!</div>
+<div class="floating-word" style="bottom:18%;right:3%;color:#F59E0B;animation-delay:-9s;animation-duration:10s;">GOGGINS MODE!</div>
+<div class="floating-word" style="top:55%;left:1%;color:#DC2626;animation-delay:-4.5s;animation-duration:15s;">EMBRACE THE SUCK!</div>
+<div class="floating-word" style="top:70%;right:2%;color:#F59E0B;animation-delay:-7s;animation-duration:12s;">WHO'S GONNA CARRY THE BOATS?</div>
+
+<!-- Motivational popup -->
+<div class="moto-popup" id="motoPopup"></div>
+
+<!-- Main content -->
+<div class="wrapper">
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">💪 RAPHAEL EDITION — STAY HARD</div>
+    <h1>RAPHAEL <span class="accent">STAY HARD</span></h1>
+    <p class="hero-sub">Liste de prospection — Sport, fitness &amp; bien-être</p>
+    <p class="hero-quote">"You are not tired. You just quit." — <span>David Goggins</span></p>
+
+    <!-- SVG Characters -->
+    <div class="characters">
+      <!-- Runner -->
+      <div class="char-wrap">
+        <svg width="80" height="110" viewBox="0 0 80 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Head -->
+          <circle cx="52" cy="12" r="9" fill="#DC2626"/>
+          <!-- Body leaning forward -->
+          <path d="M52 21 L38 52" stroke="#F59E0B" stroke-width="5" stroke-linecap="round"/>
+          <!-- Right arm back -->
+          <path d="M48 32 L62 44" stroke="#DC2626" stroke-width="4" stroke-linecap="round"/>
+          <!-- Left arm forward -->
+          <path d="M44 36 L28 28" stroke="#DC2626" stroke-width="4" stroke-linecap="round"/>
+          <!-- Right leg back -->
+          <path d="M38 52 L55 72 L58 90" stroke="#F59E0B" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Left leg forward -->
+          <path d="M38 52 L22 68 L14 88" stroke="#DC2626" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Foot right -->
+          <path d="M58 90 L66 92" stroke="#F59E0B" stroke-width="4" stroke-linecap="round"/>
+          <!-- Foot left -->
+          <path d="M14 88 L6 88" stroke="#DC2626" stroke-width="4" stroke-linecap="round"/>
+          <!-- Motion lines -->
+          <path d="M4 46 L16 46" stroke="#DC2626" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+          <path d="M2 54 L12 54" stroke="#DC2626" stroke-width="2" stroke-linecap="round" opacity=".4"/>
+          <path d="M0 62 L8 62" stroke="#DC2626" stroke-width="2" stroke-linecap="round" opacity=".3"/>
+        </svg>
+        <span class="char-label">RUNNER</span>
+      </div>
+      <!-- Weightlifter -->
+      <div class="char-wrap">
+        <svg width="100" height="120" viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Head -->
+          <circle cx="50" cy="12" r="10" fill="#DC2626"/>
+          <!-- Neck -->
+          <rect x="46" y="22" width="8" height="6" fill="#F59E0B"/>
+          <!-- Torso (wide) -->
+          <path d="M30 28 L70 28 L66 60 L34 60 Z" fill="#DC2626"/>
+          <!-- Arms holding bar -->
+          <path d="M30 28 L10 42" stroke="#DC2626" stroke-width="6" stroke-linecap="round"/>
+          <path d="M70 28 L90 42" stroke="#DC2626" stroke-width="6" stroke-linecap="round"/>
+          <!-- Barbell bar -->
+          <rect x="2" y="40" width="96" height="5" rx="2.5" fill="#F59E0B"/>
+          <!-- Left weights -->
+          <rect x="2" y="30" width="10" height="25" rx="3" fill="#B45309"/>
+          <rect x="0" y="33" width="5" height="19" rx="2" fill="#F59E0B"/>
+          <!-- Right weights -->
+          <rect x="88" y="30" width="10" height="25" rx="3" fill="#B45309"/>
+          <rect x="95" y="33" width="5" height="19" rx="2" fill="#F59E0B"/>
+          <!-- Legs -->
+          <path d="M34 60 L26 90 L24 110" stroke="#F59E0B" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M66 60 L74 90 L76 110" stroke="#F59E0B" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Shoes -->
+          <path d="M24 110 L14 112" stroke="#DC2626" stroke-width="4" stroke-linecap="round"/>
+          <path d="M76 110 L86 112" stroke="#DC2626" stroke-width="4" stroke-linecap="round"/>
+          <!-- Effort lines -->
+          <path d="M50 2 L50 0" stroke="#F59E0B" stroke-width="2" opacity=".6"/>
+          <path d="M62 4 L65 2" stroke="#F59E0B" stroke-width="2" opacity=".5"/>
+          <path d="M38 4 L35 2" stroke="#F59E0B" stroke-width="2" opacity=".5"/>
+        </svg>
+        <span class="char-label">LIFTER</span>
+      </div>
+      <!-- Boxer -->
+      <div class="char-wrap">
+        <svg width="90" height="115" viewBox="0 0 90 115" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Head -->
+          <circle cx="45" cy="12" r="10" fill="#DC2626"/>
+          <!-- Guard hand left (raised) -->
+          <circle cx="22" cy="18" r="9" fill="#F59E0B" stroke="#DC2626" stroke-width="2"/>
+          <!-- Body -->
+          <path d="M35 22 L55 22 L58 58 L32 58 Z" fill="#DC2626"/>
+          <!-- Punch arm right (extended) -->
+          <path d="M55 30 L78 22" stroke="#DC2626" stroke-width="6" stroke-linecap="round"/>
+          <!-- Punch fist -->
+          <circle cx="82" cy="20" r="8" fill="#F59E0B" stroke="#DC2626" stroke-width="2"/>
+          <!-- Motion lines on fist -->
+          <path d="M72 12 L66 10" stroke="#F59E0B" stroke-width="2" opacity=".7" stroke-linecap="round"/>
+          <path d="M73 16 L67 16" stroke="#F59E0B" stroke-width="2" opacity=".6" stroke-linecap="round"/>
+          <path d="M72 20 L66 22" stroke="#F59E0B" stroke-width="2" opacity=".5" stroke-linecap="round"/>
+          <!-- Guard arm left to body -->
+          <path d="M35 30 L26 26" stroke="#DC2626" stroke-width="5" stroke-linecap="round"/>
+          <!-- Legs in fighting stance -->
+          <path d="M32 58 L20 80 L18 100" stroke="#F59E0B" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M58 58 L68 76 L72 98" stroke="#DC2626" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- Feet -->
+          <path d="M18 100 L8 103" stroke="#F59E0B" stroke-width="4" stroke-linecap="round"/>
+          <path d="M72 98 L82 100" stroke="#DC2626" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        <span class="char-label">BOXER</span>
+      </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div class="stats-bar">
+      <div class="stat-chip hot">  <span class="dot"></span><span class="num" id="cnt-hot">20</span><span class="lbl">Chaud 🔥</span></div>
+      <div class="stat-chip warm"> <span class="dot"></span><span class="num" id="cnt-warm">35</span><span class="lbl">Tiède ⚡</span></div>
+      <div class="stat-chip mild"> <span class="dot"></span><span class="num" id="cnt-mild">15</span><span class="lbl">Modéré 💪</span></div>
+      <div class="stat-chip cold"> <span class="dot"></span><span class="num" id="cnt-cold">10</span><span class="lbl">Froid ❄️</span></div>
+      <div class="stat-chip">      <span class="num" id="cnt-total">80</span><span class="lbl">Total prospects</span></div>
+    </div>
+
+    <!-- Credits -->
+    <div class="credits-badge">⚡ 500 CRÉDITS — 80 PROSPECTS DÉVERROUILLÉS</div>
+  </section>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Rechercher un prospect, ville, type..." />
+    </div>
+    <button class="filter-btn active" data-filter="all">Tous</button>
+    <button class="filter-btn" data-filter="hot">🔥 Chaud</button>
+    <button class="filter-btn" data-filter="warm">⚡ Tiède</button>
+    <button class="filter-btn" data-filter="mild">💪 Modéré</button>
+    <button class="filter-btn" data-filter="cold">❄️ Froid</button>
+  </div>
+
+  <p class="results-count">Affichage de <span id="displayCount">80</span> / 80 prospects</p>
+
+  <!-- GRID -->
+  <div class="grid" id="prospectGrid"></div>
+
+  <div class="footer">RAPHAEL — STAY HARD — GOGGINS MODE ACTIVATED — 2026</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  PARTICLE CANVAS
+// ═══════════════════════════════════════════════════
+(function () {
+  const canvas = document.getElementById('canvas-bg');
+  const ctx    = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const COLORS = ['#DC2626', '#F59E0B', '#991b1b', '#B45309', '#fff'];
+
+  class Particle {
+    constructor() { this.reset(true); }
+    reset(init) {
+      this.x  = Math.random() * W;
+      this.y  = init ? Math.random() * H : H + 6;
+      this.r  = Math.random() * 2 + 0.5;
+      this.vx = (Math.random() - 0.5) * 0.4;
+      this.vy = -(Math.random() * 0.6 + 0.2);
+      this.alpha = Math.random() * 0.5 + 0.1;
+      this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+    }
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      if (this.y < -10) this.reset(false);
+    }
+    draw() {
+      ctx.save();
+      ctx.globalAlpha = this.alpha;
+      ctx.fillStyle   = this.color;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  for (let i = 0; i < 140; i++) particles.push(new Particle());
+
+  function loop() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+// ═══════════════════════════════════════════════════
+//  PROSPECT DATA
+// ═══════════════════════════════════════════════════
+const prospects = [
+  // HOT (20)
+  { name:"Iron Gym Paris 11", type:"Salle de musculation", city:"Paris 11e", phone:"01 43 55 12 48", temp:"hot", note:"A demandé un devis la semaine dernière" },
+  { name:"CrossFit République", type:"Box CrossFit", city:"Paris 3e", phone:"01 42 71 98 34", temp:"hot", note:"Intéressé par programme nutrition" },
+  { name:"Decathlon Pro Lyon", type:"Magasin sport", city:"Lyon 2e", phone:"04 72 40 15 62", temp:"hot", note:"Responsable confirme RDV" },
+  { name:"Sport Elite Bordeaux", type:"Coach personnel", city:"Bordeaux", phone:"05 56 44 78 90", temp:"hot", note:"Suit notre compte Instagram" },
+  { name:"Titan Boxing Club", type:"Club de boxe", city:"Marseille 6e", phone:"04 91 22 56 31", temp:"hot", note:"Veut équiper 3 salles" },
+  { name:"Running Shop Nantes", type:"Magasin running", city:"Nantes", phone:"02 40 35 67 12", temp:"hot", note:"Commande en attente" },
+  { name:"Yoga Flow Studio", type:"Studio yoga", city:"Lyon 6e", phone:"04 78 89 23 45", temp:"hot", note:"A rappelé 2 fois" },
+  { name:"Performance Lab Paris", type:"Centre fitness", city:"Paris 16e", phone:"01 47 27 44 10", temp:"hot", note:"Budget validé" },
+  { name:"MMA Factory Toulouse", type:"Club MMA", city:"Toulouse", phone:"05 61 23 88 55", temp:"hot", note:"Réunion prévue vendredi" },
+  { name:"Fit & Strong Lille", type:"Salle fitness", city:"Lille", phone:"03 20 57 33 79", temp:"hot", note:"Commande imminente" },
+  { name:"Extreme Sports Nice", type:"Équipement sport", city:"Nice", phone:"04 93 87 12 44", temp:"hot", note:"Très motivé" },
+  { name:"PowerLift Strasbourg", type:"Salle haltérophilie", city:"Strasbourg", phone:"03 88 36 72 18", temp:"hot", note:"Contrat en cours" },
+  { name:"Triathlon Club Rennes", type:"Club triathlon", city:"Rennes", phone:"02 99 67 45 23", temp:"hot", note:"Commande équipement confirmée" },
+  { name:"Body Sculpt Studio", type:"Coach fitness", city:"Paris 9e", phone:"01 48 74 16 90", temp:"hot", note:"Signature contrat demain" },
+  { name:"Gym Nation Montpellier", type:"Salle de gym", city:"Montpellier", phone:"04 67 92 44 67", temp:"hot", note:"A testé nos produits" },
+  { name:"Urban Ride Paris", type:"Vélo indoor", city:"Paris 17e", phone:"01 46 27 83 55", temp:"hot", note:"Veut partenariat annuel" },
+  { name:"Judo Club Grenoble", type:"Club judo", city:"Grenoble", phone:"04 76 44 21 88", temp:"hot", note:"Très intéressé" },
+  { name:"Nutrition Sport Spa", type:"Complément alimentaire", city:"Spa", phone:"04 89 55 34 12", temp:"hot", note:"Urgent" },
+  { name:"Fight Club Rouen", type:"Club arts martiaux", city:"Rouen", phone:"02 35 88 23 67", temp:"hot", note:"Prêt à signer" },
+  { name:"Pro Swim Angers", type:"Club natation", city:"Angers", phone:"02 41 67 88 34", temp:"hot", note:"Demo convaincante" },
+
+  // WARM (35)
+  { name:"Endurance Shop Tours", type:"Magasin running", city:"Tours", phone:"02 47 64 22 11", temp:"warm", note:"A visité notre site" },
+  { name:"Wellness Center Dijon", type:"Centre bien-être", city:"Dijon", phone:"03 80 45 67 89", temp:"warm", note:"Échange mail positif" },
+  { name:"Le Dojo Nîmes", type:"Club karaté", city:"Nîmes", phone:"04 66 21 34 56", temp:"warm", note:"Présenté nos offres" },
+  { name:"FitBox Clermont", type:"Boxe fitness", city:"Clermont-Ferrand", phone:"04 73 31 55 22", temp:"warm", note:"Suit nos stories" },
+  { name:"Trail Passion Chamonix", type:"Magasin trail", city:"Chamonix", phone:"04 50 53 18 90", temp:"warm", note:"Contact LinkedIn" },
+  { name:"Gym Plus Toulon", type:"Salle fitness", city:"Toulon", phone:"04 94 62 44 23", temp:"warm", note:"A aimé notre post" },
+  { name:"Pilates Studio Brest", type:"Studio Pilates", city:"Brest", phone:"02 98 46 32 77", temp:"warm", note:"Demande de catalogue" },
+  { name:"Martial Arts World", type:"Arts martiaux", city:"Metz", phone:"03 87 55 31 44", temp:"warm", note:"A ouvert notre email" },
+  { name:"Sport & Santé Nancy", type:"Salle fitness médicalisée", city:"Nancy", phone:"03 83 37 66 18", temp:"warm", note:"Intéressé formations" },
+  { name:"Aventure Outdoor Pau", type:"Sport outdoor", city:"Pau", phone:"05 59 27 88 45", temp:"warm", note:"Échange téléphonique OK" },
+  { name:"Gold's Gym Reims", type:"Salle de musculation", city:"Reims", phone:"03 26 47 15 82", temp:"warm", note:"Veut plaquette" },
+  { name:"Escalade Club Perpignan", type:"Salle d'escalade", city:"Perpignan", phone:"04 68 34 56 78", temp:"warm", note:"A visité notre stand" },
+  { name:"Spin Studio Caen", type:"Vélo indoor", city:"Caen", phone:"02 31 88 23 45", temp:"warm", note:"Intérêt exprimé" },
+  { name:"KungFu Académie Paris", type:"Club kung-fu", city:"Paris 13e", phone:"01 45 88 76 34", temp:"warm", note:"A téléchargé notre brochure" },
+  { name:"CrossFit Bassin", type:"Box CrossFit", city:"Arcachon", phone:"05 56 83 22 18", temp:"warm", note:"Contact réseau" },
+  { name:"Naturel Running Rennes", type:"Coach running", city:"Rennes", phone:"02 99 54 78 12", temp:"warm", note:"Suit notre newsletter" },
+  { name:"Iron Will Gym", type:"Salle musculation", city:"Amiens", phone:"03 22 45 67 89", temp:"warm", note:"Premier contact positif" },
+  { name:"Surf Fitness Biarritz", type:"Coach fitness", city:"Biarritz", phone:"05 59 24 33 77", temp:"warm", note:"A commenté notre post" },
+  { name:"Zen Body Studio", type:"Yoga & Méditation", city:"Aix-en-Provence", phone:"04 42 26 55 34", temp:"warm", note:"Intéressé programme annuel" },
+  { name:"Karaté Do Orléans", type:"Club karaté", city:"Orléans", phone:"02 38 62 44 88", temp:"warm", note:"Échange WhatsApp" },
+  { name:"Speed Cycling Mulhouse", type:"Club cyclisme", city:"Mulhouse", phone:"03 89 56 23 67", temp:"warm", note:"A demandé nos tarifs" },
+  { name:"Sports Club Bayonne", type:"Salle multisports", city:"Bayonne", phone:"05 59 59 34 22", temp:"warm", note:"Contact salon sport" },
+  { name:"Dynamic Fitness Annecy", type:"Salle de gym", city:"Annecy", phone:"04 50 45 66 34", temp:"warm", note:"Profil très qualifié" },
+  { name:"Jiu-Jitsu Academy Nantes", type:"Club BJJ", city:"Nantes", phone:"02 40 89 44 56", temp:"warm", note:"Suit nos tutoriels" },
+  { name:"Swim Pro Paris", type:"Coach natation", city:"Paris 15e", phone:"01 45 75 88 23", temp:"warm", note:"Demande devis" },
+  { name:"Mountain Sports Gap", type:"Équipement montagne", city:"Gap", phone:"04 92 51 34 78", temp:"warm", note:"A interagi sur Facebook" },
+  { name:"Boxe Française Roubaix", type:"Club boxe française", city:"Roubaix", phone:"03 20 45 67 34", temp:"warm", note:"Potentiel fort" },
+  { name:"CoreFit Studio Bordeaux", type:"Studio fitness", city:"Bordeaux", phone:"05 56 48 23 90", temp:"warm", note:"Ouvert discussion budget" },
+  { name:"Energize Gym Limoges", type:"Salle fitness", city:"Limoges", phone:"05 55 34 77 12", temp:"warm", note:"A visité site web" },
+  { name:"Wellness Lab Poitiers", type:"Centre bien-être", city:"Poitiers", phone:"05 49 88 23 45", temp:"warm", note:"Envoi plaquette OK" },
+  { name:"Pro Fitness Besançon", type:"Coach personnel", city:"Besançon", phone:"03 81 56 34 88", temp:"warm", note:"Échange mail ouvert" },
+  { name:"Club Évasion Valence", type:"Salle multisports", city:"Valence", phone:"04 75 44 22 67", temp:"warm", note:"Réseaux actifs" },
+  { name:"Espace Forme Quimper", type:"Centre fitness", city:"Quimper", phone:"02 98 95 44 23", temp:"warm", note:"Suit nos actus" },
+  { name:"Strong Mind Gym", type:"Salle musculation", city:"Versailles", phone:"01 39 53 67 44", temp:"warm", note:"Intérêt coaching" },
+  { name:"Alpha Training Troyes", type:"Box CrossFit", city:"Troyes", phone:"03 25 73 56 88", temp:"warm", note:"A liké notre page" },
+
+  // MILD (15)
+  { name:"Aqua Sport Dunkerque", type:"Club natation", city:"Dunkerque", phone:"03 28 59 22 77", temp:"mild", note:"Contact froid converti" },
+  { name:"Zen Attitude Montauban", type:"Studio yoga", city:"Montauban", phone:"05 63 22 45 88", temp:"mild", note:"À relancer dans 15j" },
+  { name:"Gymnase Municipal Auxerre", type:"Gymnase", city:"Auxerre", phone:"03 86 51 23 44", temp:"mild", note:"Intérêt modéré" },
+  { name:"Surf & Sport Sète", type:"Sport côtier", city:"Sète", phone:"04 67 53 88 34", temp:"mild", note:"A reçu nos docs" },
+  { name:"Combat Sport Laval", type:"Club arts martiaux", city:"Laval", phone:"02 43 56 22 78", temp:"mild", note:"En réflexion budget" },
+  { name:"Fit Life Chartres", type:"Salle fitness", city:"Chartres", phone:"02 37 21 55 33", temp:"mild", note:"Décision mi-avril" },
+  { name:"Cyclisme Club Cambrai", type:"Club cyclisme", city:"Cambrai", phone:"03 27 81 34 67", temp:"mild", note:"Besoin de relance" },
+  { name:"Pilates & Co Vichy", type:"Studio pilates", city:"Vichy", phone:"04 70 98 23 56", temp:"mild", note:"Profil intéressant" },
+  { name:"Sport Access Albi", type:"Magasin sport", city:"Albi", phone:"05 63 54 77 23", temp:"mild", note:"Pas encore décidé" },
+  { name:"Tennis Club Évry", type:"Club tennis", city:"Évry", phone:"01 69 36 45 78", temp:"mild", note:"À rappeler" },
+  { name:"Outdoor Fit Colmar", type:"Coach outdoor", city:"Colmar", phone:"03 89 41 22 67", temp:"mild", note:"Hésitant" },
+  { name:"Move Studio Cholet", type:"Studio fitness", city:"Cholet", phone:"02 41 65 34 88", temp:"mild", note:"Suit nos posts parfois" },
+  { name:"Sport Passion Mâcon", type:"Magasin sport", city:"Mâcon", phone:"03 85 39 56 23", temp:"mild", note:"Dossier en attente" },
+  { name:"Active Life Vannes", type:"Centre bien-être", city:"Vannes", phone:"02 97 54 22 67", temp:"mild", note:"Moyen terme" },
+  { name:"Boxe Club Évreux", type:"Club boxe", city:"Évreux", phone:"02 32 78 45 33", temp:"mild", note:"Prospect à qualifier" },
+
+  // COLD (10)
+  { name:"Gym Municipal Arras", type:"Gymnase", city:"Arras", phone:"03 21 21 55 44", temp:"cold", note:"Pas de réponse x3" },
+  { name:"Sport Loisirs Draguignan", type:"Magasin sport", city:"Draguignan", phone:"04 94 68 34 56", temp:"cold", note:"Peu réceptif" },
+  { name:"Club Forme Quimper", type:"Salle fitness", city:"Quimper", phone:"02 98 64 23 78", temp:"cold", note:"Hors budget actuel" },
+  { name:"Natation Club Agen", type:"Club natation", city:"Agen", phone:"05 53 77 34 22", temp:"cold", note:"Contrat concurrent" },
+  { name:"Dojo Zen Béziers", type:"Club judo", city:"Béziers", phone:"04 67 28 56 90", temp:"cold", note:"Peu actif" },
+  { name:"Gym Valley Épinal", type:"Salle de gym", city:"Épinal", phone:"03 29 34 67 23", temp:"cold", note:"Pas de budget" },
+  { name:"Cardio Club Lorient", type:"Salle cardio", city:"Lorient", phone:"02 97 64 34 56", temp:"cold", note:"Déjà équipé" },
+  { name:"Run Factory Cherbourg", type:"Magasin running", city:"Cherbourg", phone:"02 33 43 22 78", temp:"cold", note:"Directeur absent" },
+  { name:"Sport Arena Châteauroux", type:"Centre multisports", city:"Châteauroux", phone:"02 54 34 67 23", temp:"cold", note:"Intérêt très faible" },
+  { name:"Fitness Club Romans", type:"Salle fitness", city:"Romans-sur-Isère", phone:"04 75 72 34 56", temp:"cold", note:"Budget gelé" },
+];
+
+// ═══════════════════════════════════════════════════
+//  MOTIVATIONAL POPUP
+// ═══════════════════════════════════════════════════
+const MOTOS = [
+  "STAY HARD! 💪", "GOGGINS MODE!", "CALLOUS YOUR MIND!", "NEVER STOP!",
+  "EMBRACE THE SUCK!", "WHO'S GONNA CARRY THE BOATS?", "STAY HARD!",
+  "NO EXCUSES!", "OUTWORK EVERYONE!", "SUFFER FOR GREATNESS!"
+];
+const popup = document.getElementById('motoPopup');
+let popTimeout;
+function showMoto() {
+  clearTimeout(popTimeout);
+  popup.textContent = MOTOS[Math.floor(Math.random() * MOTOS.length)];
+  popup.classList.remove('show');
+  void popup.offsetWidth; // reflow
+  popup.classList.add('show');
+  popTimeout = setTimeout(() => popup.classList.remove('show'), 800);
+}
+
+// ═══════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════
+const grid = document.getElementById('prospectGrid');
+const searchInput  = document.getElementById('searchInput');
+const filterBtns   = document.querySelectorAll('.filter-btn');
+const displayCount = document.getElementById('displayCount');
+
+let currentFilter = 'all';
+
+const tempLabel = { hot:'Chaud 🔥', warm:'Tiède ⚡', mild:'Modéré 💪', cold:'Froid ❄️' };
+
+function render() {
+  const q = searchInput.value.toLowerCase().trim();
+  const filtered = prospects.filter(p => {
+    const matchFilter = currentFilter === 'all' || p.temp === currentFilter;
+    const matchSearch = !q || [p.name, p.type, p.city, p.note].join(' ').toLowerCase().includes(q);
+    return matchFilter && matchSearch;
+  });
+
+  displayCount.textContent = filtered.length;
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '<div class="empty"><span class="big">💀</span>Aucun prospect trouvé.<br>STAY HARD — recommence!</div>';
+    return;
+  }
+
+  grid.innerHTML = filtered.map((p, i) => `
+    <div class="card ${p.temp}" data-idx="${prospects.indexOf(p)}" onclick="showMoto()">
+      <div class="card-header">
+        <span class="card-num">#${String(prospects.indexOf(p)+1).padStart(3,'0')}</span>
+        <span class="temp-badge">${tempLabel[p.temp]}</span>
+      </div>
+      <div class="card-name">${p.name}</div>
+      <div class="card-type">${p.type}</div>
+      <div class="card-info">
+        <div class="card-info-row"><span class="icon">📍</span>${p.city}</div>
+        <div class="card-info-row"><span class="icon">📞</span>${p.phone}</div>
+        <div class="card-info-row gold-row"><span class="icon" style="color:var(--gold)">💬</span>${p.note}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Filter buttons
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    render();
+  });
+});
+
+searchInput.addEventListener('input', render);
+
+render();
+</script>
+</body>
+</html>

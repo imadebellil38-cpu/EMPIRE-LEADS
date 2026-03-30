@@ -1,4 +1,4 @@
-/* ProspectHunter — Pricing Page Styles v2 — Orange & White */
+/* Empire Leads — Pricing Page Styles v2 — Orange & White */
 
 body {
   background: var(--bg);
@@ -22,7 +22,7 @@ header {
   width: 34px; height: 34px;
   background: var(--grad);
   border-radius: 9px; display: flex; align-items: center; justify-content: center;
-  box-shadow: var(--shadow-orange); font-size: 1rem; color: #fff;
+  box-shadow: var(--shadow-green); font-size: 1rem; color: #fff;
 }
 .logo-text { font-size: 1.15rem; font-weight: 800; letter-spacing: -.4px; color: var(--text1); }
 .logo-text span { color: var(--accent); }
@@ -63,11 +63,11 @@ header {
 .plan-card:hover {
   border-color: var(--accent-border);
   transform: translateY(-4px);
-  box-shadow: var(--shadow-orange);
+  box-shadow: var(--shadow-green);
 }
 .plan-card.popular {
   border-color: var(--accent);
-  box-shadow: var(--shadow-orange);
+  box-shadow: var(--shadow-green);
 }
 
 .popular-tag {
@@ -123,7 +123,7 @@ header {
 .btn-plan.pro {
   background: var(--grad);
   color: #fff;
-  box-shadow: var(--shadow-orange);
+  box-shadow: var(--shadow-green);
 }
 .btn-plan.pro:hover { opacity: .92; transform: translateY(-1px); }
 .btn-plan.enterprise {

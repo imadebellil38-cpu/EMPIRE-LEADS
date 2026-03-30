@@ -41,7 +41,7 @@ function generateQuotePDF(quote, prospect, user, settings = {}) {
     doc.rect(0, 0, 595, 120).fill('#030f1e');
 
     // ── Logo / Company name ──
-    const bizName = settings.company_name || user.email.split('@')[0] || 'ProspectHunter';
+    const bizName = settings.company_name || user.email.split('@')[0] || 'Empire Leads';
     doc.fillColor(ACCENT).fontSize(22).font('Helvetica-Bold').text(bizName, 50, 30);
     doc.fillColor(GRAY).fontSize(10).font('Helvetica').text(user.email, 50, 58);
     if (settings.phone) doc.text(settings.phone, 50, 72);

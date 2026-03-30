@@ -5,7 +5,7 @@ const dossier = __dirname;
 let timer = null;
 
 // Fichiers/dossiers à ne jamais commiter
-const IGNORE = ['.git', 'node_modules', 'autosave', '.env', 'prospecthunter.db', 'package-lock.json'];
+const IGNORE = ['.git', 'node_modules', 'autosave', '.env', 'empire-leads.db', 'package-lock.json'];
 
 console.log('✅ Sauvegarde automatique activée — je surveille ton projet...');
 

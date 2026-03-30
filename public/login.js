@@ -1,4 +1,4 @@
-/* ProspectHunter — Login Page Logic */
+/* Empire Leads — Login Page Logic */
 
 // If already logged in, redirect
 if (localStorage.getItem('ph_token')) {

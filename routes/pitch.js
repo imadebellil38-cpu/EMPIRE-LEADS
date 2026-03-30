@@ -245,15 +245,15 @@ router.post('/', async (req, res) => {
   const type = VALID_PITCH_TYPES.includes(pitchType) ? pitchType : 'appel';
 
   // ── Resolve API key ──
-  const user = db.prepare('SELECT anthropic_key FROM users WHERE id = ?').get(req.user.id);
-  const apiKey = getAnthropicKey() || (user && user.anthropic_key);
-  if (!apiKey) {
-    return res.status(400).json({ error: 'Clé API Anthropic non configurée. Contactez l\'administrateur.' });
-  }
-
   try {
+    const user = await db.get('SELECT anthropic_key FROM users WHERE id = ?', [req.user.id]);
+    const apiKey = getAnthropicKey() || (user && user.anthropic_key);
+    if (!apiKey) {
+      return res.status(400).json({ error: 'Clé API Anthropic non configurée. Contactez l\'administrateur.' });
+    }
+
     const result = await callClaude(apiKey, prospect, validator.trim(niche), type);
-    try { db.prepare('INSERT INTO activity_log (user_id, action, details) VALUES (?, ?, ?)').run(req.user.id, 'pitch_generated', JSON.stringify({ prospect: prospect.name, type })); } catch {}
+    try { await db.run('INSERT INTO activity_log (user_id, action, details) VALUES (?, ?, ?)', [req.user.id, 'pitch_generated', JSON.stringify({ prospect: prospect.name, type })]); } catch {}
     res.status(result.status).json(result.body);
   } catch (err) {
     console.error('[PITCH] Error:', err.message);
@@ -270,13 +270,13 @@ router.post('/keywords', async (req, res) => {
     return res.status(400).json({ error: 'Niche requise.' });
   }
 
-  const user = db.prepare('SELECT anthropic_key FROM users WHERE id = ?').get(req.user.id);
-  const apiKey = getAnthropicKey() || (user && user.anthropic_key);
-  if (!apiKey) {
-    return res.status(400).json({ error: 'Clé API Anthropic non configurée.' });
-  }
-
   try {
+    const user = await db.get('SELECT anthropic_key FROM users WHERE id = ?', [req.user.id]);
+    const apiKey = getAnthropicKey() || (user && user.anthropic_key);
+    if (!apiKey) {
+      return res.status(400).json({ error: 'Clé API Anthropic non configurée.' });
+    }
+
     const result = await callClaude(apiKey, { name: '', city: '' }, validator.trim(niche), 'keywords');
     const text = result.body?.content?.[0]?.text || '';
     const keywords = text.split(',').map(k => k.trim().toLowerCase()).filter(k => k.length > 1);
@@ -316,29 +316,34 @@ router.post('/batch', async (req, res) => {
   const limit = Math.min(prospects.length, 20);
   const type = VALID_PITCH_TYPES.includes(pitchType) ? pitchType : 'appel';
 
-  const user = db.prepare('SELECT anthropic_key FROM users WHERE id = ?').get(req.user.id);
-  const apiKey = getAnthropicKey() || (user && user.anthropic_key);
-  if (!apiKey) {
-    return res.status(400).json({ error: 'Cle API Anthropic non configuree.' });
-  }
-
-  const results = [];
-  let success = 0;
-  for (let i = 0; i < limit; i++) {
-    const p = prospects[i];
-    try {
-      const result = await callClaude(apiKey, p, validator.trim(niche || p.niche || ''), type);
-      const text = result.body?.content?.[0]?.text || '';
-      results.push({ name: p.name, pitch: text, error: null });
-      if (text) success++;
-    } catch (err) {
-      results.push({ name: p.name, pitch: '', error: err.message });
+  try {
+    const user = await db.get('SELECT anthropic_key FROM users WHERE id = ?', [req.user.id]);
+    const apiKey = getAnthropicKey() || (user && user.anthropic_key);
+    if (!apiKey) {
+      return res.status(400).json({ error: 'Cle API Anthropic non configuree.' });
     }
-    // Small delay between calls
-    if (i < limit - 1) await new Promise(r => setTimeout(r, 500));
-  }
 
-  res.json({ results, total: limit, success });
+    const results = [];
+    let success = 0;
+    for (let i = 0; i < limit; i++) {
+      const p = prospects[i];
+      try {
+        const result = await callClaude(apiKey, p, validator.trim(niche || p.niche || ''), type);
+        const text = result.body?.content?.[0]?.text || '';
+        results.push({ name: p.name, pitch: text, error: null });
+        if (text) success++;
+      } catch (err) {
+        results.push({ name: p.name, pitch: '', error: err.message });
+      }
+      // Small delay between calls
+      if (i < limit - 1) await new Promise(r => setTimeout(r, 500));
+    }
+
+    res.json({ results, total: limit, success });
+  } catch (err) {
+    console.error('[BATCH] Error:', err.message);
+    res.status(500).json({ error: 'Erreur lors de la génération batch.' });
+  }
 });
 
 // POST /api/pitch/extract-owners — extract owner names (2 phases: name analysis + Google search)
@@ -352,20 +357,19 @@ router.post('/extract-owners', async (req, res) => {
     return res.status(400).json({ error: 'Maximum 200 prospects à la fois.' });
   }
 
-  // ── Check credits (costs 3) ──
-  const user = db.prepare('SELECT credits, anthropic_key FROM users WHERE id = ?').get(req.user.id);
-  if (!user || user.credits < 3) {
-    return res.status(400).json({ error: `Crédits insuffisants (${user ? user.credits : 0}/3 requis).` });
-  }
-  const apiKey = getAnthropicKey() || user.anthropic_key;
-  if (!apiKey) {
-    return res.status(400).json({ error: 'Clé API Anthropic non configurée.' });
-  }
-
-  const updateStmt = db.prepare('UPDATE prospects SET owner_name = ? WHERE id = ? AND user_id = ?');
-  const results = [];
-
   try {
+    // ── Check credits (costs 3) ──
+    const user = await db.get('SELECT credits, anthropic_key FROM users WHERE id = ?', [req.user.id]);
+    if (!user || user.credits < 3) {
+      return res.status(403).json({ error: 'Plus de crédits. Passez au plan supérieur.', upgrade: true });
+    }
+    const apiKey = getAnthropicKey() || user.anthropic_key;
+    if (!apiKey) {
+      return res.status(400).json({ error: 'Clé API Anthropic non configurée.' });
+    }
+
+    const results = [];
+
     // ════════════════════════════════════════
     // PHASE 1 — Extract from business names
     // ════════════════════════════════════════
@@ -403,7 +407,7 @@ ${list}`;
       if (idx >= 0 && idx < prospects.length) {
         const ownerName = (item.n || '').trim().substring(0, 200);
         if (ownerName) {
-          updateStmt.run(ownerName, prospects[idx].id, req.user.id);
+          await db.run('UPDATE prospects SET owner_name = ? WHERE id = ? AND user_id = ?', [ownerName, prospects[idx].id, req.user.id]);
           results.push({ id: prospects[idx].id, owner_name: ownerName });
         } else {
           stillMissing.push({ idx, prospect: prospects[idx] });
@@ -458,7 +462,7 @@ ${listP2}`;
             const ownerName = (item.n || '').trim().substring(0, 200);
             const prospectIdx = toSearch[si].idx;
             if (ownerName) {
-              updateStmt.run(ownerName, prospects[prospectIdx].id, req.user.id);
+              await db.run('UPDATE prospects SET owner_name = ? WHERE id = ? AND user_id = ?', [ownerName, prospects[prospectIdx].id, req.user.id]);
             }
             results.push({ id: prospects[prospectIdx].id, owner_name: ownerName });
           }
@@ -476,7 +480,11 @@ ${listP2}`;
     const totalFound = results.filter(r => r.owner_name).length;
     const creditsUsed = totalFound > 0 ? 3 : 0;
     if (creditsUsed > 0) {
-      db.prepare('UPDATE users SET credits = credits - 3 WHERE id = ?').run(req.user.id);
+      // Atomic deduction with guard: never go below 0
+      await db.run(
+        'UPDATE users SET credits = GREATEST(credits - 3, 0) WHERE id = ? AND credits >= 3',
+        [req.user.id]
+      );
     }
 
     const phase2Count = toSearch.length;

@@ -1,4 +1,4 @@
-/* ProspectHunter — Design System v2 — Orange & White / Onyx & Fire */
+/* Empire Leads — Design System v3 — Green & Black / Onyx & Emerald */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 /* ═══════════════════════════════════
@@ -16,18 +16,18 @@
   --border:   #E5E7EB;
   --border2:  #D1D5DB;
 
-  /* ── Brand Orange ── */
-  --accent:        #F97316;
-  --accent-hover:  #EA580C;
-  --accent-light:  #FFF7ED;
-  --accent-soft:   rgba(249,115,22,.08);
-  --accent-border: rgba(249,115,22,.3);
+  /* ── Brand Green ── */
+  --accent:        #22c55e;
+  --accent-hover:  #16a34a;
+  --accent-light:  #f0fdf4;
+  --accent-soft:   rgba(34,197,94,.08);
+  --accent-border: rgba(34,197,94,.3);
 
   /* ── Gradients ── */
-  --grad:        linear-gradient(135deg, #F97316 0%, #EA580C 100%);
-  --grad-text:   linear-gradient(135deg, #F97316 0%, #EA580C 100%);
-  --grad-subtle: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
-  --glow:        rgba(249,115,22,.18);
+  --grad:        linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  --grad-text:   linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  --grad-subtle: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  --glow:        rgba(34,197,94,.18);
 
   /* ── Text ── */
   --text:  #111827;
@@ -112,10 +112,10 @@
   --teal-bd: rgba(13,148,136,.2);
 
   /* ── Legacy compat ── */
-  --cyan:        #F97316;
-  --cyan2:       #EA580C;
-  --cyan-glow:   rgba(249,115,22,.1);
-  --cyan-glow2:  rgba(249,115,22,.05);
+  --cyan:        #22c55e;
+  --cyan2:       #16a34a;
+  --cyan-glow:   rgba(34,197,94,.1);
+  --cyan-glow2:  rgba(34,197,94,.05);
   --purple2:     rgba(124,58,237,.08);
 
   /* ── Overlay ── */
@@ -127,7 +127,7 @@
   --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.05);
   --shadow-lg: 0 8px 32px rgba(0,0,0,.1), 0 4px 12px rgba(0,0,0,.06);
   --shadow-xl: 0 20px 60px rgba(0,0,0,.12);
-  --shadow-orange: 0 4px 20px rgba(249,115,22,.25);
+  --shadow-green: 0 4px 24px rgba(34,197,94,.4), 0 0 60px rgba(34,197,94,.15);
 
   /* ── Radius ── */
   --radius-sm: 6px;
@@ -151,18 +151,18 @@ html[data-theme="dark"] {
   --border:   #262626;
   --border2:  #333333;
 
-  /* ── Brand Orange ── */
-  --accent:        #F97316;
-  --accent-hover:  #FB923C;
-  --accent-light:  rgba(249,115,22,.12);
-  --accent-soft:   rgba(249,115,22,.08);
-  --accent-border: rgba(249,115,22,.35);
+  /* ── Brand Green ── */
+  --accent:        #22c55e;
+  --accent-hover:  #4ade80;
+  --accent-light:  rgba(34,197,94,.12);
+  --accent-soft:   rgba(34,197,94,.08);
+  --accent-border: rgba(34,197,94,.35);
 
   /* ── Gradients ── */
-  --grad:        linear-gradient(135deg, #F97316 0%, #EA580C 100%);
-  --grad-text:   linear-gradient(135deg, #FB923C 0%, #F97316 100%);
-  --grad-subtle: linear-gradient(135deg, rgba(249,115,22,.12) 0%, rgba(234,88,12,.06) 100%);
-  --glow:        rgba(249,115,22,.25);
+  --grad:        linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  --grad-text:   linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+  --grad-subtle: linear-gradient(135deg, rgba(34,197,94,.12) 0%, rgba(22,163,74,.06) 100%);
+  --glow:        rgba(34,197,94,.25);
 
   /* ── Text ── */
   --text:  #F5F5F5;
@@ -247,10 +247,10 @@ html[data-theme="dark"] {
   --teal-bd: rgba(20,184,166,.25);
 
   /* ── Legacy compat ── */
-  --cyan:        #F97316;
-  --cyan2:       #FB923C;
-  --cyan-glow:   rgba(249,115,22,.1);
-  --cyan-glow2:  rgba(249,115,22,.05);
+  --cyan:        #22c55e;
+  --cyan2:       #4ade80;
+  --cyan-glow:   rgba(34,197,94,.1);
+  --cyan-glow2:  rgba(34,197,94,.05);
   --purple2:     rgba(168,85,247,.1);
 
   /* ── Overlay ── */

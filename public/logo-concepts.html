@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Empire Leads — Concepts Logo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0a; font-family: 'Segoe UI', sans-serif; padding: 40px 20px; }
+  h1 { color: #fff; text-align: center; font-size: 1.2rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px; opacity: 0.5; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; max-width: 1200px; margin: 40px auto; }
+  .card { background: #111; border: 2px solid #1a1a1a; border-radius: 20px; padding: 40px 24px; display: flex; flex-direction: column; align-items: center; gap: 20px; cursor: pointer; transition: all 0.3s; }
+  .card:hover { border-color: #22c55e; transform: translateY(-4px); box-shadow: 0 20px 60px rgba(34,197,94,0.15); }
+  .card h2 { color: #555; font-size: 0.7rem; letter-spacing: 3px; text-transform: uppercase; }
+  .label { color: #22c55e; font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; background: rgba(34,197,94,0.08); padding: 5px 14px; border-radius: 20px; border: 1px solid rgba(34,197,94,0.25); }
+  .c1-wrap { position: relative; width: 110px; height: 110px; }
+  .c1-ring { position: absolute; border-radius: 50%; border: 1.5px solid #22c55e; top: 50%; left: 50%; transform: translate(-50%,-50%); }
+  .c1-r1 { width: 110px; height: 110px; opacity: 0.15; }
+  .c1-r2 { width: 76px; height: 76px; opacity: 0.35; }
+  .c1-r3 { width: 44px; height: 44px; opacity: 0.7; }
+  .c1-lh { position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: rgba(34,197,94,0.25); }
+  .c1-lv { position: absolute; left: 50%; top: 0; height: 100%; width: 1px; background: rgba(34,197,94,0.25); }
+  .c1-e { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 1.6rem; font-weight: 900; color: #22c55e; font-family: 'Arial Black', sans-serif; text-shadow: 0 0 20px rgba(34,197,94,0.6); }
+  .c3-row { display: flex; align-items: center; gap: 14px; }
+  .c3-icon { width: 64px; height: 64px; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 900; color: #000; font-family: 'Arial Black', sans-serif; box-shadow: 0 0 30px rgba(34,197,94,0.4); }
+  .c3-name { color: #fff; font-size: 1.5rem; font-weight: 900; letter-spacing: -1px; }
+  .c3-sub { color: #22c55e; font-size: 0.65rem; letter-spacing: 5px; text-transform: uppercase; }
+  .c4-bars { display: flex; align-items: flex-end; gap: 6px; height: 70px; }
+  .c4-bar { width: 12px; border-radius: 3px 3px 0 0; background: #22c55e; }
+  .c4-b1 { height: 20%; opacity: 0.25; }
+  .c4-b2 { height: 40%; opacity: 0.45; }
+  .c4-b3 { height: 60%; opacity: 0.65; }
+  .c4-b4 { height: 80%; opacity: 0.85; }
+  .c4-b5 { height: 100%; opacity: 1; box-shadow: 0 0 12px rgba(34,197,94,0.7); }
+  .c4-dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; margin-bottom: 4px; box-shadow: 0 0 10px #22c55e; animation: blink 1s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.1} }
+  .c5-empire { font-size: 2.8rem; font-weight: 900; color: #fff; letter-spacing: -2px; font-family: 'Arial Black', sans-serif; line-height: 1; }
+  .c5-line { width: 100%; height: 2px; background: linear-gradient(90deg, transparent, #22c55e, transparent); margin: 6px 0; }
+  .c5-leads { font-size: 0.85rem; color: #22c55e; letter-spacing: 8px; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<h1>Empire Leads · Concepts Logo</h1>
+<div class="grid">
+
+  <div class="card">
+    <h2>Concept 1</h2>
+    <div class="c1-wrap">
+      <div class="c1-ring c1-r1"></div>
+      <div class="c1-ring c1-r2"></div>
+      <div class="c1-ring c1-r3"></div>
+      <div class="c1-lh"></div>
+      <div class="c1-lv"></div>
+      <div class="c1-e">E</div>
+    </div>
+    <div style="color:#fff;font-weight:900;font-size:1.2rem;letter-spacing:1px">EMPIRE <span style="color:#22c55e">LEADS</span></div>
+    <div class="label">Radar · Ciblage</div>
+  </div>
+
+  <div class="card">
+    <h2>Concept 2</h2>
+    <svg width="110" height="90" viewBox="0 0 110 90" style="filter:drop-shadow(0 0 16px rgba(34,197,94,0.35))">
+      <defs><filter id="g"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      <polygon points="8,75 8,38 28,56 55,16 82,56 102,38 102,75" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linejoin="round"/>
+      <line x1="8" y1="75" x2="102" y2="75" stroke="#22c55e" stroke-width="2.5"/>
+      <circle cx="8" cy="38" r="4" fill="#22c55e"/>
+      <circle cx="55" cy="16" r="5" fill="#22c55e" filter="url(#g)"/>
+      <circle cx="102" cy="38" r="4" fill="#22c55e"/>
+    </svg>
+    <div style="text-align:center">
+      <div style="color:#fff;font-weight:900;font-size:1.4rem;letter-spacing:3px">EMPIRE</div>
+      <div style="color:#22c55e;font-size:0.7rem;letter-spacing:6px;margin-top:2px">L E A D S</div>
+    </div>
+    <div class="label">Couronne · Prestige</div>
+  </div>
+
+  <div class="card">
+    <h2>Concept 3</h2>
+    <div class="c3-row">
+      <div class="c3-icon">E</div>
+      <div>
+        <div class="c3-name">Empire</div>
+        <div class="c3-sub">Leads</div>
+      </div>
+    </div>
+    <div class="label">App Icon · Tech</div>
+  </div>
+
+  <div class="card">
+    <h2>Concept 4</h2>
+    <div style="display:flex;align-items:flex-end;gap:8px">
+      <div class="c4-bars">
+        <div class="c4-bar c4-b1"></div>
+        <div class="c4-bar c4-b2"></div>
+        <div class="c4-bar c4-b3"></div>
+        <div class="c4-bar c4-b4"></div>
+        <div class="c4-bar c4-b5"></div>
+      </div>
+      <div class="c4-dot"></div>
+    </div>
+    <div style="color:#fff;font-weight:900;font-size:1.2rem">EMPIRE <span style="color:#22c55e">LEADS</span></div>
+    <div style="color:#444;font-size:0.6rem;letter-spacing:3px">SCAN · CLOSE · WIN</div>
+    <div class="label">Signal · Growth</div>
+  </div>
+
+  <div class="card">
+    <h2>Concept 5</h2>
+    <div style="text-align:center">
+      <div class="c5-empire">EMPIRE</div>
+      <div class="c5-line"></div>
+      <div class="c5-leads">L E A D S</div>
+    </div>
+    <div class="label">Wordmark · Épuré</div>
+  </div>
+
+</div>
+</body>
+</html>

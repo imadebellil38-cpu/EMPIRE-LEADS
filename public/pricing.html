@@ -3,22 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ProspectHunter — Tarifs</title>
+  <title>Empire Leads — Tarifs & Abonnements | Prospection B2B à partir de 79€/mois</title>
+  <meta name="description" content="Decouvrez les tarifs Empire Leads : Starter 79EUR, Pro 349EUR, Business 549EUR, Elite 849EUR. Prospection B2B, leads B2B, entreprises sans site web via Google Maps.">
+  <meta name="keywords" content="Empire Leads, tarifs, prospection B2B, CRM prospection, leads B2B, trouver des clients, entreprises sans site web, Google Maps prospection">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://empireleads.fr/pricing">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Empire Leads — Tarifs et Abonnements | Prospection B2B">
+  <meta property="og:description" content="Plans a partir de 79EUR/mois. Trouvez des entreprises sans site web avec Google Maps. CRM prospection et leads B2B.">
+  <meta property="og:url" content="https://empireleads.fr/pricing">
+  <meta property="og:site_name" content="Empire Leads">
+  <meta property="og:image" content="https://empireleads.fr/og-image.png">
+  <meta property="og:locale" content="fr_FR">
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Empire Leads — Tarifs Prospection B2B">
+  <meta name="twitter:description" content="Plans a partir de 79EUR/mois. CRM prospection, leads B2B, entreprises sans site web.">
+  <meta name="twitter:image" content="https://empireleads.fr/og-image.png">
+  <!-- Structured Data -->
+  <script type="application/ld+json">{
+    "@context":"https://schema.org",
+    "@type":"WebPage",
+    "name":"Empire Leads — Tarifs et Abonnements",
+    "description":"Plans et tarifs Empire Leads pour la prospection B2B automatisee. Trouvez des entreprises sans site web via Google Maps.",
+    "url":"https://empireleads.fr/pricing",
+    "isPartOf":{"@type":"WebSite","name":"Empire Leads","url":"https://empireleads.fr"}
+  }</script>
+  <script type="application/ld+json">{
+    "@context":"https://schema.org",
+    "@type":"BreadcrumbList",
+    "itemListElement":[
+      {"@type":"ListItem","position":1,"name":"Accueil","item":"https://empireleads.fr/"},
+      {"@type":"ListItem","position":2,"name":"Tarifs","item":"https://empireleads.fr/pricing"}
+    ]
+  }</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
       --bg: #FAFAF9; --surface: #F3F4F6; --card: #FFFFFF;
       --border: #E5E7EB; --border2: #D1D5DB;
-      --grad: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
-      --accent: #F97316; --glow: rgba(249,115,22,.25);
+      --grad: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      --accent: #22c55e; --glow: rgba(34,197,94,.25);
       --text: #111827; --text2: #4B5563; --muted: #9CA3AF;
     }
     body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; -webkit-font-smoothing: antialiased; }
     body::before {
       content: ''; position: fixed; top: -10%; left: 50%; transform: translateX(-50%);
       width: 800px; height: 400px;
-      background: radial-gradient(ellipse, rgba(249,115,22,.06) 0%, transparent 70%);
+      background: radial-gradient(ellipse, rgba(34,197,94,.06) 0%, transparent 70%);
       pointer-events: none; z-index: 0;
     }
     header {
@@ -38,7 +74,16 @@
     .page-title { text-align: center; font-size: 2.2rem; font-weight: 900; letter-spacing: -.04em; margin-bottom: .5rem; background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .page-sub { text-align: center; color: var(--text2); font-size: .95rem; margin-bottom: 3rem; }
 
-    .plans { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; }
+    .billing-toggle { display: flex; align-items: center; justify-content: center; gap: .8rem; margin-bottom: 2.5rem; }
+    .billing-toggle span { font-size: .9rem; font-weight: 600; color: var(--text2); cursor: pointer; transition: color .2s; }
+    .billing-toggle span.active { color: var(--text); }
+    .billing-switch { position: relative; width: 52px; height: 28px; background: var(--border2); border-radius: 14px; cursor: pointer; transition: background .2s; }
+    .billing-switch.annual { background: var(--accent); }
+    .billing-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; background: #fff; border-radius: 50%; transition: transform .2s; box-shadow: 0 1px 4px rgba(0,0,0,.2); }
+    .billing-switch.annual::after { transform: translateX(24px); }
+    .save-badge { background: rgba(34,197,94,.12); color: var(--accent); font-size: .7rem; font-weight: 700; padding: .2rem .6rem; border-radius: 20px; border: 1px solid rgba(34,197,94,.3); }
+
+    .plans { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
 
     .plan-card {
       background: var(--card); border: 1px solid var(--border); border-radius: 16px;
@@ -46,8 +91,8 @@
       text-align: center; position: relative; transition: border-color .2s, transform .2s, box-shadow .2s;
       box-shadow: 0 1px 3px rgba(0,0,0,.05);
     }
-    .plan-card:hover { border-color: rgba(249,115,22,.4); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(249,115,22,.12); }
-    .plan-card.hot { border-color: rgba(249,115,22,.5); background: linear-gradient(180deg, rgba(249,115,22,.04) 0%, var(--card) 100%); box-shadow: 0 4px 20px var(--glow); }
+    .plan-card:hover { border-color: rgba(34,197,94,.4); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(34,197,94,.12); }
+    .plan-card.hot { border-color: rgba(34,197,94,.5); background: linear-gradient(180deg, rgba(249,115,22,.04) 0%, var(--card) 100%); box-shadow: 0 4px 20px var(--glow); }
     .plan-card.hot:hover { border-color: var(--accent); }
 
     .hot-tag {
@@ -95,98 +140,94 @@
 </head>
 <body>
   <header>
-    <div class="logo-icon">🎯</div>
-    <span class="logo-text">Prospect<span>Hunter</span></span>
+    <span class="logo-text">EMPIRE<span>LEADS</span></span>
     <a class="hdr-btn" href="/app">← Retour</a>
   </header>
 
   <div class="page">
-    <div class="page-title">Simples. Transparents. 🎯</div>
-    <div class="page-sub">Choisis ton plan · Paiement unique · Crédits disponibles immédiatement</div>
+    <h1 class="page-title">Tarifs Empire Leads — Prospection B2B simple et transparente</h1>
+    <p class="page-sub">Choisis ton plan de CRM prospection · Credits disponibles immediatement</p>
+
+    <div class="billing-toggle">
+      <span class="active" id="lbl-monthly">Mensuel</span>
+      <div class="billing-switch" id="billing-switch" onclick="toggleBilling()"></div>
+      <span id="lbl-annual">Annuel</span>
+      <span class="save-badge">-30%</span>
+    </div>
 
     <div class="plans">
 
-      <!-- FREE -->
-      <div class="plan-card" id="card-free">
-        <div class="plan-name">Gratuit</div>
-        <div class="plan-price">0<span>€</span></div>
-        <div class="plan-credits"><strong>5</strong> crédits</div>
-        <ul class="plan-features">
-          <li>✓ Pipeline CRM</li>
-          <li>✓ 5 prospects offerts</li>
-          <li>✓ Pitch IA</li>
-        </ul>
-        <button class="btn-plan current-btn" disabled id="btn-free">Plan actuel</button>
-        <div class="current-label" id="tag-free">✓ Actif</div>
-      </div>
-
-      <!-- STARTER — 40€ -->
+      <!-- STARTER — 79€ / 200 leads -->
       <div class="plan-card" id="card-starter">
         <div class="plan-name">Starter</div>
-        <div class="plan-price">40<span>€</span></div>
-        <div class="plan-credits"><strong>100</strong> crédits</div>
+        <div class="plan-price" data-monthly="79" data-annual="55">79<span>€</span></div>
+        <div class="plan-credits"><strong>200</strong> leads/mois</div>
+        <div style="font-size:.7rem;color:var(--text3);margin-top:-.3rem">0.40€ / lead</div>
         <ul class="plan-features">
-          <li>✓ Pipeline CRM</li>
-          <li>✓ Pitch IA</li>
-          <li>✓ Filtre sans site</li>
-          <li>✓ Badges signaux</li>
+          <li>✓ Pipeline CRM 6 étapes</li>
+          <li>✓ Pitch IA personnalisé</li>
+          <li>✓ Filtre sans site web</li>
+          <li>✓ France, Suisse, Belgique</li>
         </ul>
         <button class="btn-plan" onclick="buyPack('starter')" id="btn-starter">Choisir</button>
         <div class="current-label" id="tag-starter">✓ Actif</div>
       </div>
 
-      <!-- PRO — 100€ (populaire) -->
+      <!-- PRO — 349€ / 1000 leads (POPULAIRE) -->
       <div class="plan-card hot" id="card-pro">
         <div class="hot-tag">⚡ Populaire</div>
         <div class="plan-name" style="background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Pro</div>
-        <div class="plan-price">100<span>€</span></div>
-        <div class="plan-credits"><strong>500</strong> crédits</div>
+        <div class="plan-price" data-monthly="349" data-annual="244">349<span>€</span></div>
+        <div class="plan-credits"><strong>1 000</strong> leads/mois</div>
+        <div style="font-size:.7rem;color:var(--accent);margin-top:-.3rem;font-weight:600">0.35€ / lead · -12%</div>
         <ul class="plan-features">
           <li>✓ Tout du Starter</li>
-          <li>✓ Filtre sans réseaux</li>
-          <li>✓ Autour de moi</li>
-          <li>✓ Multi-villes</li>
-          <li>✓ Export CSV</li>
+          <li>✓ Filtre sans réseaux sociaux</li>
+          <li>✓ Géolocalisation "Autour de moi"</li>
+          <li>✓ Export CSV illimité</li>
+          <li>✓ Support prioritaire</li>
         </ul>
         <button class="btn-plan hot-btn" onclick="buyPack('pro')" id="btn-pro">Choisir</button>
         <div class="current-label" id="tag-pro">✓ Actif</div>
       </div>
 
-      <!-- BUSINESS — 300€ -->
+      <!-- BUSINESS — 549€ / 3000 leads -->
       <div class="plan-card" id="card-business">
         <div class="plan-name">Business</div>
-        <div class="plan-price">300<span>€</span></div>
-        <div class="plan-credits"><strong>2 000</strong> crédits</div>
+        <div class="plan-price" data-monthly="549" data-annual="384">549<span>€</span></div>
+        <div class="plan-credits"><strong>3 000</strong> leads/mois</div>
+        <div style="font-size:.7rem;color:var(--text3);margin-top:-.3rem">0.18€ / lead</div>
         <ul class="plan-features">
           <li>✓ Tout du Pro</li>
           <li>✓ Pitch IA illimité</li>
-          <li>✓ Support prioritaire</li>
           <li>✓ Historique complet</li>
+          <li>✓ Support prioritaire 24/7</li>
         </ul>
         <button class="btn-plan" onclick="buyPack('business')" id="btn-business">Choisir</button>
         <div class="current-label" id="tag-business">✓ Actif</div>
       </div>
 
-      <!-- LEGEND — 445€ -->
-      <div class="plan-card" id="card-legend">
-        <div class="plan-name" style="color:#ff8844">Légende 👑</div>
-        <div class="plan-price">445<span>€</span></div>
-        <div class="plan-credits"><strong>3 000</strong> crédits</div>
+      <!-- ELITE — 849€ / 5000 leads -->
+      <div class="plan-card" id="card-elite">
+        <div class="plan-name" style="color:#22c55e">Elite 👑</div>
+        <div class="plan-price" data-monthly="849" data-annual="594">849<span>€</span></div>
+        <div class="plan-credits"><strong>5 000</strong> leads/mois</div>
+        <div style="font-size:.7rem;color:var(--accent);margin-top:-.3rem;font-weight:600">0.17€ / lead</div>
         <ul class="plan-features">
           <li>✓ Tout du Business</li>
-          <li>✓ Onboarding perso</li>
-          <li>✓ Accès équipe</li>
-          <li>✓ Support VIP 24/7</li>
+          <li>✓ Onboarding personnalisé</li>
+          <li>✓ Accès multi-utilisateurs</li>
+          <li>✓ Account manager dédié</li>
         </ul>
-        <button class="btn-plan" style="background:linear-gradient(135deg,#e11d48,#f97316);color:#fff;border:none;box-shadow:0 4px 20px rgba(225,29,72,.3)" onclick="buyPack('legend')" id="btn-legend">Choisir</button>
-        <div class="current-label" id="tag-legend">✓ Actif</div>
+        <button class="btn-plan" style="background:linear-gradient(135deg,#22c55e,#16a34a);color:#000;border:none;box-shadow:0 4px 20px rgba(34,197,94,.3)" onclick="buyPack('elite')" id="btn-elite">Choisir</button>
+        <div class="current-label" id="tag-elite">✓ Actif</div>
       </div>
 
     </div>
 
     <div class="footnote">
       Paiement sécurisé par Stripe · Crédits ajoutés instantanément<br>
-      1 crédit = 1 prospect trouvé · Pas d'abonnement récurrent ✌️
+      1 crédit = 1 prospect trouvé · Abonnement mensuel sans engagement ✌️
     </div>
   </div>
 
@@ -203,7 +244,24 @@ if (params.get('cancelled')) {
   document.body.insertAdjacentHTML('afterbegin', `<div style="background:#ef4444;color:#fff;text-align:center;padding:.75rem;font-weight:700">❌ Paiement annulé.</div>`);
 }
 
-const PLANS = ['free','starter','pro','business','legend'];
+const PLANS = ['starter','pro','business','elite'];
+
+let isAnnual = false;
+function toggleBilling() {
+  isAnnual = !isAnnual;
+  const sw = document.getElementById('billing-switch');
+  const lblM = document.getElementById('lbl-monthly');
+  const lblA = document.getElementById('lbl-annual');
+  sw.classList.toggle('annual', isAnnual);
+  lblM.classList.toggle('active', !isAnnual);
+  lblA.classList.toggle('active', isAnnual);
+  document.querySelectorAll('.plan-price[data-monthly]').forEach(el => {
+    const price = isAnnual ? el.dataset.annual : el.dataset.monthly;
+    el.innerHTML = price + '<span>€</span>';
+    if (isAnnual) el.innerHTML += '<small style="font-size:.55rem;color:var(--text2);display:block;margin-top:2px">/mois · facturé annuellement</small>';
+    else el.innerHTML += '<small style="font-size:.55rem;color:var(--text2);display:block;margin-top:2px">/mois</small>';
+  });
+}
 
 async function init() {
   try {

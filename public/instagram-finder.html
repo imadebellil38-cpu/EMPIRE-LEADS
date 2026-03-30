@@ -332,14 +332,22 @@ td{padding:10px 14px;font-size:14px;vertical-align:middle}
       </div>
     </div>
     <div class="how-note">
-      <strong>Aucune API externe.</strong> L'outil interroge Instagram directement depuis ton navigateur, avec ta session. Gratuit, illimité, sans clé API.
+      L'outil fonctionne directement depuis ton navigateur, avec ta session Instagram.
     </div>
   </div>
 
   <!-- BOOKMARKLET SECTION -->
   <div class="bm-section">
     <h2>Installer le bookmarklet</h2>
-    <p class="bm-subtitle">Deux méthodes selon ton appareil</p>
+    <p class="bm-subtitle">Étape 1 : copie le code, puis crée un favori</p>
+    <div style="text-align:center;margin-bottom:16px">
+      <button class="copy-bm-btn" id="copy-bm-main" onclick="copyBookmarklet()" style="padding:14px 32px;font-size:16px;font-weight:700;background:linear-gradient(135deg,#E1306C,#F77737);color:#fff;border:none;border-radius:10px;cursor:pointer">
+        📋 Copier le code du bookmarklet
+      </button>
+      <div id="copy-status-main" style="color:#00d084;font-size:12px;margin-top:6px;min-height:18px"></div>
+      <p style="color:#9090a8;font-size:12px;margin-top:12px">Si le bouton ne copie pas, sélectionne tout le texte ci-dessous (Ctrl+A dans la boîte) puis Ctrl+C :</p>
+      <textarea id="igf-code-box" readonly onclick="this.select()" style="width:100%;height:80px;background:#0a0a12;border:1.5px solid #2a2a38;border-radius:8px;color:#E1306C;font-size:11px;font-family:monospace;padding:10px;resize:vertical;word-break:break-all">Chargement du code...</textarea>
+    </div>
     <div class="bm-methods">
 
       <!-- Desktop -->
@@ -347,11 +355,15 @@ td{padding:10px 14px;font-size:14px;vertical-align:middle}
         <div class="bm-method-title">
           🖥️ Desktop <span class="badge">Chrome / Firefox / Safari</span>
         </div>
-        <p class="bm-drag-hint">Glisse ce bouton dans ta barre de favoris :</p>
-        <a id="bm-link" class="bm-btn" href="#">📷 IG Finder</a>
-        <p class="bm-drag-hint" style="margin-top:10px;font-size:11px">
-          Puis va sur instagram.com et clique le favori "IG Finder".
-        </p>
+        <p class="bm-drag-hint" style="font-weight:600;color:#e0e0f0">Méthode copier-coller (recommandée) :</p>
+        <ol style="color:#9090a8;font-size:13px;line-height:1.8;padding-left:20px;margin:8px 0">
+          <li>Clique <strong style="color:#E1306C">"Copier le code bookmarklet"</strong> ci-contre →</li>
+          <li><strong>Clic droit</strong> sur ta barre de favoris → <strong>"Ajouter une page"</strong></li>
+          <li>Nom : <code style="background:#222;padding:2px 6px;border-radius:4px">IG Finder</code></li>
+          <li>URL : <strong>Ctrl+V</strong> (colle le code)</li>
+          <li>Va sur <strong style="color:#E1306C">instagram.com</strong> → clique <strong>"IG Finder"</strong> dans tes favoris</li>
+        </ol>
+        <a id="bm-link" class="bm-btn" href="#" style="opacity:0.5;font-size:12px">📷 IG Finder (ou glisse-moi)</a>
       </div>
 
       <!-- Mobile -->
@@ -486,42 +498,55 @@ td{padding:10px 14px;font-size:14px;vertical-align:middle}
 </div><!-- /container -->
 
 <script>
-// ── Build the loader bookmarklet code ──
-var ORIGIN = window.location.origin;
-var BOOKMARKLET_CODE = "javascript:void(fetch('" + ORIGIN + "/ig-finder.js').then(r=>r.text()).then(c=>(new Function(c))()))";
+// ── Load full bookmarklet code from server ──
+var FULL_BOOKMARKLET_CODE = '';
 
-// ── Set bookmarklet href ──
-(function(){
-  var bm=document.getElementById('bm-link');
-  if(bm)bm.href=BOOKMARKLET_CODE;
-})();
+fetch('/ig-finder.js')
+  .then(function(r){ return r.text(); })
+  .then(function(code){
+    FULL_BOOKMARKLET_CODE = 'javascript:' + encodeURIComponent(code);
+    // Set drag button href
+    var bm = document.getElementById('bm-link');
+    if(bm) bm.href = FULL_BOOKMARKLET_CODE;
+    // Fill the visible textarea so user can manually copy
+    var box = document.getElementById('igf-code-box');
+    if(box) box.value = FULL_BOOKMARKLET_CODE;
+  })
+  .catch(function(e){ console.error('Failed to load ig-finder.js', e); });
 
 // ── Copy to clipboard ──
 function copyBookmarklet(){
-  var text=BOOKMARKLET_CODE;
-  var btn=document.getElementById('copy-bm-btn');
-  var lbl=document.getElementById('copy-bm-text');
-  if(navigator.clipboard&&navigator.clipboard.writeText){
+  if(!FULL_BOOKMARKLET_CODE){
+    alert('Chargement en cours, réessaie dans 2 secondes');
+    return;
+  }
+  var text = FULL_BOOKMARKLET_CODE;
+  var btn = document.getElementById('copy-bm-btn');
+  var lbl = document.getElementById('copy-bm-text');
+
+  if(navigator.clipboard && navigator.clipboard.writeText){
     navigator.clipboard.writeText(text).then(function(){
-      if(lbl)lbl.textContent='Code copié !';
-      if(btn)btn.classList.add('copied');
-      setTimeout(function(){if(lbl)lbl.textContent='Copier le code bookmarklet';if(btn)btn.classList.remove('copied');},2500);
-    }).catch(function(){fallbackCopy(text,btn,lbl);});
+      if(lbl) lbl.textContent = 'Copié ! (' + text.length + ' chars)';
+      if(btn) btn.classList.add('copied');
+      setTimeout(function(){if(lbl) lbl.textContent='Copier le code bookmarklet';if(btn) btn.classList.remove('copied');}, 3000);
+    }).catch(function(){ fallbackCopy(text, btn, lbl); });
   } else {
-    fallbackCopy(text,btn,lbl);
+    fallbackCopy(text, btn, lbl);
   }
 }
-function fallbackCopy(text,btn,lbl){
-  var ta=document.createElement('textarea');
-  ta.value=text;ta.style.cssText='position:fixed;opacity:0;top:-9999px';
-  document.body.appendChild(ta);ta.select();
+function fallbackCopy(text, btn, lbl){
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;opacity:0;top:-9999px';
+  document.body.appendChild(ta);
+  ta.select();
   try{
     document.execCommand('copy');
-    if(lbl)lbl.textContent='Code copié !';
-    if(btn)btn.classList.add('copied');
-    setTimeout(function(){if(lbl)lbl.textContent='Copier le code bookmarklet';if(btn)btn.classList.remove('copied');},2500);
+    if(lbl) lbl.textContent = 'Copié ! (' + text.length + ' chars)';
+    if(btn) btn.classList.add('copied');
+    setTimeout(function(){if(lbl) lbl.textContent='Copier le code bookmarklet';if(btn) btn.classList.remove('copied');}, 3000);
   }catch(e){
-    if(lbl)lbl.textContent='Copie manuelle : Ctrl+C';
+    if(lbl) lbl.textContent = 'Erreur — sélectionne le texte manuellement';
   }
   document.body.removeChild(ta);
 }

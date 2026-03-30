@@ -1,4 +1,4 @@
-/* ProspectHunter — Login Page Styles v2 — Orange & White */
+/* Empire Leads — Login Page Styles v2 — Orange & White */
 
 body {
   display: flex; align-items: center; justify-content: center; min-height: 100vh;
@@ -34,7 +34,7 @@ body::after {
   width: 52px; height: 52px; margin: 0 auto .75rem;
   background: var(--grad);
   border-radius: 14px; display: flex; align-items: center; justify-content: center;
-  box-shadow: var(--shadow-orange); font-size: 1.5rem;
+  box-shadow: var(--shadow-green); font-size: 1.5rem;
 }
 .logo h1 { font-size: 1.5rem; font-weight: 900; letter-spacing: -.5px; color: var(--text1); }
 .logo h1 span { color: var(--accent); }
@@ -80,7 +80,7 @@ body::after {
   color: #fff; border: none; border-radius: 10px;
   font-size: .95rem; font-weight: 800; cursor: pointer;
   font-family: inherit; transition: opacity .15s, transform .1s;
-  box-shadow: var(--shadow-orange);
+  box-shadow: var(--shadow-green);
 }
 .btn:hover { opacity: .92; transform: translateY(-1px); }
 .btn:active { transform: translateY(0); }

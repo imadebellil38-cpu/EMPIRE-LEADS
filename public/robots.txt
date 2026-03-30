@@ -1,8 +1,10 @@
 User-agent: *
 Allow: /
-Allow: /login
+Allow: /landing
 Allow: /pricing
+Allow: /login
 Disallow: /api/
 Disallow: /admin
+Disallow: /app
 
-Sitemap: https://prospecthunter.fr/sitemap.xml
+Sitemap: https://empireleads.fr/sitemap.xml

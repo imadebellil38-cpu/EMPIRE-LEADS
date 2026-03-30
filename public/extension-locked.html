@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accès restreint — Empire Leads</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter',sans-serif;background:#0a0a0f;color:#e0e0f0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:#111118;border:1px solid #2a2a38;border-radius:16px;padding:40px 32px;max-width:420px;width:100%;text-align:center}
+.icon{font-size:48px;margin-bottom:16px}
+h1{font-size:22px;font-weight:700;margin-bottom:8px}
+p{font-size:14px;color:#9090a8;margin-bottom:28px;line-height:1.6}
+input{width:100%;padding:14px 16px;background:#0a0a0f;border:1.5px solid #2a2a38;border-radius:10px;color:#e0e0f0;font-size:15px;outline:none;margin-bottom:12px;transition:border .2s;text-align:center;letter-spacing:.08em}
+input:focus{border-color:#E1306C}
+input::placeholder{color:#5a5a70;letter-spacing:0}
+button{width:100%;padding:14px;background:linear-gradient(135deg,#E1306C,#F77737);color:#fff;font-size:15px;font-weight:700;border:none;border-radius:10px;cursor:pointer;transition:opacity .2s}
+button:hover{opacity:.9}
+.error{font-size:13px;color:#ff4444;margin-top:10px;display:none}
+.back{margin-top:20px;font-size:13px;color:#5a5a70}
+.back a{color:#9090a8;text-decoration:none}
+.back a:hover{color:#E1306C}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="icon">🔐</div>
+  <h1>Accès restreint</h1>
+  <p>Cette extension est réservée. Entre ton code d'accès pour continuer.</p>
+  <input type="text" id="key-input" placeholder="Code d'accès" autocomplete="off" spellcheck="false">
+  <button onclick="submitKey()">Accéder à l'extension</button>
+  <div class="error" id="error-msg">Code incorrect. Contacte l'administrateur.</div>
+  <div class="back"><a href="/app">← Retour à l'app</a></div>
+</div>
+<script>
+// Vérif JWT
+var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+if (!token) window.location.href = '/login';
+
+function submitKey() {
+  var key = document.getElementById('key-input').value.trim();
+  if (!key) return;
+  var token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
+  window.location.href = '/monteur-video?key=' + encodeURIComponent(key) + '&token=' + encodeURIComponent(token);
+}
+document.getElementById('key-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') submitKey();
+});
+
+// Vérifier si on vient d'une tentative échouée (présence du param key dans l'URL précédente)
+var ref = document.referrer;
+if (ref && ref.includes('/monteur-video') && ref.includes('key=')) {
+  document.getElementById('error-msg').style.display = 'block';
+}
+</script>
+</body>
+</html>

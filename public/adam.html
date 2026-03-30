@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ADAM — THE WOLF | Prospect List</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --black: #0a0a0a;
+      --blue: #3B82F6;
+      --blue-dark: #1d4ed8;
+      --blue-glow: rgba(59,130,246,0.35);
+      --silver: #E5E7EB;
+      --silver-dim: #9CA3AF;
+      --card-bg: #111827;
+      --card-border: rgba(59,130,246,0.4);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background-color: var(--black);
+      color: var(--silver);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ── Canvas background ── */
+    #particle-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── City skyline ── */
+    .skyline {
+      position: fixed;
+      bottom: 0; left: 0;
+      width: 100%;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.07;
+    }
+
+    /* ── Floating hustle words ── */
+    .hustle-words {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 2;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .hustle-word {
+      position: absolute;
+      font-family: 'Bangers', cursive;
+      font-size: clamp(12px, 2vw, 22px);
+      color: var(--blue);
+      opacity: 0;
+      white-space: nowrap;
+      letter-spacing: 2px;
+      text-shadow: 0 0 10px var(--blue);
+      animation: floatWord linear infinite;
+    }
+
+    @keyframes floatWord {
+      0%   { transform: translateY(110vh) rotate(-5deg); opacity: 0; }
+      10%  { opacity: 0.18; }
+      90%  { opacity: 0.12; }
+      100% { transform: translateY(-10vh) rotate(5deg); opacity: 0; }
+    }
+
+    /* ── Layout wrapper ── */
+    .wrapper {
+      position: relative;
+      z-index: 10;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px 80px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 60px 0 40px;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--blue-dark), var(--blue));
+      color: #fff;
+      font-family: 'Bangers', cursive;
+      font-size: 18px;
+      letter-spacing: 3px;
+      padding: 8px 28px;
+      border-radius: 4px;
+      border: 1px solid var(--blue);
+      box-shadow: 0 0 20px var(--blue-glow);
+      margin-bottom: 24px;
+      text-transform: uppercase;
+    }
+
+    .hero h1 {
+      font-family: 'Bangers', cursive;
+      font-size: clamp(52px, 9vw, 110px);
+      letter-spacing: 6px;
+      color: var(--silver);
+      line-height: 1;
+      text-shadow: 0 0 40px rgba(59,130,246,0.3);
+      margin-bottom: 12px;
+    }
+    .hero h1 .blue { color: var(--blue); text-shadow: 0 0 30px var(--blue); }
+
+    .hero-sub {
+      font-size: 16px;
+      color: var(--silver-dim);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .tagline {
+      font-family: 'Bangers', cursive;
+      font-size: clamp(20px, 3.5vw, 36px);
+      color: #fff;
+      letter-spacing: 2px;
+      margin-bottom: 32px;
+    }
+    .tagline .money { color: #22c55e; }
+
+    /* ── Stats bar ── */
+    .stats-bar {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+    .stat-pill {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 999px;
+      padding: 8px 22px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--silver);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+    .stat-pill span { color: var(--blue); }
+
+    /* ── SVG Characters ── */
+    .characters {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 40px;
+      margin-bottom: 20px;
+    }
+    .character { text-align: center; }
+    .character svg { display: block; margin: 0 auto 8px; }
+    .char-label {
+      font-family: 'Bangers', cursive;
+      font-size: 13px;
+      letter-spacing: 2px;
+      color: var(--blue);
+      text-transform: uppercase;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--blue), transparent);
+      margin: 0 0 32px;
+      box-shadow: 0 0 12px var(--blue-glow);
+    }
+
+    /* ── Search + filters ── */
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    .search-box {
+      flex: 1;
+      min-width: 220px;
+      background: var(--card-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: 6px;
+      padding: 12px 16px;
+      color: var(--silver);
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-box::placeholder { color: var(--silver-dim); }
+    .search-box:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px var(--blue-glow);
+    }
+
+    .filter-btn {
+      background: transparent;
+      border: 1.5px solid var(--card-border);
+      border-radius: 6px;
+      padding: 10px 18px;
+      color: var(--silver-dim);
+      font-size: 13px;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      transition: all 0.18s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+      box-shadow: 0 0 14px var(--blue-glow);
+    }
+    .filter-btn.hot.active  { background: #ef4444; border-color: #ef4444; box-shadow: 0 0 14px rgba(239,68,68,0.4); }
+    .filter-btn.warm.active { background: #f97316; border-color: #f97316; box-shadow: 0 0 14px rgba(249,115,22,0.4); }
+    .filter-btn.mild.active { background: #eab308; border-color: #eab308; color: #000; box-shadow: 0 0 14px rgba(234,179,8,0.4); }
+    .filter-btn.cold.active { background: #6b7280; border-color: #6b7280; box-shadow: 0 0 14px rgba(107,114,128,0.4); }
+
+    /* ── Count label ── */
+    .count-label {
+      font-family: 'Bangers', cursive;
+      font-size: 22px;
+      letter-spacing: 2px;
+      color: var(--silver-dim);
+      margin-bottom: 14px;
+    }
+    .count-label span { color: var(--blue); }
+
+    /* ── Prospect grid ── */
+    .prospect-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--card-border);
+      border-radius: 10px;
+      padding: 20px;
+      cursor: pointer;
+      transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+      position: relative;
+      overflow: hidden;
+      user-select: none;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px var(--blue-glow);
+      border-color: var(--blue);
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px; height: 100%;
+      border-radius: 10px 0 0 10px;
+    }
+    .card.temp-hot::before   { background: #ef4444; }
+    .card.temp-warm::before  { background: #f97316; }
+    .card.temp-mild::before  { background: #eab308; }
+    .card.temp-cold::before  { background: #6b7280; }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .card-name {
+      font-family: 'Bangers', cursive;
+      font-size: 19px;
+      letter-spacing: 1.5px;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .temp-badge {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .temp-hot  .temp-badge { background: rgba(239,68,68,0.2);  color: #ef4444;  border: 1px solid rgba(239,68,68,0.4);  }
+    .temp-warm .temp-badge { background: rgba(249,115,22,0.2); color: #f97316; border: 1px solid rgba(249,115,22,0.4); }
+    .temp-mild .temp-badge { background: rgba(234,179,8,0.2);  color: #eab308; border: 1px solid rgba(234,179,8,0.4);  }
+    .temp-cold .temp-badge { background: rgba(107,114,128,0.2);color: #9CA3AF; border: 1px solid rgba(107,114,128,0.4); }
+
+    .card-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .meta-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--silver-dim);
+    }
+    .meta-row .icon { font-size: 14px; flex-shrink: 0; }
+    .meta-row strong { color: var(--silver); }
+
+    .card-phone {
+      margin-top: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.3);
+      border-radius: 6px;
+      padding: 7px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--blue);
+      letter-spacing: 1px;
+      transition: background 0.18s;
+    }
+    .card:hover .card-phone {
+      background: rgba(59,130,246,0.2);
+    }
+
+    /* ── Click burst animation ── */
+    .burst {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9999;
+      font-family: 'Bangers', cursive;
+      font-size: 24px;
+      letter-spacing: 2px;
+      color: var(--blue);
+      text-shadow: 0 0 10px var(--blue);
+      white-space: nowrap;
+      animation: burstAnim 0.9s ease forwards;
+      transform-origin: center;
+    }
+    @keyframes burstAnim {
+      0%   { opacity: 1; transform: scale(0.6) translateY(0); }
+      40%  { opacity: 1; transform: scale(1.3) translateY(-20px); }
+      100% { opacity: 0; transform: scale(1) translateY(-60px); }
+    }
+
+    /* ── Footer ── */
+    .footer {
+      text-align: center;
+      padding-top: 60px;
+      font-family: 'Bangers', cursive;
+      font-size: 26px;
+      letter-spacing: 4px;
+      color: var(--blue);
+      text-shadow: 0 0 20px var(--blue-glow);
+    }
+
+    @media (max-width: 600px) {
+      .prospect-grid { grid-template-columns: 1fr; }
+      .characters { gap: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Particle canvas -->
+<canvas id="particle-canvas"></canvas>
+
+<!-- City skyline SVG -->
+<svg class="skyline" viewBox="0 0 1440 300" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+  <g fill="#3B82F6">
+    <!-- Buildings -->
+    <rect x="0"    y="200" width="60"  height="100"/>
+    <rect x="10"   y="160" width="20"  height="40"/>
+    <rect x="70"   y="220" width="50"  height="80"/>
+    <rect x="80"   y="190" width="15"  height="30"/>
+    <rect x="130"  y="150" width="70"  height="150"/>
+    <rect x="155"  y="120" width="20"  height="30"/>
+    <rect x="210"  y="180" width="40"  height="120"/>
+    <rect x="260"  y="130" width="90"  height="170"/>
+    <rect x="295"  y="90"  width="20"  height="40"/>
+    <rect x="360"  y="210" width="55"  height="90"/>
+    <rect x="425"  y="160" width="75"  height="140"/>
+    <rect x="448"  y="130" width="20"  height="30"/>
+    <rect x="510"  y="195" width="50"  height="105"/>
+    <rect x="570"  y="120" width="85"  height="180"/>
+    <rect x="600"  y="80"  width="25"  height="40"/>
+    <rect x="665"  y="215" width="45"  height="85"/>
+    <rect x="720"  y="140" width="80"  height="160"/>
+    <rect x="750"  y="100" width="20"  height="40"/>
+    <rect x="810"  y="200" width="55"  height="100"/>
+    <rect x="875"  y="155" width="70"  height="145"/>
+    <rect x="900"  y="115" width="20"  height="40"/>
+    <rect x="955"  y="175" width="60"  height="125"/>
+    <rect x="1025" y="125" width="90"  height="175"/>
+    <rect x="1060" y="85"  width="22"  height="40"/>
+    <rect x="1125" y="205" width="50"  height="95"/>
+    <rect x="1185" y="145" width="75"  height="155"/>
+    <rect x="1210" y="110" width="20"  height="35"/>
+    <rect x="1270" y="180" width="55"  height="120"/>
+    <rect x="1335" y="135" width="70"  height="165"/>
+    <rect x="1360" y="100" width="20"  height="35"/>
+    <rect x="1415" y="210" width="30"  height="90"/>
+    <!-- Windows -->
+    <g fill="#0a0a0a" opacity="0.6">
+      <rect x="140" y="160" width="8" height="8"/>
+      <rect x="155" y="160" width="8" height="8"/>
+      <rect x="170" y="160" width="8" height="8"/>
+      <rect x="140" y="176" width="8" height="8"/>
+      <rect x="155" y="176" width="8" height="8"/>
+      <rect x="270" y="145" width="10" height="10"/>
+      <rect x="290" y="145" width="10" height="10"/>
+      <rect x="310" y="145" width="10" height="10"/>
+      <rect x="270" y="163" width="10" height="10"/>
+      <rect x="290" y="163" width="10" height="10"/>
+      <rect x="580" y="135" width="10" height="10"/>
+      <rect x="600" y="135" width="10" height="10"/>
+      <rect x="620" y="135" width="10" height="10"/>
+      <rect x="580" y="153" width="10" height="10"/>
+      <rect x="620" y="153" width="10" height="10"/>
+    </g>
+  </g>
+</svg>
+
+<!-- Floating hustle words container -->
+<div class="hustle-words" id="hustleWords"></div>
+
+<!-- Main content -->
+<div class="wrapper">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="badge">🐺 ADAM EDITION — THE WOLF</div>
+    <h1>ADAM <span class="blue">THE WOLF</span></h1>
+    <p class="hero-sub">Liste de prospection — Artisans &amp; Services B2B</p>
+    <p class="tagline">50 prospects. Tout le monde va payer. <span class="money">💵</span></p>
+
+    <!-- Stats bar -->
+    <div class="stats-bar">
+      <div class="stat-pill">Crédits : <span>200</span></div>
+      <div class="stat-pill">Prospects : <span>50</span></div>
+      <div class="stat-pill">🔥 Chauds : <span>12</span></div>
+      <div class="stat-pill">🟠 Tièdes : <span>22</span></div>
+      <div class="stat-pill">🟡 Doux : <span>10</span></div>
+      <div class="stat-pill">🔵 Froids : <span>6</span></div>
+    </div>
+
+    <!-- SVG Characters -->
+    <div class="characters">
+
+      <!-- Businessman in suit -->
+      <div class="character">
+        <svg width="90" height="140" viewBox="0 0 90 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Head -->
+          <ellipse cx="45" cy="22" rx="16" ry="18" fill="#E5E7EB"/>
+          <!-- Hair -->
+          <path d="M29 16 Q45 4 61 16 Q61 8 45 6 Q29 8 29 16Z" fill="#374151"/>
+          <!-- Neck -->
+          <rect x="41" y="38" width="8" height="10" fill="#E5E7EB"/>
+          <!-- Suit jacket -->
+          <path d="M15 50 Q20 46 30 48 L45 90 L60 48 Q70 46 75 50 L78 130 L12 130Z" fill="#1F2937"/>
+          <!-- Shirt/chest -->
+          <path d="M38 48 L45 90 L52 48 L45 54Z" fill="#fff"/>
+          <!-- Blue tie -->
+          <polygon points="45,52 43,62 45,100 47,62" fill="#3B82F6"/>
+          <!-- Lapels -->
+          <path d="M30 48 L38 48 L45 54 L38 70Z" fill="#374151"/>
+          <path d="M60 48 L52 48 L45 54 L52 70Z" fill="#374151"/>
+          <!-- Left arm -->
+          <path d="M15 50 L8 95 Q18 100 22 95 L28 55Z" fill="#1F2937"/>
+          <!-- Right arm -->
+          <path d="M75 50 L82 95 Q72 100 68 95 L62 55Z" fill="#1F2937"/>
+          <!-- Cuffs -->
+          <rect x="6"  y="90" width="18" height="7" rx="3" fill="#fff"/>
+          <rect x="66" y="90" width="18" height="7" rx="3" fill="#fff"/>
+          <!-- Briefcase left hand -->
+          <rect x="0" y="96" width="22" height="16" rx="3" fill="#374151" stroke="#3B82F6" stroke-width="1.5"/>
+          <rect x="7" y="94" width="8"  height="4"  rx="2" fill="none" stroke="#3B82F6" stroke-width="1.5"/>
+          <line x1="11" y1="96" x2="11" y2="112" stroke="#3B82F6" stroke-width="1"/>
+          <!-- Pants -->
+          <rect x="12" y="128" width="28" height="12" rx="2" fill="#111827"/>
+          <rect x="50" y="128" width="28" height="12" rx="2" fill="#111827"/>
+          <!-- Shoes -->
+          <ellipse cx="26" cy="140" rx="18" ry="5" fill="#374151"/>
+          <ellipse cx="64" cy="140" rx="18" ry="5" fill="#374151"/>
+          <!-- Pocket square -->
+          <polygon points="52,56 58,50 64,56" fill="#3B82F6"/>
+        </svg>
+        <div class="char-label">Le Closer</div>
+      </div>
+
+      <!-- Wolf silhouette -->
+      <div class="character">
+        <svg width="110" height="150" viewBox="0 0 110 150" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Body -->
+          <ellipse cx="55" cy="100" rx="30" ry="36" fill="#1d4ed8"/>
+          <!-- Head -->
+          <ellipse cx="55" cy="52" rx="24" ry="22" fill="#1d4ed8"/>
+          <!-- Snout -->
+          <ellipse cx="55" cy="64" rx="12" ry="9" fill="#2563eb"/>
+          <!-- Nose -->
+          <ellipse cx="55" cy="58" rx="5" ry="3.5" fill="#0a0a0a"/>
+          <!-- Eyes -->
+          <ellipse cx="46" cy="48" rx="4" ry="4.5" fill="#3B82F6"/>
+          <ellipse cx="64" cy="48" rx="4" ry="4.5" fill="#3B82F6"/>
+          <ellipse cx="46" cy="48" rx="2" ry="2.5" fill="#fff"/>
+          <ellipse cx="64" cy="48" rx="2" ry="2.5" fill="#fff"/>
+          <!-- Ears -->
+          <polygon points="38,38 30,10 48,32" fill="#1d4ed8"/>
+          <polygon points="72,38 80,10 62,32" fill="#1d4ed8"/>
+          <polygon points="40,36 34,18 46,32" fill="#3B82F6"/>
+          <polygon points="70,36 76,18 64,32" fill="#3B82F6"/>
+          <!-- Legs -->
+          <rect x="28" y="128" width="18" height="20" rx="6" fill="#1d4ed8"/>
+          <rect x="64" y="128" width="18" height="20" rx="6" fill="#1d4ed8"/>
+          <!-- Paws -->
+          <ellipse cx="37" cy="149" rx="13" ry="5" fill="#1d4ed8"/>
+          <ellipse cx="73" cy="149" rx="13" ry="5" fill="#1d4ed8"/>
+          <!-- Arms -->
+          <path d="M28 88 Q10 100 8 115" stroke="#1d4ed8" stroke-width="12" stroke-linecap="round"/>
+          <path d="M82 88 Q100 100 102 115" stroke="#1d4ed8" stroke-width="12" stroke-linecap="round"/>
+          <!-- Hands/claws -->
+          <line x1="2"  y1="112" x2="8"  y2="118" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="8"  y1="115" x2="10" y2="122" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="14" y1="116" x2="14" y2="123" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="96" y1="112" x2="102" y2="118" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="102" y1="115" x2="100" y2="122" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="96" y1="116" x2="96" y2="123" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Tail -->
+          <path d="M82 120 Q110 105 105 80" stroke="#1d4ed8" stroke-width="10" stroke-linecap="round" fill="none"/>
+          <ellipse cx="104" cy="78" rx="7" ry="7" fill="#3B82F6"/>
+          <!-- Glow outline -->
+          <ellipse cx="55" cy="52" rx="24" ry="22" stroke="#3B82F6" stroke-width="1.5" fill="none" opacity="0.5"/>
+        </svg>
+        <div class="char-label">The Wolf</div>
+      </div>
+
+      <!-- Money bag character -->
+      <div class="character">
+        <svg width="90" height="140" viewBox="0 0 90 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Bag body -->
+          <ellipse cx="45" cy="95" rx="35" ry="38" fill="#1F2937"/>
+          <ellipse cx="45" cy="95" rx="35" ry="38" stroke="#3B82F6" stroke-width="2"/>
+          <!-- Bag neck -->
+          <rect x="33" y="48" width="24" height="18" rx="6" fill="#111827" stroke="#3B82F6" stroke-width="1.5"/>
+          <!-- Tie on bag -->
+          <path d="M40 52 Q45 50 50 52 L48 62 Q45 66 42 62Z" fill="#1d4ed8"/>
+          <!-- Bag eyes -->
+          <ellipse cx="35" cy="85" rx="5" ry="5.5" fill="#3B82F6"/>
+          <ellipse cx="55" cy="85" rx="5" ry="5.5" fill="#3B82F6"/>
+          <ellipse cx="35" cy="85" rx="2.5" ry="3" fill="#fff"/>
+          <ellipse cx="55" cy="85" rx="2.5" ry="3" fill="#fff"/>
+          <!-- Smile -->
+          <path d="M33 102 Q45 114 57 102" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+          <!-- Dollar sign on bag -->
+          <text x="45" y="100" text-anchor="middle" font-size="22" font-weight="900" fill="#3B82F6" font-family="Inter,sans-serif">$</text>
+          <!-- Arms with money -->
+          <path d="M12 88 Q5 78 8 68" stroke="#1F2937" stroke-width="10" stroke-linecap="round" fill="none"/>
+          <path d="M78 88 Q85 78 82 68" stroke="#1F2937" stroke-width="10" stroke-linecap="round" fill="none"/>
+          <!-- Money stacks in hands -->
+          <rect x="0"  y="58" width="18" height="12" rx="2" fill="#22c55e"/>
+          <rect x="1"  y="56" width="18" height="12" rx="2" fill="#16a34a"/>
+          <rect x="2"  y="54" width="18" height="12" rx="2" fill="#22c55e"/>
+          <text x="11" y="64" text-anchor="middle" font-size="7" fill="#fff" font-weight="700" font-family="Inter,sans-serif">$$$</text>
+          <rect x="72" y="58" width="18" height="12" rx="2" fill="#22c55e"/>
+          <rect x="71" y="56" width="18" height="12" rx="2" fill="#16a34a"/>
+          <rect x="70" y="54" width="18" height="12" rx="2" fill="#22c55e"/>
+          <text x="79" y="64" text-anchor="middle" font-size="7" fill="#fff" font-weight="700" font-family="Inter,sans-serif">$$$</text>
+          <!-- Legs -->
+          <rect x="28" y="130" width="14" height="12" rx="4" fill="#1F2937" stroke="#3B82F6" stroke-width="1"/>
+          <rect x="48" y="130" width="14" height="12" rx="4" fill="#1F2937" stroke="#3B82F6" stroke-width="1"/>
+          <!-- Shoes -->
+          <ellipse cx="35" cy="142" rx="12" ry="4" fill="#111827"/>
+          <ellipse cx="55" cy="142" rx="12" ry="4" fill="#111827"/>
+        </svg>
+        <div class="char-label">Money Bag</div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <input class="search-box" type="text" id="searchInput" placeholder="🔍  Rechercher un prospect, ville, métier..." />
+    <button class="filter-btn active" data-filter="all">Tous (50)</button>
+    <button class="filter-btn hot"  data-filter="hot">🔥 Chauds (12)</button>
+    <button class="filter-btn warm" data-filter="warm">🟠 Tièdes (22)</button>
+    <button class="filter-btn mild" data-filter="mild">🟡 Doux (10)</button>
+    <button class="filter-btn cold" data-filter="cold">🔵 Froids (6)</button>
+  </div>
+
+  <div class="count-label">Affichage : <span id="visibleCount">50</span> prospects</div>
+
+  <!-- Prospect grid -->
+  <div class="prospect-grid" id="prospectGrid"></div>
+
+  <div class="footer">🐺 WOLF MODE ACTIVATED 🐺</div>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────
+   PROSPECT DATA — 50 French artisan businesses
+───────────────────────────────────────────────*/
+const prospects = [
+  { id:1,  name:"Plomberie Marchand",           city:"Lyon (69)",        trade:"Plombier",       phone:"06 12 34 56 78", temp:"hot",  note:"PAS de site, annonce Pages Jaunes active" },
+  { id:2,  name:"Élec Dupont & Fils",           city:"Marseille (13)",   trade:"Électricien",    phone:"06 23 45 67 89", temp:"hot",  note:"Facebook pro mais zéro site web" },
+  { id:3,  name:"Peinture Leblanc",             city:"Paris 15e (75)",   trade:"Peintre",        phone:"06 34 56 78 90", temp:"hot",  note:"6 avis Google, aucune présence web" },
+  { id:4,  name:"Toiture Martin",               city:"Nantes (44)",      trade:"Couvreur",       phone:"06 45 67 89 01", temp:"hot",  note:"Camion avec numéro, PAS de site" },
+  { id:5,  name:"Serrurerie Gauthier",          city:"Toulouse (31)",    trade:"Serrurier",      phone:"06 56 78 90 12", temp:"hot",  note:"Urgence 24/7, visible Leboncoin" },
+  { id:6,  name:"Menuiserie Rousseau",          city:"Bordeaux (33)",    trade:"Menuisier",      phone:"06 67 89 01 23", temp:"hot",  note:"Atelier local, bouche-à-oreille" },
+  { id:7,  name:"Maçonnerie Simon",             city:"Strasbourg (67)",  trade:"Maçon",          phone:"06 78 90 12 34", temp:"hot",  note:"Grosse boîte sans présence web" },
+  { id:8,  name:"Chauffage Bernard",            city:"Lille (59)",       trade:"Chauffagiste",   phone:"06 89 01 23 45", temp:"hot",  note:"RGE certifié, aucun site" },
+  { id:9,  name:"Carrelage Thomas",             city:"Rennes (35)",      trade:"Carreleur",      phone:"06 90 12 34 56", temp:"hot",  note:"Portfolio photos sur papier seulement" },
+  { id:10, name:"Plâtrerie Richard",            city:"Nice (06)",        trade:"Plâtrier",       phone:"07 01 23 45 67", temp:"hot",  note:"Gérant actif sur WhatsApp, pas de site" },
+  { id:11, name:"Charpente Morel",              city:"Grenoble (38)",    trade:"Charpentier",    phone:"07 12 34 56 78", temp:"hot",  note:"Spécialiste ossature bois, sans web" },
+  { id:12, name:"Isolation Petit",              city:"Montpellier (34)", trade:"Isolateur",      phone:"07 23 45 67 89", temp:"hot",  note:"Prime CEE, clients cherchent en ligne" },
+
+  { id:13, name:"Plomberie Garnier",            city:"Nîmes (30)",       trade:"Plombier",       phone:"07 34 56 78 90", temp:"warm", note:"Annonce Leboncoin mais pas de site" },
+  { id:14, name:"Électricité Faure",            city:"Toulon (83)",      trade:"Électricien",    phone:"07 45 67 89 01", temp:"warm", note:"Auto-entrepreneur, profil LinkedIn basique" },
+  { id:15, name:"Peinture Girard",              city:"Clermont-Fd (63)", trade:"Peintre",        phone:"07 56 78 90 12", temp:"warm", note:"2 ouvriers, développement en cours" },
+  { id:16, name:"Toiture André",               city:"Dijon (21)",       trade:"Couvreur",       phone:"07 67 89 01 23", temp:"warm", note:"Affiché sur camion, pas de site" },
+  { id:17, name:"Serrurerie Leroy",             city:"Angers (49)",      trade:"Serrurier",      phone:"07 78 90 12 34", temp:"warm", note:"Vitrine Google Maps incomplète" },
+  { id:18, name:"Menuiserie Roux",              city:"Reims (51)",       trade:"Menuisier",      phone:"07 89 01 23 45", temp:"warm", note:"Artisan qualifié, bouche-à-oreille" },
+  { id:19, name:"Maçonnerie David",             city:"Le Havre (76)",    trade:"Maçon",          phone:"07 90 12 34 56", temp:"warm", note:"Flyers distribués dans quartier" },
+  { id:20, name:"Chauffage Bertrand",           city:"Saint-Étienne (42)",trade:"Chauffagiste",  phone:"06 01 23 45 67", temp:"warm", note:"Certifié QualiPAC, invisible en ligne" },
+  { id:21, name:"Carrelage Morin",              city:"Le Mans (72)",     trade:"Carreleur",      phone:"06 12 34 56 79", temp:"warm", note:"Artisan pro, références clients OK" },
+  { id:22, name:"Plâtrerie Fournier",           city:"Aix-en-Pce (13)", trade:"Plâtrier",       phone:"06 23 45 67 80", temp:"warm", note:"Rénov standing, besoin vitrine web" },
+  { id:23, name:"Charpente Henry",              city:"Brest (29)",       trade:"Charpentier",    phone:"06 34 56 78 91", temp:"warm", note:"Atelier familial depuis 20 ans" },
+  { id:24, name:"Isolation Roussel",            city:"Perpignan (66)",   trade:"Isolateur",      phone:"06 45 67 89 02", temp:"warm", note:"Subventions ANAH, cherchent clients" },
+  { id:25, name:"Électricité Blanc",            city:"Amiens (80)",      trade:"Électricien",    phone:"06 56 78 90 13", temp:"warm", note:"Domotique & rénovation, sans site" },
+  { id:26, name:"Peinture Laurent",             city:"Metz (57)",        trade:"Peintre",        phone:"06 67 89 01 24", temp:"warm", note:"Décoration intérieure, insta perso" },
+  { id:27, name:"Toiture Lecomte",              city:"Besançon (25)",    trade:"Couvreur",       phone:"06 78 90 12 35", temp:"warm", note:"Urgences sinistres, pas de site" },
+  { id:28, name:"Menuiserie Picard",            city:"Orléans (45)",     trade:"Menuisier",      phone:"06 89 01 23 46", temp:"warm", note:"Sur-mesure cuisine/dressing" },
+  { id:29, name:"Maçonnerie Dupuis",            city:"Mulhouse (68)",    trade:"Maçon",          phone:"06 90 12 34 57", temp:"warm", note:"Extension maison, devis papier" },
+  { id:30, name:"Chauffage Renard",             city:"Rouen (76)",       trade:"Chauffagiste",   phone:"07 01 23 45 68", temp:"warm", note:"Pompe à chaleur, clients actifs" },
+  { id:31, name:"Serrurerie Mercier",           city:"Caen (14)",        trade:"Serrurier",      phone:"07 12 34 56 79", temp:"warm", note:"Interventions rapides, flyers" },
+  { id:32, name:"Plomberie Bonnet",             city:"Nancy (54)",       trade:"Plombier",       phone:"07 23 45 67 80", temp:"warm", note:"Salle de bain clé-en-main" },
+  { id:33, name:"Carrelage Perrin",             city:"Toulon (83)",      trade:"Carreleur",      phone:"07 34 56 78 91", temp:"warm", note:"Pose terrasse & piscine, sans web" },
+  { id:34, name:"Charpente Fontaine",           city:"Avignon (84)",     trade:"Charpentier",    phone:"07 45 67 89 02", temp:"warm", note:"Spécialiste mas & bastide Provence" },
+
+  { id:35, name:"Plâtrerie Lacroix",            city:"Limoges (87)",     trade:"Plâtrier",       phone:"07 56 78 90 13", temp:"mild", note:"Petite structure, peu de demandes" },
+  { id:36, name:"Isolation Chevalier",          city:"Poitiers (86)",    trade:"Isolateur",      phone:"07 67 89 01 24", temp:"mild", note:"Travaux secondaires, carnet plein" },
+  { id:37, name:"Électricité Caron",            city:"Tours (37)",       trade:"Électricien",    phone:"07 78 90 12 35", temp:"mild", note:"Rénovation appartements, très occupé" },
+  { id:38, name:"Peinture Gautier",             city:"Pau (64)",         trade:"Peintre",        phone:"07 89 01 23 46", temp:"mild", note:"Façades extérieures, planning chargé" },
+  { id:39, name:"Toiture Barbier",              city:"Bayonne (64)",     trade:"Couvreur",       phone:"07 90 12 34 57", temp:"mild", note:"Ardoise & tuiles, secteur rural" },
+  { id:40, name:"Serrurerie Lefebvre",          city:"Troyes (10)",      trade:"Serrurier",      phone:"06 01 23 45 68", temp:"mild", note:"Commerce & résidentiel mixte" },
+  { id:41, name:"Menuiserie Giraud",            city:"La Rochelle (17)", trade:"Menuisier",      phone:"06 12 34 56 80", temp:"mild", note:"Bateau + habitat, niche spécifique" },
+  { id:42, name:"Maçonnerie Perez",             city:"Montauban (82)",   trade:"Maçon",          phone:"06 23 45 67 81", temp:"mild", note:"Petits travaux, peu d'ambition digitale" },
+  { id:43, name:"Chauffage Dufour",             city:"Lorient (56)",     trade:"Chauffagiste",   phone:"06 34 56 78 92", temp:"mild", note:"Fioul & gaz, clientèle âgée fidèle" },
+  { id:44, name:"Carrelage Bertrand",           city:"Vannes (56)",      trade:"Carreleur",      phone:"06 45 67 89 03", temp:"mild", note:"Résidentiel uniquement, peu ouvert web" },
+
+  { id:45, name:"Plomberie Vidal",              city:"Agen (47)",        trade:"Plombier",       phone:"06 56 78 90 14", temp:"cold", note:"Artisan 60 ans, retraite proche" },
+  { id:46, name:"Électricité Bourgeois",        city:"Auxerre (89)",     trade:"Électricien",    phone:"06 67 89 01 25", temp:"cold", note:"Refus polite du digital, habitués" },
+  { id:47, name:"Peinture Lemaire",             city:"Charleville (08)", trade:"Peintre",        phone:"06 78 90 12 36", temp:"cold", note:"Très peu de volume, pas intéressé" },
+  { id:48, name:"Toiture Benoit",               city:"Albi (81)",        trade:"Couvreur",       phone:"06 89 01 23 47", temp:"cold", note:"Associé à gros groupement local" },
+  { id:49, name:"Menuiserie Collin",            city:"Évreux (27)",      trade:"Menuisier",      phone:"06 90 12 34 58", temp:"cold", note:"Transmission familiale en cours" },
+  { id:50, name:"Maçonnerie Hubert",            city:"Laval (53)",       trade:"Maçon",          phone:"07 01 23 45 69", temp:"cold", note:"Pas de besoin identifié pour l'instant" },
+];
+
+const TEMP_LABELS = { hot:"🔥 CHAUD", warm:"🟠 TIÈDE", mild:"🟡 DOUX", cold:"🔵 FROID" };
+const BURST_WORDS = ["SOLD! 💰","CLOSED! 🤝","MONEY! 💵","LET'S GO! 🔥","WOLF MODE! 🐺","DEAL! ✅","SELL SELL! 📞","GRIND! 💪","KA-CHING! 🤑","NEXT! ⚡"];
+
+/* ── Render cards ── */
+const grid = document.getElementById("prospectGrid");
+const visibleCount = document.getElementById("visibleCount");
+
+function renderCards(list) {
+  grid.innerHTML = "";
+  list.forEach(p => {
+    const card = document.createElement("div");
+    card.className = `card temp-${p.temp}`;
+    card.dataset.temp = p.temp;
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-name">${p.name}</div>
+        <div class="temp-badge">${TEMP_LABELS[p.temp]}</div>
+      </div>
+      <div class="card-meta">
+        <div class="meta-row"><span class="icon">🏙️</span><span>${p.city}</span></div>
+        <div class="meta-row"><span class="icon">🔧</span><strong>${p.trade}</strong></div>
+        <div class="meta-row"><span class="icon">📝</span><span>${p.note}</span></div>
+      </div>
+      <div class="card-phone">📞 ${p.phone}</div>`;
+    card.addEventListener("click", e => spawnBurst(e));
+    grid.appendChild(card);
+  });
+  visibleCount.textContent = list.length;
+}
+
+/* ── Filter + Search logic ── */
+let activeFilter = "all";
+
+function getFiltered() {
+  const q = document.getElementById("searchInput").value.toLowerCase().trim();
+  return prospects.filter(p => {
+    const matchFilter = activeFilter === "all" || p.temp === activeFilter;
+    const matchSearch = !q || [p.name, p.city, p.trade, p.note].some(s => s.toLowerCase().includes(q));
+    return matchFilter && matchSearch;
+  });
+}
+
+document.querySelectorAll(".filter-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    activeFilter = btn.dataset.filter;
+    renderCards(getFiltered());
+  });
+});
+
+document.getElementById("searchInput").addEventListener("input", () => renderCards(getFiltered()));
+
+renderCards(prospects);
+
+/* ── Click burst ── */
+function spawnBurst(e) {
+  const word = BURST_WORDS[Math.floor(Math.random() * BURST_WORDS.length)];
+  const el = document.createElement("div");
+  el.className = "burst";
+  el.textContent = word;
+  el.style.left = (e.clientX - 60) + "px";
+  el.style.top  = (e.clientY - 20) + "px";
+  el.style.color = ["#3B82F6","#22c55e","#f97316","#fff"][Math.floor(Math.random()*4)];
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 950);
+}
+
+/* ── Floating hustle words ── */
+const hustleWords = ["SELL!","CLOSE THE DEAL!","GRIND!","MONEY!","WOLF MODE!","LET'S GO!","HUSTLE!","CLOSE!","GET PAID!","DOMINATE!"];
+const container = document.getElementById("hustleWords");
+function spawnHustleWord() {
+  const el = document.createElement("div");
+  el.className = "hustle-word";
+  el.textContent = hustleWords[Math.floor(Math.random() * hustleWords.length)];
+  el.style.left  = (Math.random() * 95) + "vw";
+  el.style.fontSize = (Math.random() * 14 + 10) + "px";
+  const dur = (Math.random() * 10 + 12) + "s";
+  el.style.animationDuration = dur;
+  el.style.animationDelay = (Math.random() * 4) + "s";
+  container.appendChild(el);
+  setTimeout(() => el.remove(), parseFloat(dur) * 1000 + 4000);
+}
+for (let i = 0; i < 14; i++) setTimeout(spawnHustleWord, i * 1200);
+setInterval(spawnHustleWord, 3000);
+
+/* ── Canvas particle animation ── */
+const canvas = document.getElementById("particle-canvas");
+const ctx = canvas.getContext("2d");
+let W, H, particles = [];
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener("resize", resize);
+
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x  = Math.random() * W;
+    this.y  = Math.random() * H;
+    this.r  = Math.random() * 1.8 + 0.4;
+    this.vx = (Math.random() - 0.5) * 0.35;
+    this.vy = (Math.random() - 0.5) * 0.35;
+    this.a  = Math.random() * 0.45 + 0.05;
+    this.type = Math.random() < 0.08 ? "dollar" : "dot";
+  }
+  update() {
+    this.x += this.vx;
+    this.y += this.vy;
+    if (this.x < 0 || this.x > W || this.y < 0 || this.y > H) this.reset();
+  }
+  draw() {
+    ctx.globalAlpha = this.a;
+    if (this.type === "dollar") {
+      ctx.fillStyle = "#22c55e";
+      ctx.font = "bold 11px Inter";
+      ctx.fillText("$", this.x, this.y);
+    } else {
+      ctx.fillStyle = "#3B82F6";
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+}
+
+for (let i = 0; i < 140; i++) particles.push(new Particle());
+
+/* Draw connecting lines between nearby particles */
+function drawConnections() {
+  const max = 100;
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const d  = Math.sqrt(dx*dx + dy*dy);
+      if (d < max) {
+        ctx.globalAlpha = (1 - d/max) * 0.06;
+        ctx.strokeStyle = "#3B82F6";
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+
+function animate() {
+  ctx.clearRect(0, 0, W, H);
+  drawConnections();
+  particles.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(animate);
+}
+animate();
+</script>
+</body>
+</html>

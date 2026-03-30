@@ -1,4 +1,4 @@
-/* ProspectHunter — Pricing Page Logic */
+/* Empire Leads — Pricing Page Logic */
 
 const token = localStorage.getItem('ph_token');
 if (!token) window.location.href = '/login';

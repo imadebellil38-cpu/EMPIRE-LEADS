@@ -52,6 +52,7 @@
       <span class="agenda-count" id="agenda-count" style="display:none"></span>
     </button>
     <a class="app-nav-btn" href="/instagram-finder" title="Instagram Finder — trouve des profils par niche">📷 Instagram</a>
+    <a class="app-nav-btn" href="#" onclick="var t=localStorage.getItem('token')||'';window.location.href='/monteur-video?token='+encodeURIComponent(t)" title="Extensions — outils spéciaux">🧩 Extensions</a>
   </nav>
 
   <!-- ── AGENDA PANEL ── -->
@@ -86,6 +87,7 @@
       <div class="hdr-dropdown" id="hdr-dropdown" style="display:none">
         <a href="/pricing" class="hdr-drop-item">📦 Abonnement</a>
         <a href="/instagram-finder" class="hdr-drop-item">📷 Instagram Finder</a>
+        <a href="#" onclick="var t=localStorage.getItem('token')||'';window.location.href='/monteur-video?token='+encodeURIComponent(t)" class="hdr-drop-item">🧩 Extensions</a>
         <a id="btn-theme-perso-mobile" href="#" class="hdr-drop-item" style="display:none">🎨 Mon thème perso</a>
         <button class="hdr-drop-item" onclick="logout()">🚪 Déconnexion</button>
       </div>

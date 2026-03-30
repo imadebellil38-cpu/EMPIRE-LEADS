@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://prospecthunter.fr/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://prospecthunter.fr/login</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://prospecthunter.fr/pricing</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://empireleads.fr/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://empireleads.fr/landing</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://empireleads.fr/pricing</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://empireleads.fr/login</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
 </urlset>

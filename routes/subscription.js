@@ -15,25 +15,29 @@ router.get('/plans', (req, res) => {
 });
 
 // PUT /api/subscription/upgrade — change plan (simulated, no payment)
-router.put('/upgrade', (req, res) => {
+router.put('/upgrade', async (req, res) => {
   const { plan } = req.body;
 
   if (!PLANS[plan]) {
     return res.status(400).json({ error: `Plan invalide. Choix: ${Object.keys(PLANS).join(', ')}` });
   }
 
-  const user = db.prepare('SELECT id, plan FROM users WHERE id = ?').get(req.user.id);
-  if (!user) return res.status(404).json({ error: 'Utilisateur introuvable.' });
+  try {
+    const user = await db.get('SELECT id, plan FROM users WHERE id = ?', [req.user.id]);
+    if (!user) return res.status(404).json({ error: 'Utilisateur introuvable.' });
 
-  if (user.plan === plan) {
-    return res.status(400).json({ error: 'Vous avez déjà ce plan.' });
+    if (user.plan === plan) {
+      return res.status(400).json({ error: 'Vous avez déjà ce plan.' });
+    }
+
+    await db.run('UPDATE users SET plan = ?, credits = ? WHERE id = ?',
+      [plan, PLANS[plan].credits, req.user.id]);
+
+    const updated = await db.get('SELECT id, email, plan, credits FROM users WHERE id = ?', [req.user.id]);
+    res.json({ ok: true, user: updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-
-  db.prepare('UPDATE users SET plan = ?, credits = ? WHERE id = ?')
-    .run(plan, PLANS[plan].credits, req.user.id);
-
-  const updated = db.prepare('SELECT id, email, plan, credits FROM users WHERE id = ?').get(req.user.id);
-  res.json({ ok: true, user: updated });
 });
 
 module.exports = router;

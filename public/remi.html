@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>REMI NO DENWA — Liste Prospection Naruto</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ===================== RESET & BASE ===================== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --orange:      #FF6B00;
+      --orange-light:#FF8C00;
+      --navy:        #0d0d1a;
+      --navy2:       #13132b;
+      --navy3:       #1a1a35;
+      --card-bg:     #111128;
+      --gold:        #FFD700;
+      --red:         #e63946;
+      --text:        #e8e8f0;
+      --muted:       #888aaa;
+      --hot:         #FF4444;
+      --warm:        #FF8C00;
+      --mild:        #44AAFF;
+      --cold:        #8899BB;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--navy);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ===================== PANEL BORDERS ===================== */
+    body::before,
+    body::after,
+    #border-left,
+    #border-right {
+      content: '';
+      position: fixed;
+      background: linear-gradient(90deg, var(--orange), var(--orange-light), var(--orange));
+      z-index: 9999;
+      pointer-events: none;
+    }
+    body::before  { top: 0; left: 0; right: 0; height: 6px; }
+    body::after   { bottom: 0; left: 0; right: 0; height: 6px; }
+    #border-left  { top: 0; left: 0; bottom: 0; width: 6px; background: linear-gradient(180deg, var(--orange), var(--orange-light), var(--orange)); }
+    #border-right { top: 0; right: 0; bottom: 0; width: 6px; background: linear-gradient(180deg, var(--orange), var(--orange-light), var(--orange)); }
+
+    /* ===================== CANVAS ===================== */
+    #particles-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ===================== FLOATING MANGA SHAPES ===================== */
+    .manga-shapes {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+    .manga-shape {
+      position: absolute;
+      opacity: 0.06;
+      animation: floatShape 20s linear infinite;
+    }
+    .manga-shape:nth-child(1)  { top: 10%; left: 5%;  font-size: 120px; animation-duration: 25s; animation-delay: 0s; }
+    .manga-shape:nth-child(2)  { top: 30%; right: 8%; font-size: 80px;  animation-duration: 18s; animation-delay: -5s; }
+    .manga-shape:nth-child(3)  { top: 60%; left: 12%; font-size: 100px; animation-duration: 22s; animation-delay: -8s; }
+    .manga-shape:nth-child(4)  { top: 70%; right: 5%; font-size: 90px;  animation-duration: 30s; animation-delay: -12s; }
+    .manga-shape:nth-child(5)  { top: 5%;  right: 25%;font-size: 110px; animation-duration: 20s; animation-delay: -3s; }
+    .manga-shape:nth-child(6)  { top: 80%; left: 40%; font-size: 70px;  animation-duration: 15s; animation-delay: -7s; }
+    .manga-shape:nth-child(7)  { top: 45%; left: 50%; font-size: 85px;  animation-duration: 28s; animation-delay: -15s; }
+    .manga-shape:nth-child(8)  { top: 20%; left: 35%; font-size: 65px;  animation-duration: 23s; animation-delay: -10s; }
+
+    @keyframes floatShape {
+      0%   { transform: translateY(0px) rotate(0deg); }
+      33%  { transform: translateY(-30px) rotate(5deg); }
+      66%  { transform: translateY(15px) rotate(-3deg); }
+      100% { transform: translateY(0px) rotate(0deg); }
+    }
+
+    /* ===================== FLOATING ONOMATOPOEIA ===================== */
+    .onomatopoeia-container {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 2;
+      overflow: hidden;
+    }
+    .onoma {
+      position: absolute;
+      font-family: 'Bangers', cursive;
+      color: var(--orange);
+      opacity: 0.12;
+      letter-spacing: 2px;
+      white-space: nowrap;
+      animation: floatOnoma linear infinite;
+    }
+    .onoma:nth-child(1)  { font-size: 28px; top: 12%; left: 2%;  animation-duration: 35s; animation-delay: 0s; }
+    .onoma:nth-child(2)  { font-size: 22px; top: 35%; right: 3%; animation-duration: 40s; animation-delay: -8s; }
+    .onoma:nth-child(3)  { font-size: 32px; top: 55%; left: 60%; animation-duration: 30s; animation-delay: -15s; }
+    .onoma:nth-child(4)  { font-size: 24px; top: 75%; left: 10%; animation-duration: 38s; animation-delay: -5s; }
+    .onoma:nth-child(5)  { font-size: 26px; top: 20%; left: 45%; animation-duration: 45s; animation-delay: -20s; }
+    .onoma:nth-child(6)  { font-size: 20px; top: 85%; right: 15%;animation-duration: 32s; animation-delay: -12s; }
+
+    @keyframes floatOnoma {
+      0%   { transform: translateY(0) rotate(-3deg); opacity: 0.12; }
+      50%  { transform: translateY(-20px) rotate(3deg); opacity: 0.2; }
+      100% { transform: translateY(0) rotate(-3deg); opacity: 0.12; }
+    }
+
+    /* ===================== MAIN CONTENT ===================== */
+    .main-wrapper {
+      position: relative;
+      z-index: 10;
+      padding: 30px 20px 60px;
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+
+    /* ===================== HERO ===================== */
+    .hero {
+      text-align: center;
+      padding: 50px 20px 40px;
+      position: relative;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--orange), var(--orange-light));
+      color: #fff;
+      font-family: 'Bangers', cursive;
+      font-size: 22px;
+      letter-spacing: 3px;
+      padding: 8px 28px;
+      border-radius: 50px;
+      margin-bottom: 24px;
+      box-shadow: 0 0 30px rgba(255, 107, 0, 0.5);
+      animation: pulseBadge 2s ease-in-out infinite;
+    }
+    @keyframes pulseBadge {
+      0%, 100% { box-shadow: 0 0 30px rgba(255,107,0,0.5); }
+      50%       { box-shadow: 0 0 60px rgba(255,107,0,0.9), 0 0 100px rgba(255,140,0,0.4); }
+    }
+
+    .hero h1 {
+      font-family: 'Bangers', cursive;
+      font-size: clamp(52px, 8vw, 96px);
+      letter-spacing: 6px;
+      line-height: 1;
+      color: #fff;
+      text-shadow: 4px 4px 0 var(--orange), 8px 8px 0 rgba(255,107,0,0.3);
+      margin-bottom: 16px;
+    }
+    .hero h1 .accent {
+      color: var(--orange);
+      text-shadow: 4px 4px 0 var(--orange-light), 0 0 40px rgba(255,140,0,0.6);
+    }
+
+    .hero-sub {
+      font-size: 17px;
+      color: var(--muted);
+      letter-spacing: 1px;
+      margin-bottom: 36px;
+      text-transform: uppercase;
+    }
+
+    /* ===================== STATS BAR ===================== */
+    .stats-bar {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 44px;
+    }
+    .stat-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 22px;
+      border-radius: 50px;
+      font-family: 'Bangers', cursive;
+      font-size: 18px;
+      letter-spacing: 1px;
+      border: 2px solid;
+      cursor: default;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .stat-pill:hover { transform: translateY(-3px); }
+    .stat-pill.hot  { border-color: var(--hot);  color: var(--hot);  background: rgba(255,68,68,0.1);  box-shadow: 0 0 15px rgba(255,68,68,0.2); }
+    .stat-pill.warm { border-color: var(--warm); color: var(--warm); background: rgba(255,140,0,0.1); box-shadow: 0 0 15px rgba(255,140,0,0.2); }
+    .stat-pill.mild { border-color: var(--mild); color: var(--mild); background: rgba(68,170,255,0.1); box-shadow: 0 0 15px rgba(68,170,255,0.2); }
+    .stat-pill.cold { border-color: var(--cold); color: var(--cold); background: rgba(136,153,187,0.1); box-shadow: 0 0 15px rgba(136,153,187,0.2); }
+
+    .stat-count {
+      background: rgba(255,255,255,0.1);
+      border-radius: 50px;
+      padding: 2px 10px;
+      font-size: 16px;
+    }
+
+    /* ===================== CHARACTERS ===================== */
+    .characters-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: 40px;
+      margin-bottom: 50px;
+      flex-wrap: wrap;
+    }
+    .character-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      animation: charFloat 4s ease-in-out infinite;
+    }
+    .character-wrap:nth-child(2) { animation-delay: -1.5s; }
+    .character-wrap:nth-child(3) { animation-delay: -3s; }
+    @keyframes charFloat {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-12px); }
+    }
+    .char-label {
+      font-family: 'Bangers', cursive;
+      font-size: 16px;
+      letter-spacing: 2px;
+      color: var(--muted);
+    }
+    .character-wrap.naruto .char-label { color: var(--orange); }
+    .character-wrap.sasuke .char-label { color: #8888ff; }
+    .character-wrap.kakashi .char-label { color: #aaaacc; }
+
+    /* SVG characters */
+    .char-svg { filter: drop-shadow(0 6px 16px rgba(0,0,0,0.5)); }
+
+    /* ===================== SEARCH & FILTERS ===================== */
+    .controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .search-box {
+      flex: 1;
+      min-width: 220px;
+      position: relative;
+    }
+    .search-box input {
+      width: 100%;
+      background: var(--navy3);
+      border: 2px solid rgba(255,107,0,0.3);
+      color: var(--text);
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      padding: 12px 18px 12px 46px;
+      border-radius: 12px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .search-box input:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 20px rgba(255,107,0,0.3);
+    }
+    .search-box input::placeholder { color: var(--muted); }
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 20px;
+      pointer-events: none;
+    }
+
+    .filter-btn {
+      padding: 12px 22px;
+      border-radius: 12px;
+      border: 2px solid rgba(255,107,0,0.3);
+      background: var(--navy3);
+      color: var(--muted);
+      font-family: 'Bangers', cursive;
+      font-size: 17px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+    }
+    .filter-btn:hover,
+    .filter-btn.active {
+      border-color: var(--orange);
+      color: var(--orange);
+      background: rgba(255,107,0,0.12);
+      box-shadow: 0 0 15px rgba(255,107,0,0.2);
+    }
+    .filter-btn.f-hot.active  { border-color: var(--hot);  color: var(--hot);  background: rgba(255,68,68,0.12);  box-shadow: 0 0 15px rgba(255,68,68,0.2); }
+    .filter-btn.f-warm.active { border-color: var(--warm); color: var(--warm); background: rgba(255,140,0,0.12); box-shadow: 0 0 15px rgba(255,140,0,0.2); }
+    .filter-btn.f-mild.active { border-color: var(--mild); color: var(--mild); background: rgba(68,170,255,0.12); box-shadow: 0 0 15px rgba(68,170,255,0.2); }
+    .filter-btn.f-cold.active { border-color: var(--cold); color: var(--cold); background: rgba(136,153,187,0.12); box-shadow: 0 0 15px rgba(136,153,187,0.2); }
+
+    /* ===================== COUNTER BAR ===================== */
+    .counter-bar {
+      font-family: 'Bangers', cursive;
+      font-size: 20px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      margin-bottom: 20px;
+      padding: 0 4px;
+    }
+    .counter-bar span { color: var(--orange); }
+
+    /* ===================== PROSPECT GRID ===================== */
+    .prospect-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 18px;
+    }
+
+    /* ===================== PROSPECT CARD ===================== */
+    .prospect-card {
+      background: var(--card-bg);
+      border: 1.5px solid rgba(255,107,0,0.15);
+      border-radius: 16px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+      transition: transform .25s, border-color .25s, box-shadow .25s;
+      cursor: default;
+    }
+    .prospect-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: 16px 16px 0 0;
+    }
+    .prospect-card.hot::before  { background: linear-gradient(90deg, var(--hot), #ff6666); }
+    .prospect-card.warm::before { background: linear-gradient(90deg, var(--orange), var(--orange-light)); }
+    .prospect-card.mild::before { background: linear-gradient(90deg, var(--mild), #66ccff); }
+    .prospect-card.cold::before { background: linear-gradient(90deg, var(--cold), #aabbcc); }
+
+    .prospect-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255,107,0,0.5);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 20px rgba(255,107,0,0.15);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .card-name {
+      font-family: 'Bangers', cursive;
+      font-size: 21px;
+      letter-spacing: 1px;
+      color: #fff;
+      line-height: 1.2;
+      flex: 1;
+      padding-right: 10px;
+    }
+    .temp-badge {
+      font-family: 'Bangers', cursive;
+      font-size: 13px;
+      letter-spacing: 1px;
+      padding: 4px 12px;
+      border-radius: 50px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .temp-badge.hot  { background: rgba(255,68,68,0.2);  color: var(--hot);  border: 1px solid rgba(255,68,68,0.4); }
+    .temp-badge.warm { background: rgba(255,140,0,0.2);  color: var(--warm); border: 1px solid rgba(255,140,0,0.4); }
+    .temp-badge.mild { background: rgba(68,170,255,0.2); color: var(--mild); border: 1px solid rgba(68,170,255,0.4); }
+    .temp-badge.cold { background: rgba(136,153,187,0.2);color: var(--cold); border: 1px solid rgba(136,153,187,0.4); }
+
+    .card-address {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-stars {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .stars-visual { color: var(--gold); font-size: 15px; letter-spacing: 1px; }
+    .stars-info {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .stars-info strong { color: var(--text); }
+
+    .card-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .card-phone {
+      font-size: 14px;
+      color: var(--muted);
+      font-family: 'Inter', monospace;
+    }
+    .call-btn {
+      background: linear-gradient(135deg, var(--orange), var(--orange-light));
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 9px 18px;
+      font-family: 'Bangers', cursive;
+      font-size: 16px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+      position: relative;
+    }
+    .call-btn:hover {
+      transform: scale(1.06);
+      box-shadow: 0 0 20px rgba(255,107,0,0.5);
+    }
+    .call-btn:active { transform: scale(0.97); }
+
+    /* ===================== BOOM ANIMATION ===================== */
+    .boom-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 99999;
+    }
+    .boom-word {
+      position: fixed;
+      font-family: 'Bangers', cursive;
+      font-size: 80px;
+      letter-spacing: 4px;
+      color: var(--orange);
+      text-shadow: 4px 4px 0 #fff, 8px 8px 0 var(--orange-light);
+      pointer-events: none;
+      z-index: 99999;
+      animation: boomAnim 1s cubic-bezier(.17,.89,.32,1.49) forwards;
+      white-space: nowrap;
+    }
+    @keyframes boomAnim {
+      0%   { transform: translate(-50%, -50%) scale(0) rotate(-10deg); opacity: 1; }
+      60%  { transform: translate(-50%, -50%) scale(1.2) rotate(5deg);  opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1.5) rotate(0deg);  opacity: 0; }
+    }
+
+    /* ===================== CREDITS FOOTER ===================== */
+    .credits-footer {
+      text-align: center;
+      margin-top: 60px;
+      padding: 30px 20px;
+      border-top: 1px solid rgba(255,107,0,0.2);
+    }
+    .credits-footer .credits-pill {
+      display: inline-block;
+      background: linear-gradient(135deg, rgba(255,107,0,0.15), rgba(255,140,0,0.1));
+      border: 1px solid rgba(255,107,0,0.3);
+      border-radius: 50px;
+      padding: 10px 30px;
+      font-family: 'Bangers', cursive;
+      font-size: 20px;
+      letter-spacing: 2px;
+      color: var(--orange);
+      margin-bottom: 12px;
+    }
+    .credits-footer p {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* ===================== HIDDEN CARD ===================== */
+    .prospect-card.hidden { display: none; }
+
+    /* ===================== SCROLLBAR ===================== */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--navy); }
+    ::-webkit-scrollbar-thumb { background: var(--orange); border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+<!-- Border elements -->
+<div id="border-left"></div>
+<div id="border-right"></div>
+
+<!-- Particle canvas -->
+<canvas id="particles-canvas"></canvas>
+
+<!-- Floating manga shapes -->
+<div class="manga-shapes">
+  <div class="manga-shape">🍥</div>
+  <div class="manga-shape">⭐</div>
+  <div class="manga-shape">🌀</div>
+  <div class="manga-shape">🍜</div>
+  <div class="manga-shape">⚡</div>
+  <div class="manga-shape">🔥</div>
+  <div class="manga-shape">🌿</div>
+  <div class="manga-shape">💫</div>
+</div>
+
+<!-- Floating onomatopoeia -->
+<div class="onomatopoeia-container">
+  <div class="onoma">BELIEVE IT!</div>
+  <div class="onoma">CHIDORI!</div>
+  <div class="onoma">RASENGAN!</div>
+  <div class="onoma">DATTEBAYO!</div>
+  <div class="onoma">SHADOW CLONE!</div>
+  <div class="onoma">BELIEVE IT!</div>
+</div>
+
+<!-- Boom overlay -->
+<div class="boom-overlay" id="boom-overlay"></div>
+
+<!-- ===================== MAIN ===================== -->
+<div class="main-wrapper">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">🍥 REMI EDITION</div>
+    <h1>REMI <span class="accent">NO DENWA</span></h1>
+    <p class="hero-sub">Liste de prospection — Secteur restaurant &amp; alimentation</p>
+
+    <!-- Stats bar -->
+    <div class="stats-bar">
+      <div class="stat-pill hot">🔥 TRÈS CHAUD <span class="stat-count">15</span></div>
+      <div class="stat-pill warm">☕ CHAUD <span class="stat-count">20</span></div>
+      <div class="stat-pill mild">🌤️ TIÈDE <span class="stat-count">10</span></div>
+      <div class="stat-pill cold">❄️ FROID <span class="stat-count">5</span></div>
+    </div>
+
+    <!-- SVG CHARACTERS -->
+    <div class="characters-row">
+
+      <!-- NARUTO — orange jumpsuit, yellow hair, running pose -->
+      <div class="character-wrap naruto">
+        <svg class="char-svg" width="100" height="160" viewBox="0 0 100 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Body/jumpsuit -->
+          <rect x="32" y="65" width="36" height="55" rx="6" fill="#FF6B00"/>
+          <!-- Orange legs -->
+          <rect x="34" y="108" width="14" height="35" rx="5" fill="#FF6B00" transform="rotate(-8 34 108)"/>
+          <rect x="52" y="108" width="14" height="35" rx="5" fill="#FF6B00" transform="rotate(15 52 108)"/>
+          <!-- Boots -->
+          <ellipse cx="37" cy="143" rx="9" ry="5" fill="#2a2a2a"/>
+          <ellipse cx="62" cy="143" rx="9" ry="5" fill="#2a2a2a"/>
+          <!-- Arms -->
+          <rect x="10" y="68" width="12" height="32" rx="5" fill="#FF6B00" transform="rotate(20 10 68)"/>
+          <rect x="68" y="68" width="12" height="28" rx="5" fill="#FF6B00" transform="rotate(-25 68 68)"/>
+          <!-- Hands -->
+          <ellipse cx="20" cy="100" rx="7" ry="6" fill="#FFD0A0"/>
+          <ellipse cx="78" cy="96" rx="7" ry="6" fill="#FFD0A0"/>
+          <!-- Head -->
+          <ellipse cx="50" cy="44" rx="22" ry="24" fill="#FFD0A0"/>
+          <!-- Whisker marks -->
+          <line x1="34" y1="44" x2="42" y2="46" stroke="#cc8866" stroke-width="1.5"/>
+          <line x1="34" y1="48" x2="42" y2="49" stroke="#cc8866" stroke-width="1.5"/>
+          <line x1="58" y1="44" x2="66" y2="46" stroke="#cc8866" stroke-width="1.5"/>
+          <line x1="58" y1="48" x2="66" y2="49" stroke="#cc8866" stroke-width="1.5"/>
+          <!-- Eyes -->
+          <ellipse cx="43" cy="44" rx="4" ry="4" fill="#fff"/>
+          <ellipse cx="57" cy="44" rx="4" ry="4" fill="#fff"/>
+          <ellipse cx="43" cy="45" rx="2.5" ry="2.5" fill="#1a6090"/>
+          <ellipse cx="57" cy="45" rx="2.5" ry="2.5" fill="#1a6090"/>
+          <!-- Smile -->
+          <path d="M43 54 Q50 60 57 54" stroke="#cc6644" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- Yellow spiky hair -->
+          <path d="M28 38 Q25 18 35 14 Q32 22 40 20 Q38 10 48 8 Q46 18 55 16 Q55 8 63 12 Q60 20 66 22 Q70 16 72 28 Q65 26 64 36" fill="#FFD700"/>
+          <!-- Headband -->
+          <rect x="28" y="30" width="44" height="10" rx="3" fill="#aaaacc"/>
+          <!-- Headband plate (Leaf symbol) -->
+          <rect x="37" y="31" width="26" height="8" rx="2" fill="#ccccdd"/>
+          <text x="50" y="38" text-anchor="middle" font-size="6" fill="#445555">🍃</text>
+          <!-- Orange collar -->
+          <rect x="36" y="63" width="28" height="8" rx="3" fill="#FF8C00"/>
+          <!-- Spiral on chest -->
+          <ellipse cx="50" cy="80" rx="7" ry="7" fill="#FF8C00"/>
+          <text x="50" y="83" text-anchor="middle" font-size="9" fill="#fff">🌀</text>
+        </svg>
+        <span class="char-label">NARUTO</span>
+      </div>
+
+      <!-- SASUKE — dark clothes, black hair, serious pose -->
+      <div class="character-wrap sasuke">
+        <svg class="char-svg" width="90" height="170" viewBox="0 0 90 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Body dark clothes -->
+          <rect x="27" y="68" width="36" height="58" rx="6" fill="#1a1a2e"/>
+          <!-- Blue shirt accent -->
+          <rect x="29" y="68" width="32" height="20" rx="4" fill="#2233aa"/>
+          <!-- Legs -->
+          <rect x="29" y="115" width="14" height="38" rx="5" fill="#1a1a2e"/>
+          <rect x="47" y="115" width="14" height="38" rx="5" fill="#1a1a2e"/>
+          <!-- Boots -->
+          <ellipse cx="36" cy="153" rx="9" ry="5" fill="#111"/>
+          <ellipse cx="54" cy="153" rx="9" ry="5" fill="#111"/>
+          <!-- Arms (crossed) -->
+          <rect x="8"  y="70" width="12" height="30" rx="5" fill="#2233aa" transform="rotate(15 8 70)"/>
+          <rect x="70" y="70" width="12" height="30" rx="5" fill="#2233aa" transform="rotate(-15 70 70)"/>
+          <!-- Hands -->
+          <ellipse cx="18" cy="100" rx="6" ry="6" fill="#FFD0A0"/>
+          <ellipse cx="72" cy="100" rx="6" ry="6" fill="#FFD0A0"/>
+          <!-- Head -->
+          <ellipse cx="45" cy="46" rx="20" ry="22" fill="#FFD0A0"/>
+          <!-- Dark eyes (Sharingan-ish) -->
+          <ellipse cx="38" cy="47" rx="4" ry="4" fill="#fff"/>
+          <ellipse cx="52" cy="47" rx="4" ry="4" fill="#fff"/>
+          <ellipse cx="38" cy="47" rx="2.5" ry="2.5" fill="#cc0000"/>
+          <ellipse cx="52" cy="47" rx="2.5" ry="2.5" fill="#cc0000"/>
+          <!-- Serious mouth -->
+          <line x1="38" y1="57" x2="52" y2="57" stroke="#cc8866" stroke-width="2" stroke-linecap="round"/>
+          <!-- Black spiky hair -->
+          <path d="M25 40 Q22 16 35 10 Q38 20 42 14 Q44 6 50 8 Q50 18 56 14 Q60 6 65 12 Q63 22 68 26 Q70 36 66 42 Q58 30 45 28 Q32 30 25 40Z" fill="#111122"/>
+          <!-- Hair falling to side -->
+          <path d="M25 40 Q18 50 20 64 Q28 56 30 48Z" fill="#111122"/>
+          <!-- Headband -->
+          <rect x="26" y="32" width="38" height="10" rx="3" fill="#aaaacc"/>
+          <rect x="33" y="33" width="24" height="8" rx="2" fill="#ccccdd"/>
+          <text x="45" y="40" text-anchor="middle" font-size="6" fill="#445555">🍃</text>
+          <!-- Lightning hand effect -->
+          <text x="14" y="108" font-size="14" opacity="0.8">⚡</text>
+        </svg>
+        <span class="char-label">SASUKE</span>
+      </div>
+
+      <!-- KAKASHI — gray hair, mask, relaxed pose -->
+      <div class="character-wrap kakashi">
+        <svg class="char-svg" width="95" height="165" viewBox="0 0 95 165" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Body — jounin vest -->
+          <rect x="27" y="68" width="38" height="56" rx="6" fill="#4a5a3a"/>
+          <!-- Vest pockets -->
+          <rect x="32" y="72" width="12" height="12" rx="3" fill="#3a4a2a" stroke="#556644" stroke-width="1"/>
+          <rect x="50" y="72" width="12" height="12" rx="3" fill="#3a4a2a" stroke="#556644" stroke-width="1"/>
+          <!-- Black turtleneck -->
+          <rect x="34" y="62" width="24" height="12" rx="4" fill="#1a1a1a"/>
+          <!-- Legs -->
+          <rect x="29" y="113" width="14" height="36" rx="5" fill="#1a1a2e"/>
+          <rect x="49" y="113" width="14" height="36" rx="5" fill="#1a1a2e"/>
+          <!-- Boots -->
+          <ellipse cx="36" cy="149" rx="9" ry="5" fill="#111"/>
+          <ellipse cx="56" cy="149" rx="9" ry="5" fill="#111"/>
+          <!-- Arms -->
+          <rect x="8"  y="70" width="13" height="32" rx="5" fill="#4a5a3a" transform="rotate(10 8 70)"/>
+          <rect x="72" y="70" width="13" height="32" rx="5" fill="#4a5a3a" transform="rotate(-5 72 70)"/>
+          <!-- Book in hand -->
+          <rect x="2" y="97" width="14" height="18" rx="3" fill="#cc4444"/>
+          <text x="9" y="110" text-anchor="middle" font-size="8" fill="#fff">📕</text>
+          <!-- Head -->
+          <ellipse cx="46" cy="46" rx="21" ry="23" fill="#FFD0A0"/>
+          <!-- Mask covering lower face -->
+          <rect x="26" y="54" width="40" height="18" rx="8" fill="#1a1a1a"/>
+          <!-- One visible eye (left) -->
+          <ellipse cx="38" cy="46" rx="4" ry="4" fill="#fff"/>
+          <ellipse cx="38" cy="46" rx="2.5" ry="2.5" fill="#555566"/>
+          <!-- Right eye covered by forehead protector -->
+          <rect x="48" y="40" width="18" height="10" rx="3" fill="#aaaacc" transform="rotate(-10 48 40)"/>
+          <!-- Sharingan behind protector hint -->
+          <ellipse cx="55" cy="44" rx="3" ry="3" fill="#cc0000" opacity="0.6"/>
+          <!-- Silver/gray spiky hair -->
+          <path d="M26 36 Q30 10 46 8 Q50 20 58 12 Q65 8 68 20 Q72 30 68 40 Q60 28 46 26 Q36 28 26 36Z" fill="#aaaaaa"/>
+          <!-- Hair spikes going up-right -->
+          <path d="M58 12 Q70 4 75 14 Q68 16 68 20Z" fill="#aaaaaa"/>
+          <!-- Headband pushed up on forehead -->
+          <rect x="26" y="28" width="40" height="10" rx="3" fill="#333344"/>
+          <rect x="34" y="29" width="24" height="8" rx="2" fill="#aaaacc"/>
+          <text x="46" y="36" text-anchor="middle" font-size="6" fill="#445555">🍃</text>
+        </svg>
+        <span class="char-label">KAKASHI</span>
+      </div>
+
+    </div><!-- /characters-row -->
+  </section>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Rechercher un prospect..." oninput="filterCards()" />
+    </div>
+    <button class="filter-btn active" data-filter="all" onclick="setFilter('all', this)">TOUS (50)</button>
+    <button class="filter-btn f-hot"  data-filter="hot"  onclick="setFilter('hot', this)">🔥 CHAUD (15)</button>
+    <button class="filter-btn f-warm" data-filter="warm" onclick="setFilter('warm', this)">☕ TIÈDE (20)</button>
+    <button class="filter-btn f-mild" data-filter="mild" onclick="setFilter('mild', this)">🌤️ DOUX (10)</button>
+    <button class="filter-btn f-cold" data-filter="cold" onclick="setFilter('cold', this)">❄️ FROID (5)</button>
+  </div>
+
+  <!-- COUNTER -->
+  <div class="counter-bar" id="counter-bar"><span id="visible-count">50</span> prospects affichés</div>
+
+  <!-- PROSPECT GRID -->
+  <div class="prospect-grid" id="prospect-grid">
+    <!-- Cards injected by JS -->
+  </div>
+
+  <!-- FOOTER -->
+  <div class="credits-footer">
+    <div class="credits-pill">🍥 CRÉDITS : 200</div>
+    <p>ProspectHunter · Remi Edition · Powered by the Will of Fire 🔥</p>
+  </div>
+
+</div><!-- /main-wrapper -->
+
+<script>
+/* ===================== PROSPECT DATA ===================== */
+const prospects = [
+  /* HOT — 15 */
+  { name: "Chez Mémé Georgette", address: "14 rue de la Paix, Paris 75001", phone: "01 42 33 54 21", stars: 4.8, reviews: 312, temp: "hot" },
+  { name: "Le Bouillon du Marché", address: "8 place Carnot, Lyon 69002", phone: "04 78 92 11 44", stars: 4.7, reviews: 278, temp: "hot" },
+  { name: "La Fabrique des Pâtes", address: "23 cours Ju. Guesde, Bordeaux 33000", phone: "05 56 44 87 32", stars: 4.8, reviews: 401, temp: "hot" },
+  { name: "Pizzeria Da Roberto", address: "5 rue Paradis, Marseille 13006", phone: "04 91 55 23 67", stars: 4.9, reviews: 524, temp: "hot" },
+  { name: "Boulangerie Le Fournil d'Or", address: "3 rue Nationale, Toulouse 31000", phone: "05 61 23 45 78", stars: 4.7, reviews: 289, temp: "hot" },
+  { name: "Crêperie Ar Vro", address: "17 rue Saint-Michel, Rennes 35000", phone: "02 99 67 34 12", stars: 4.8, reviews: 356, temp: "hot" },
+  { name: "Sushi Bar Sakura", address: "42 rue de Rivoli, Paris 75004", phone: "01 44 61 78 90", stars: 4.6, reviews: 231, temp: "hot" },
+  { name: "Brasserie La Cigogne", address: "11 rue des Orfèvres, Strasbourg 67000", phone: "03 88 32 14 55", stars: 4.7, reviews: 318, temp: "hot" },
+  { name: "Friterie Chez Marcel", address: "9 rue Faidherbe, Lille 59000", phone: "03 20 54 89 23", stars: 4.6, reviews: 203, temp: "hot" },
+  { name: "Le Coq Hardi", address: "26 boulevard Jean Jaurès, Nantes 44000", phone: "02 40 73 55 66", stars: 4.8, reviews: 447, temp: "hot" },
+  { name: "Trattoria Bella Vita", address: "7 promenade des Anglais, Nice 06000", phone: "04 93 87 12 34", stars: 4.7, reviews: 296, temp: "hot" },
+  { name: "Épicerie Fine Lacombe", address: "18 allées Paul Riquet, Béziers 34500", phone: "04 67 49 23 78", stars: 4.6, reviews: 214, temp: "hot" },
+  { name: "Boucherie Artisanale Renard", address: "4 rue du Marché, Dijon 21000", phone: "03 80 41 77 22", stars: 4.8, reviews: 332, temp: "hot" },
+  { name: "Le Jardin des Délices", address: "30 rue Émile Zola, Grenoble 38000", phone: "04 76 51 89 44", stars: 4.7, reviews: 267, temp: "hot" },
+  { name: "Poissonnerie du Port", address: "2 quai du Lazaret, La Rochelle 17000", phone: "05 46 41 30 88", stars: 4.6, reviews: 245, temp: "hot" },
+
+  /* WARM — 20 */
+  { name: "Café des Amis", address: "55 rue de la République, Lyon 69001", phone: "04 72 41 23 90", stars: 4.3, reviews: 187, temp: "warm" },
+  { name: "Boulangerie Viennoise", address: "12 avenue du Général de Gaulle, Reims 51100", phone: "03 26 88 54 31", stars: 4.2, reviews: 142, temp: "warm" },
+  { name: "Snack Le Palais", address: "67 rue Victor Hugo, Bordeaux 33000", phone: "05 56 79 34 12", stars: 4.4, reviews: 176, temp: "warm" },
+  { name: "Restaurant La Méditerranée", address: "19 cours Lieutaud, Marseille 13006", phone: "04 91 37 88 44", stars: 4.1, reviews: 153, temp: "warm" },
+  { name: "Le Café du Commerce", address: "8 rue du Capitole, Toulouse 31000", phone: "05 61 11 44 77", stars: 4.3, reviews: 198, temp: "warm" },
+  { name: "Crêperie du Vieux Nantes", address: "24 rue de la Juiverie, Nantes 44000", phone: "02 40 48 23 65", stars: 4.2, reviews: 134, temp: "warm" },
+  { name: "Épicerie Orientale Benhamed", address: "33 boulevard de la Liberté, Lille 59000", phone: "03 20 78 12 56", stars: 4.0, reviews: 89, temp: "warm" },
+  { name: "Wok & Roll", address: "15 avenue Jean Médecin, Nice 06000", phone: "04 93 16 45 78", stars: 4.3, reviews: 167, temp: "warm" },
+  { name: "Fromagerie Père Louis", address: "6 place Gutenberg, Strasbourg 67000", phone: "03 88 24 67 33", stars: 4.4, reviews: 192, temp: "warm" },
+  { name: "Kebab Le Sultan", address: "41 rue Saint-Denis, Paris 75001", phone: "01 40 26 54 89", stars: 4.0, reviews: 112, temp: "warm" },
+  { name: "Boulangerie Artisanale Moulin d'Or", address: "9 rue Gambetta, Clermont-Ferrand 63000", phone: "04 73 91 23 44", stars: 4.1, reviews: 99, temp: "warm" },
+  { name: "Restaurant Le Chambon", address: "14 allée Jean Jaurès, Montpellier 34000", phone: "04 67 60 44 89", stars: 4.3, reviews: 145, temp: "warm" },
+  { name: "Charcuterie Maison Bonnot", address: "27 rue du Maréchal Foch, Besançon 25000", phone: "03 81 80 56 78", stars: 4.2, reviews: 118, temp: "warm" },
+  { name: "Sandwicherie Côté Gourmet", address: "3 place de la Bourse, Rennes 35000", phone: "02 99 31 88 12", stars: 4.1, reviews: 107, temp: "warm" },
+  { name: "Pâtisserie Sucré Salé", address: "22 avenue de Villiers, Paris 75017", phone: "01 46 22 73 56", stars: 4.4, reviews: 183, temp: "warm" },
+  { name: "La Table du Marché", address: "5 place du Marché, Angers 49000", phone: "02 41 73 44 21", stars: 4.2, reviews: 131, temp: "warm" },
+  { name: "Burger Craft & Co", address: "18 rue du Palais de Justice, Rouen 76000", phone: "02 35 70 33 89", stars: 4.1, reviews: 156, temp: "warm" },
+  { name: "Poké Bowl Paradise", address: "7 rue Sainte-Catherine, Bordeaux 33000", phone: "05 33 09 87 45", stars: 4.3, reviews: 128, temp: "warm" },
+  { name: "Restaurant Chez Fatou", address: "48 avenue de la Somme, Amiens 80000", phone: "03 22 92 33 78", stars: 4.0, reviews: 76, temp: "warm" },
+  { name: "Le Comptoir du Rhône", address: "11 quai Perrache, Lyon 69002", phone: "04 72 77 54 23", stars: 4.2, reviews: 160, temp: "warm" },
+
+  /* MILD — 10 */
+  { name: "Sandwicherie Express Moussa", address: "71 avenue de Clichy, Paris 75017", phone: "01 43 87 22 14", stars: 3.8, reviews: 34, temp: "mild" },
+  { name: "Épicerie du Soleil", address: "16 boulevard Michelet, Marseille 13008", phone: "04 91 75 44 56", stars: 3.6, reviews: 28, temp: "mild" },
+  { name: "Brasserie du Stade", address: "99 rue du Docteur Charcot, Limoges 87000", phone: "05 55 34 77 89", stars: 3.9, reviews: 41, temp: "mild" },
+  { name: "Tacos House", address: "30 rue des Carmes, Caen 14000", phone: "02 31 44 67 23", stars: 3.5, reviews: 19, temp: "mild" },
+  { name: "Café Bar Les Copains", address: "4 rue Étienne Marcel, Paris 75002", phone: "01 40 28 55 67", stars: 3.7, reviews: 36, temp: "mild" },
+  { name: "Boulangerie Chez Dupont", address: "2 avenue de la Gare, Metz 57000", phone: "03 87 63 44 21", stars: 3.6, reviews: 22, temp: "mild" },
+  { name: "Restauration Rapide Amir", address: "55 rue de la Marne, Tours 37000", phone: "02 47 61 55 33", stars: 3.9, reviews: 47, temp: "mild" },
+  { name: "Pizzéria Chez Tony", address: "8 avenue des Minimes, Toulouse 31200", phone: "05 62 26 78 90", stars: 3.7, reviews: 31, temp: "mild" },
+  { name: "Buffet Asiatique Garden", address: "44 boulevard de la Victoire, Strasbourg 67000", phone: "03 88 61 23 45", stars: 3.5, reviews: 26, temp: "mild" },
+  { name: "Snack du Coin", address: "17 rue de la Station, Saint-Étienne 42000", phone: "04 77 41 88 56", stars: 3.8, reviews: 39, temp: "mild" },
+
+  /* COLD — 5 */
+  { name: "Épicerie du Quartier", address: "102 rue de Belleville, Paris 75020", phone: "01 43 55 12 78", stars: 3.1, reviews: 7, temp: "cold" },
+  { name: "Café de la Poste", address: "1 place de la Poste, Aurillac 15000", phone: "04 71 64 55 89", stars: 2.9, reviews: 5, temp: "cold" },
+  { name: "Friterie du Quartier Nord", address: "88 rue des Rosiers, Roubaix 59100", phone: "03 20 26 77 34", stars: 2.7, reviews: 3, temp: "cold" },
+  { name: "Sandwicherie Rapide", address: "23 avenue Charles de Gaulle, Perpignan 66000", phone: "04 68 34 56 77", stars: 3.0, reviews: 8, temp: "cold" },
+  { name: "Bar Tabac Le Normandie", address: "6 place du Vieux Marché, Le Havre 76600", phone: "02 35 41 22 89", stars: 2.8, reviews: 4, temp: "cold" },
+];
+
+/* ===================== CURRENT FILTER STATE ===================== */
+let currentFilter = 'all';
+
+/* ===================== RENDER CARDS ===================== */
+function renderStars(rating) {
+  const full  = Math.floor(rating);
+  const half  = rating % 1 >= 0.5;
+  const empty = 5 - full - (half ? 1 : 0);
+  return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+}
+
+function tempLabel(temp) {
+  const map = {
+    hot:  '🔥 TRÈS CHAUD',
+    warm: '☕ CHAUD',
+    mild: '🌤️ TIÈDE',
+    cold: '❄️ FROID',
+  };
+  return map[temp] || temp;
+}
+
+function buildCard(p, idx) {
+  const card = document.createElement('div');
+  card.className = `prospect-card ${p.temp}`;
+  card.dataset.temp = p.temp;
+  card.dataset.name = p.name.toLowerCase();
+  card.dataset.address = p.address.toLowerCase();
+  card.innerHTML = `
+    <div class="card-top">
+      <div class="card-name">${p.name}</div>
+      <div class="temp-badge ${p.temp}">${tempLabel(p.temp)}</div>
+    </div>
+    <div class="card-address">📍 ${p.address}</div>
+    <div class="card-stars">
+      <span class="stars-visual">${renderStars(p.stars)}</span>
+      <span class="stars-info"><strong>${p.stars}</strong>/5 · ${p.reviews} avis</span>
+    </div>
+    <div class="card-bottom">
+      <div class="card-phone">📞 ${p.phone}</div>
+      <button class="call-btn" onclick="boom(event, this)" data-phone="${p.phone}">🔥 APPELER</button>
+    </div>
+  `;
+  return card;
+}
+
+function initGrid() {
+  const grid = document.getElementById('prospect-grid');
+  prospects.forEach((p, i) => grid.appendChild(buildCard(p, i)));
+  updateCounter();
+}
+
+/* ===================== FILTER LOGIC ===================== */
+function setFilter(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterCards();
+}
+
+function filterCards() {
+  const query = document.getElementById('search-input').value.toLowerCase().trim();
+  let visible = 0;
+  document.querySelectorAll('.prospect-card').forEach(card => {
+    const matchFilter  = currentFilter === 'all' || card.dataset.temp === currentFilter;
+    const matchSearch  = !query || card.dataset.name.includes(query) || card.dataset.address.includes(query);
+    if (matchFilter && matchSearch) {
+      card.classList.remove('hidden');
+      visible++;
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+  updateCounter(visible);
+}
+
+function updateCounter(n) {
+  if (n === undefined) n = document.querySelectorAll('.prospect-card:not(.hidden)').length;
+  document.getElementById('visible-count').textContent = n;
+}
+
+/* ===================== BOOM ANIMATION ===================== */
+const boomWords = ['DATTEBAYO!', 'BELIEVE IT!', 'RASENGAN!', 'CHIDORI!', 'SHADOW CLONE!', 'KONOHA!', '🍥 IZZY!'];
+
+function boom(event, btn) {
+  event.stopPropagation();
+  const word = boomWords[Math.floor(Math.random() * boomWords.length)];
+  const el   = document.createElement('div');
+  el.className = 'boom-word';
+  el.textContent = word;
+  const x = event.clientX || window.innerWidth / 2;
+  const y = event.clientY || window.innerHeight / 2;
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+
+  /* also open phone dialer */
+  const phone = btn.dataset.phone.replace(/\s/g, '');
+  window.location.href = `tel:${phone}`;
+}
+
+/* ===================== PARTICLE CANVAS ===================== */
+(function() {
+  const canvas = document.getElementById('particles-canvas');
+  const ctx    = canvas.getContext('2d');
+  let W, H, particles = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const COLORS = ['rgba(255,107,0,', 'rgba(255,140,0,', 'rgba(255,215,0,', 'rgba(255,255,255,'];
+  const SHAPES = ['🍥', '🌀', '⭐', '✦', '•'];
+
+  class Particle {
+    constructor() { this.reset(true); }
+    reset(init) {
+      this.x  = Math.random() * W;
+      this.y  = init ? Math.random() * H : H + 20;
+      this.vy = -(0.3 + Math.random() * 0.7);
+      this.vx = (Math.random() - 0.5) * 0.4;
+      this.size   = 3 + Math.random() * 5;
+      this.alpha  = 0.1 + Math.random() * 0.3;
+      this.color  = COLORS[Math.floor(Math.random() * COLORS.length)];
+      this.isEmoji = Math.random() < 0.15;
+      this.shape  = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+      this.life   = 0;
+      this.maxLife= 300 + Math.random() * 400;
+    }
+    update() {
+      this.x   += this.vx;
+      this.y   += this.vy;
+      this.life++;
+      if (this.life > this.maxLife || this.y < -20) this.reset(false);
+    }
+    draw() {
+      ctx.save();
+      ctx.globalAlpha = this.alpha * Math.sin((this.life / this.maxLife) * Math.PI);
+      if (this.isEmoji) {
+        ctx.font = `${this.size * 2.5}px serif`;
+        ctx.fillText(this.shape, this.x, this.y);
+      } else {
+        ctx.fillStyle = this.color + this.alpha + ')';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size / 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+
+  for (let i = 0; i < 80; i++) particles.push(new Particle());
+
+  function loop() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
+
+/* ===================== INIT ===================== */
+initGrid();
+</script>
+</body>
+</html>

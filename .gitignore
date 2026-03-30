@@ -25,3 +25,4 @@ npm-debug.log*
 
 # Legacy data
 prospects.json
+.vercel

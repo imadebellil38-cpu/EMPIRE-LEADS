@@ -22,6 +22,14 @@ require('./db');
   } catch (e) { /* column already exists or DB not ready */ }
 })();
 
+// Auto-migration: add extension_key column to users
+(async () => {
+  try {
+    const db = require('./db');
+    await db.run(`DO $$ BEGIN ALTER TABLE users ADD COLUMN extension_key TEXT DEFAULT ''; EXCEPTION WHEN duplicate_column THEN NULL; END $$`);
+  } catch (e) { /* column already exists or DB not ready */ }
+})();
+
 const { requireAuth, requireAdminFromDB } = require('./auth');
 
 const app = express();
@@ -120,6 +128,41 @@ app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'log
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.get('/pricing', (req, res) => res.sendFile(path.join(__dirname, 'public', 'pricing.html')));
 app.get('/instagram-finder', (req, res) => res.sendFile(path.join(__dirname, 'public', 'instagram-finder.html')));
+app.get('/monteur-video', (req, res, next) => {
+  const jwt = require('jsonwebtoken');
+  const header = req.headers.authorization;
+  const tokenFromQuery = req.query.token;
+  const token = (header && header.startsWith('Bearer ') ? header.slice(7) : null) || tokenFromQuery;
+  if (!token) return res.redirect('/login');
+  try {
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch(e) { return res.redirect('/login'); }
+}, async (req, res) => {
+  const fs = require('fs');
+  const db = require('./db');
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
+  const key = req.query.key || '';
+  const user = await db.get('SELECT extension_key FROM users WHERE id = $1', [req.user.id]);
+  const granted = !!(user && user.extension_key && key === user.extension_key);
+
+  // Logger la tentative
+  try {
+    await db.run(
+      `INSERT INTO activity_log (user_id, action, details) VALUES ($1, $2, $3)`,
+      [req.user.id, 'extension_access', JSON.stringify({ extension: 'monteur-video', ip, granted })]
+    );
+  } catch (e) { /* log non-critique */ }
+
+  if (!granted) {
+    return res.sendFile(path.join(__dirname, 'public', 'extension-locked.html'));
+  }
+
+  const html = fs.readFileSync(path.join(__dirname, 'public', 'monteur-video.html'), 'utf8');
+  const jsCode = fs.readFileSync(path.join(__dirname, 'public', 'ig-monteur.js'), 'utf8');
+  const bookmarklet = 'javascript:' + encodeURIComponent(jsCode);
+  res.type('html').send(html.replace('Chargement...', bookmarklet));
+});
 
 // ── ig-finder.js with CORS (for bookmarklet loader) ──
 app.get('/ig-finder.js', (req, res) => {

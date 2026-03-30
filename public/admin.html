@@ -169,9 +169,67 @@
         </table>
       </div>
     </div>
+    <!-- ── Extensions ── -->
+    <div class="section-title" style="margin-top:32px">🧩 Extensions — Accès &amp; Codes secrets</div>
+    <div class="cards" style="margin-bottom:16px">
+      <div class="card" style="flex:1;min-width:300px">
+        <div class="card-title">Gérer les codes d'accès</div>
+        <div id="ext-keys-list" style="font-size:14px;color:#9090a8">Chargement...</div>
+      </div>
+      <div class="card" style="flex:2;min-width:400px">
+        <div class="card-title">Historique des accès</div>
+        <table>
+          <thead><tr><th>Email</th><th>Extension</th><th>IP</th><th>Accordé</th><th>Date</th></tr></thead>
+          <tbody id="ext-log-body"></tbody>
+        </table>
+      </div>
+    </div>
   </main>
 
   <script src="/sanitize.js"></script>
   <script src="/admin.js"></script>
+  <script>
+  (function(){
+    var token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
+
+    // Charger les logs d'accès
+    fetch('/api/admin/extensions-log', { headers: { Authorization: 'Bearer ' + token } })
+      .then(function(r){ return r.json(); })
+      .then(function(logs){
+        var body = document.getElementById('ext-log-body');
+        if (!logs.length) { body.innerHTML = '<tr><td colspan="5" style="color:#5a5a70;padding:12px">Aucun accès enregistré</td></tr>'; return; }
+        body.innerHTML = logs.map(function(l){
+          var d = new Date(l.created_at).toLocaleString('fr-FR');
+          var granted = l.granted ? '<span style="color:#00d084">✅</span>' : '<span style="color:#ff4444">❌</span>';
+          return '<tr><td>' + (l.email||'') + '</td><td>' + (l.extension||'') + '</td><td>' + (l.ip||'') + '</td><td>' + granted + '</td><td>' + d + '</td></tr>';
+        }).join('');
+      }).catch(function(){ document.getElementById('ext-log-body').innerHTML = '<tr><td colspan="5" style="color:#ff4444">Erreur de chargement</td></tr>'; });
+
+    // Charger la liste des users pour gérer les codes
+    fetch('/api/admin/users', { headers: { Authorization: 'Bearer ' + token } })
+      .then(function(r){ return r.json(); })
+      .then(function(users){
+        var container = document.getElementById('ext-keys-list');
+        container.innerHTML = users.map(function(u){
+          return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">'
+            + '<span style="flex:1;min-width:140px;color:#e0e0f0;font-size:13px">' + (u.email||'') + '</span>'
+            + '<input id="extkey-' + u.id + '" type="text" value="' + (u.extension_key||'') + '" placeholder="Aucun code" style="width:140px;padding:6px 10px;background:#111118;border:1px solid #2a2a38;border-radius:6px;color:#e0e0f0;font-size:12px;outline:none">'
+            + '<button onclick="saveExtKey(' + u.id + ')" style="padding:6px 12px;background:#E1306C;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">Sauver</button>'
+            + '</div>';
+        }).join('');
+      }).catch(function(){ document.getElementById('ext-keys-list').textContent = 'Erreur de chargement'; });
+
+    window.saveExtKey = function(userId) {
+      var key = document.getElementById('extkey-' + userId).value.trim();
+      fetch('/api/admin/users/' + userId + '/extension-key', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ key: key })
+      }).then(function(r){ return r.json(); })
+        .then(function(){ alert('Code mis à jour !'); })
+        .catch(function(){ alert('Erreur'); });
+    };
+  })();
+  </script>
 </body>
 </html>

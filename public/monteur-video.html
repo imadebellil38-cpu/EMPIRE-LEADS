@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Trouver des Monteurs Vidéo — Artiom</title>
+<script>
+(function(){
+  var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  if (!token) { window.location.href = '/login'; }
+})();
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;--bg4:#222230;
+  --border:#2a2a38;--text:#e0e0f0;--text2:#9090a8;--text3:#5a5a70;
+  --ig:#E1306C;--ig2:#F77737;--green:#00d084;--radius:12px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+.header{
+  background:linear-gradient(180deg,rgba(17,17,24,.98),rgba(10,10,15,.95));
+  border-bottom:1px solid var(--border);padding:14px 20px;
+  display:flex;align-items:center;gap:16px;
+  position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);
+}
+.header-logo{font-size:18px;font-weight:900;letter-spacing:-.5px;color:#fff}
+.header-title{
+  flex:1;font-size:17px;font-weight:700;
+  background:linear-gradient(135deg,var(--ig),var(--ig2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+
+.container{max-width:700px;margin:0 auto;padding:30px 16px 80px}
+
+.welcome{
+  text-align:center;margin-bottom:30px;
+}
+.welcome h1{
+  font-size:28px;font-weight:800;margin-bottom:8px;
+  background:linear-gradient(135deg,var(--ig),var(--ig2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.welcome p{font-size:15px;color:var(--text2);line-height:1.6}
+.welcome .name{color:var(--ig);font-weight:700}
+
+.card{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:24px;margin-bottom:20px;
+}
+.card h2{font-size:15px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px}
+
+.step{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px}
+.step-num{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--ig),var(--ig2));
+  color:#fff;font-weight:700;font-size:14px;
+  display:flex;align-items:center;justify-content:center;
+}
+.step-text{font-size:14px;color:var(--text2);line-height:1.6}
+.step-text strong{color:var(--text)}
+
+.copy-btn{
+  display:block;width:100%;padding:16px;margin:20px 0 12px;
+  background:linear-gradient(135deg,var(--ig),var(--ig2));
+  color:#fff;font-size:17px;font-weight:700;border:none;border-radius:10px;
+  cursor:pointer;box-shadow:0 4px 16px rgba(225,48,108,.3);transition:opacity .2s;
+}
+.copy-btn:hover{opacity:.9}
+.copy-status{text-align:center;color:var(--green);font-size:13px;min-height:20px}
+
+.code-box{
+  width:100%;height:60px;background:#0a0a12;border:1.5px solid var(--border);
+  border-radius:8px;color:var(--ig);font-size:10px;font-family:monospace;
+  padding:10px;resize:vertical;word-break:break-all;
+}
+
+.open-btn{
+  display:block;width:100%;padding:14px;margin-top:16px;
+  background:var(--bg3);border:1.5px solid var(--ig);border-radius:10px;
+  color:var(--ig);font-size:15px;font-weight:600;text-align:center;
+  text-decoration:none;transition:all .2s;
+}
+.open-btn:hover{background:rgba(225,48,108,.1)}
+
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.tag{
+  padding:6px 14px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:20px;font-size:13px;color:var(--text2);
+}
+.tag.main{border-color:var(--ig);color:var(--ig);font-weight:600}
+
+.note{
+  margin-top:16px;padding:12px 16px;
+  background:rgba(225,48,108,.06);border:1px solid rgba(225,48,108,.15);
+  border-radius:8px;font-size:13px;color:var(--text2);line-height:1.5;
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-logo">EMPIRE LEADS</div>
+  <div class="header-title">Monteurs Vidéo Finder</div>
+</header>
+
+<div class="container">
+
+  <div class="welcome">
+    <h1>Trouve des Monteurs Vidéo sur Instagram</h1>
+    <p>Salut <span class="name">Artiom</span> ! Cet outil va chercher automatiquement des monteurs vidéo, vidéastes, et pros de la post-prod sur Instagram. Un clic et c'est parti.</p>
+  </div>
+
+  <div class="card">
+    <h2>Ce que l'outil va chercher pour toi</h2>
+    <div class="tags">
+      <span class="tag main">monteur vidéo</span>
+      <span class="tag">video editor</span>
+      <span class="tag">montage vidéo</span>
+      <span class="tag">éditeur vidéo</span>
+      <span class="tag">monteur freelance</span>
+      <span class="tag">post production</span>
+      <span class="tag">motion designer</span>
+      <span class="tag">montage youtube</span>
+      <span class="tag">montage tiktok</span>
+      <span class="tag">montage reels</span>
+      <span class="tag">montage clip</span>
+      <span class="tag">video editing</span>
+    </div>
+    <div class="note">
+      L'outil cherche toutes ces variantes automatiquement + dans les grandes villes françaises. Tu n'as rien à écrire.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Installe le bookmarklet en 3 étapes</h2>
+
+    <div style="margin:20px 0 10px">
+      <p style="color:var(--text);font-size:14px;font-weight:600;margin-bottom:8px">1. Sélectionne tout le code ci-dessous (clique dans la boîte → Ctrl+A) puis copie (Ctrl+C) :</p>
+      <textarea class="code-box" id="code-box" readonly onclick="this.select()" style="height:100px;font-size:11px;cursor:text">Chargement...</textarea>
+      <div class="copy-status" id="copy-status"></div>
+    </div>
+
+    <div style="margin:16px 0 10px">
+      <p style="color:var(--text);font-size:14px;font-weight:600;margin-bottom:8px">2. Crée un favori dans ta barre :</p>
+      <div style="color:var(--text2);font-size:13px;line-height:1.8;padding-left:8px">
+        Clic droit sur ta barre de favoris → <strong style="color:var(--text)">Ajouter une page</strong><br>
+        Nom : <code style="background:#222;padding:2px 8px;border-radius:4px">Monteur Vidéo</code><br>
+        URL : <strong style="color:var(--ig)">Ctrl+V</strong> (colle le code)
+      </div>
+    </div>
+
+    <div style="margin:20px 0 0">
+      <p style="color:var(--text);font-size:14px;font-weight:600;margin-bottom:10px">3. Va sur Instagram et clique sur ton favori :</p>
+      <a class="open-btn" href="https://www.instagram.com" target="_blank" rel="noopener" style="font-size:17px;padding:16px">Ouvrir Instagram</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+var FULL_CODE = '';
+fetch('/ig-finder.js')
+  .then(function(r){ return r.text(); })
+  .then(function(code){
+    FULL_CODE = 'javascript:' + encodeURIComponent(code);
+    document.getElementById('code-box').value = FULL_CODE;
+  });
+
+function copyBookmarklet(){
+  if(!FULL_CODE){ alert('Chargement en cours...'); return; }
+  var st = document.getElementById('copy-status');
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(FULL_CODE).then(function(){
+      st.textContent = 'Copié !';
+      setTimeout(function(){ st.textContent=''; }, 3000);
+    }).catch(function(){ fallback(); });
+  } else { fallback(); }
+  function fallback(){
+    var ta = document.createElement('textarea');
+    ta.value = FULL_CODE;
+    ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand('copy'); st.textContent='Copié !'; }
+    catch(e){ st.textContent='Sélectionne le texte manuellement'; }
+    document.body.removeChild(ta);
+    setTimeout(function(){ st.textContent=''; }, 3000);
+  }
+}
+</script>
+</body>
+</html>

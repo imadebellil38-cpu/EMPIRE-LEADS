@@ -1,4 +1,4 @@
-/* ProspectHunter — Theme Toggle (light/dark) */
+/* Empire Leads — Theme Toggle (light/dark) */
 (function () {
   const STORAGE_KEY = 'ph-theme';
 
