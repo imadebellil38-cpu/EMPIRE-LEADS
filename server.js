@@ -55,7 +55,8 @@ app.use((req, res, next) => {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: isIgFinder ? ["'self'", "'unsafe-inline'"] : ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrcAttr: ["'unsafe-inline'"],
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "https:"],
@@ -128,34 +129,58 @@ app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'log
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.get('/pricing', (req, res) => res.sendFile(path.join(__dirname, 'public', 'pricing.html')));
 app.get('/instagram-finder', (req, res) => res.sendFile(path.join(__dirname, 'public', 'instagram-finder.html')));
-app.get('/monteur-video', (req, res, next) => {
-  const jwt = require('jsonwebtoken');
-  const header = req.headers.authorization;
-  const tokenFromQuery = req.query.token;
-  const token = (header && header.startsWith('Bearer ') ? header.slice(7) : null) || tokenFromQuery;
-  if (!token) return res.redirect('/login');
+
+// Verify extension key (used by extension-locked.html)
+app.post('/api/verify-extension-key', requireAuth, async (req, res) => {
   try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
-    next();
-  } catch(e) { return res.redirect('/login'); }
-}, async (req, res) => {
+    const { key } = req.body;
+    if (!key) return res.json({ granted: false });
+    const user = await require('./db').get('SELECT extension_key FROM users WHERE id = ?', [req.user.id]);
+    const granted = !!(user && user.extension_key && key === user.extension_key);
+    res.json({ granted });
+  } catch (e) {
+    res.json({ granted: false });
+  }
+});
+// Monteur-video: no key = show locked page, with key = verify via JWT header or query
+app.get('/monteur-video', async (req, res) => {
+  const jwtLib = require('jsonwebtoken');
   const fs = require('fs');
   const db = require('./db');
-  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
   const key = req.query.key || '';
-  const user = await db.get('SELECT extension_key FROM users WHERE id = $1', [req.user.id]);
+  const tokenFromQuery = req.query.token || '';
+  const header = req.headers.authorization;
+  const token = (header && header.startsWith('Bearer ') ? header.slice(7) : null) || tokenFromQuery;
+
+  // No key provided = just show the locked page (no auth needed)
+  if (!key) {
+    return res.sendFile(path.join(__dirname, 'public', 'extension-locked.html'));
+  }
+
+  // Key provided = need to verify JWT + key
+  if (!token) return res.sendFile(path.join(__dirname, 'public', 'extension-locked.html'));
+  let userId;
+  try {
+    const decoded = jwtLib.verify(token, process.env.JWT_SECRET);
+    userId = decoded.id;
+  } catch (e) {
+    return res.sendFile(path.join(__dirname, 'public', 'extension-locked.html'));
+  }
+
+  const user = await db.get('SELECT extension_key FROM users WHERE id = ?', [userId]);
   const granted = !!(user && user.extension_key && key === user.extension_key);
 
-  // Logger la tentative
+  // Log attempt
   try {
-    await db.run(
-      `INSERT INTO activity_log (user_id, action, details) VALUES ($1, $2, $3)`,
-      [req.user.id, 'extension_access', JSON.stringify({ extension: 'monteur-video', ip, granted })]
-    );
-  } catch (e) { /* log non-critique */ }
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '';
+    await db.run('INSERT INTO activity_log (user_id, action, details) VALUES (?, ?, ?)',
+      [userId, 'extension_access', JSON.stringify({ extension: 'monteur-video', ip, granted })]);
+  } catch (e) {}
 
   if (!granted) {
-    return res.sendFile(path.join(__dirname, 'public', 'extension-locked.html'));
+    let lockedHtml = fs.readFileSync(path.join(__dirname, 'public', 'extension-locked.html'), 'utf8');
+    lockedHtml = lockedHtml.replace('"display:none"', '"display:block"');
+    return res.type('html').send(lockedHtml);
   }
 
   const html = fs.readFileSync(path.join(__dirname, 'public', 'monteur-video.html'), 'utf8');
@@ -205,14 +230,19 @@ app.use((err, req, res, next) => {
   });
 });
 
-// ── Start ──
-const http = require('http');
-const server = http.createServer(app);
-server.listen(PORT, () => {
-  console.log(`\x1b[36m⚡ Prospecto SaaS\x1b[0m démarré sur \x1b[4mhttp://localhost:${PORT}\x1b[0m`);
-  console.log(`   Mode: ${isProd ? 'production' : 'development'} | Rate limit: ${process.env.RATE_LIMIT_MAX_REQUESTS || 100} req/15min`);
-});
-server.on('error', (err) => {
-  console.error('\x1b[31m[ERROR] Impossible de démarrer le serveur:\x1b[0m', err.message);
-  process.exit(1);
-});
+// ── Export for Vercel serverless ──
+module.exports = app;
+
+// ── Start (local dev only — Vercel uses the export above) ──
+if (!process.env.VERCEL) {
+  const http = require('http');
+  const server = http.createServer(app);
+  server.listen(PORT, () => {
+    console.log(`\x1b[36m⚡ Prospecto SaaS\x1b[0m démarré sur \x1b[4mhttp://localhost:${PORT}\x1b[0m`);
+    console.log(`   Mode: ${isProd ? 'production' : 'development'} | Rate limit: ${process.env.RATE_LIMIT_MAX_REQUESTS || 100} req/15min`);
+  });
+  server.on('error', (err) => {
+    console.error('\x1b[31m[ERROR] Impossible de démarrer le serveur:\x1b[0m', err.message);
+    process.exit(1);
+  });
+}

@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET || JWT_SECRET === 'CHANGE_ME_TO_A_RANDOM_STRING') {
   console.error('\x1b[31m[FATAL] JWT_SECRET is not set or is using the default value. Set it in .env\x1b[0m');
-  process.exit(1);
+  if (!process.env.VERCEL) process.exit(1);
 }
 
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
@@ -54,7 +54,8 @@ async function requireAdminFromDB(req, res, next) {
     }
     next();
   } catch (err) {
-    return res.status(500).json({ error: 'Erreur de vérification admin.' });
+    console.error('[requireAdminFromDB]', err.message, err.stack);
+    return res.status(500).json({ error: 'Erreur de vérification admin.', detail: err.message });
   }
 }
 

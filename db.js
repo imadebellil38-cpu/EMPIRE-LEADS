@@ -2,13 +2,15 @@ const { Pool } = require('pg');
 
 const sslConfig = (() => {
   if (!process.env.DATABASE_URL || process.env.DATABASE_URL.includes('localhost')) return false;
-  if (process.env.DB_SSL_REJECT_UNAUTHORIZED === 'false') return { rejectUnauthorized: false };
-  return { rejectUnauthorized: true };
+  return { rejectUnauthorized: false };
 })();
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: sslConfig,
+  max: process.env.VERCEL ? 2 : 10,
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 10000,
 });
 
 // Convert ? placeholders → $1, $2, ...
