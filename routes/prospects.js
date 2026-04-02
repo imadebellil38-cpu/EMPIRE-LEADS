@@ -2,7 +2,7 @@ const { Router } = require('express');
 const validator = require('validator');
 const db = require('../db');
 const { sendProspectEmail, isEmailConfigured } = require('../services/email');
-const { findEmailForProspect } = require('../services/emailFinder');
+const { findEmailForProspect, deepEmailSearch, extractDomain } = require('../services/emailFinder');
 
 const router = Router();
 
@@ -524,6 +524,25 @@ router.delete('/bulk', async (req, res) => {
     res.json({ ok: true, deleted: r.rowCount });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/prospects/email-finder/search — deep email search for extension page
+router.post('/email-finder/search', async (req, res) => {
+  const { companyName, website, ownerName } = req.body;
+  if (!companyName && !website) {
+    return res.status(400).json({ error: 'Fournissez un nom d\'entreprise ou un site web.' });
+  }
+  try {
+    const cleanCompany = companyName ? validator.trim(companyName).substring(0, 200) : '';
+    const cleanWebsite = website ? validator.trim(website).substring(0, 500) : '';
+    const cleanOwner = ownerName ? validator.trim(ownerName).substring(0, 100) : '';
+    const domain = extractDomain(cleanWebsite);
+    const result = await deepEmailSearch({ companyName: cleanCompany, domain, website: cleanWebsite, ownerName: cleanOwner });
+    try { await db.run('INSERT INTO activity_log (user_id, action, details) VALUES (?, ?, ?)', [req.user.id, 'email_search', JSON.stringify({ company: cleanCompany, domain, found: result.emails.length })]); } catch {}
+    res.json({ ok: true, ...result });
+  } catch (err) {
+    res.status(500).json({ error: 'Erreur lors de la recherche d\'emails.' });
   }
 });
 

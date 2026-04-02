@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Extensions — Empire Leads</title>
+<script>
+(function(){
+  var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  if (!token) { window.location.href = '/login'; }
+})();
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;--bg4:#222230;--border:#2a2a38;--text:#e0e0f0;--text2:#9090a8;--text3:#5a5a70;--green:#00d084;--blue:#3b82f6;--blue2:#60a5fa;--ig:#E1306C;--ig2:#F77737;--accent:#7c3aed;--radius:16px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:linear-gradient(180deg,rgba(17,17,24,.98),rgba(10,10,15,.95));border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.header-logo{font-size:18px;font-weight:900;letter-spacing:-.5px}
+.header-logo span{color:var(--green)}
+.header-title{flex:1;font-size:17px;font-weight:700;color:var(--text2)}
+.back-link{font-size:13px;color:var(--text2);text-decoration:none;padding:7px 12px;border:1px solid var(--border);border-radius:8px;transition:all .2s}
+.back-link:hover{color:var(--text);border-color:var(--text3)}
+.container{max-width:800px;margin:0 auto;padding:30px 16px 80px}
+.hero{text-align:center;margin-bottom:36px}
+.hero-icon{font-size:56px;margin-bottom:12px}
+.hero h1{font-size:26px;font-weight:800;margin-bottom:8px}
+.hero p{font-size:15px;color:var(--text2);line-height:1.6}
+.ext-grid{display:grid;grid-template-columns:1fr;gap:20px}
+.ext-card{position:relative;background:var(--bg2);border:1.5px solid var(--border);border-radius:var(--radius);padding:28px 24px;transition:transform .2s,box-shadow .2s;cursor:pointer;text-decoration:none;color:inherit;display:block}
+.ext-card:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.ext-card .card-icon{font-size:36px;margin-bottom:14px;display:block}
+.ext-card .card-lock{position:absolute;top:18px;right:20px;font-size:22px;opacity:.6}
+.ext-card .card-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+.badge-available{background:rgba(0,208,132,.12);color:var(--green);border:1px solid rgba(0,208,132,.25)}
+.badge-new{background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.25)}
+.badge-soon{background:rgba(144,144,168,.1);color:var(--text3);border:1px solid rgba(144,144,168,.2)}
+.ext-card h2{font-size:20px;font-weight:700;margin-bottom:8px}
+.ext-card p{font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:16px}
+.ext-card .card-action{font-size:14px;font-weight:600}
+.card-monteur{border-color:rgba(225,48,108,.25)}.card-monteur .card-action{color:var(--ig)}
+.card-email{border-color:rgba(59,130,246,.25)}.card-email .card-action{color:var(--blue)}
+.card-soon{border-color:var(--border);opacity:.65;cursor:default}.card-soon:hover{transform:none;box-shadow:none}
+@media(max-width:480px){.container{padding:20px 12px 60px}.hero h1{font-size:22px}.ext-card{padding:22px 18px}}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="header-logo">EMPIRE <span>LEADS</span></div>
+  <div class="header-title">Extensions</div>
+  <a class="back-link" href="/app">&#8592; App</a>
+</header>
+<div class="container">
+  <div class="hero">
+    <div class="hero-icon">&#x1F9E9;</div>
+    <h1>Extensions Empire Leads</h1>
+    <p>Des outils speciaux pour booster ta prospection</p>
+  </div>
+  <div class="ext-grid">
+    <a class="ext-card card-monteur" href="#" onclick="goToExtension('monteur-video');return false;">
+      <span class="card-icon">&#x1F3AC;</span>
+      <span class="card-lock">&#x1F510;</span>
+      <span class="card-badge badge-available">DISPONIBLE</span>
+      <h2>Chercheur Monteurs Video</h2>
+      <p>Trouve des monteurs video freelance sur Instagram dans toute la France, Suisse et Belgique.</p>
+      <span class="card-action">Acceder &#8594;</span>
+    </a>
+    <a class="ext-card card-email" href="/email-finder.html">
+      <span class="card-icon">&#x1F4E7;</span>
+      <span class="card-badge badge-new">NOUVEAU</span>
+      <h2>Email Finder</h2>
+      <p>Trouve les emails professionnels des dirigeants a partir du nom de l'entreprise.</p>
+      <span class="card-action">Acceder &#8594;</span>
+    </a>
+    <div class="ext-card card-soon">
+      <span class="card-icon">&#x1F4BC;</span>
+      <span class="card-badge badge-soon">BIENTOT</span>
+      <h2>LinkedIn Prospector</h2>
+      <p>Prospection automatisee sur LinkedIn par secteur, ville et taille d'entreprise.</p>
+      <span class="card-action" style="color:var(--text3)">Disponible prochainement</span>
+    </div>
+    <div class="ext-card card-soon">
+      <span class="card-icon">&#x1F4AC;</span>
+      <span class="card-badge badge-soon">BIENTOT</span>
+      <h2>SMS &amp; WhatsApp Automator</h2>
+      <p>Envoi automatise de messages de prospection par SMS et WhatsApp.</p>
+      <span class="card-action" style="color:var(--text3)">Disponible prochainement</span>
+    </div>
+  </div>
+</div>
+<script>
+function goToExtension(name) {
+  var token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
+  window.location.href = '/' + name + '?token=' + encodeURIComponent(token);
+}
+</script>
+</body>
+</html>
