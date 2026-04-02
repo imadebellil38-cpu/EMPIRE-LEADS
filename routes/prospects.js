@@ -2,7 +2,7 @@ const { Router } = require('express');
 const validator = require('validator');
 const db = require('../db');
 const { sendProspectEmail, isEmailConfigured } = require('../services/email');
-const { findEmailForProspect, searchEmails } = require('../services/emailFinder');
+const { findEmailForProspect, deepEmailSearch, extractDomain } = require('../services/emailFinder');
 
 const router = Router();
 
@@ -338,18 +338,8 @@ router.put('/:id/stage', async (req, res) => {
     // Base update — always move the stage
     await db.run('UPDATE prospects SET pipeline_stage = ? WHERE id = ?', [stage, id]);
 
-    // Clean up fields when LEAVING a stage (prevents orphaned data / "lost" recalls)
+    // Track stage change in history
     if (oldStage !== stage) {
-      if (oldStage === 'to_recall' && stage !== 'to_recall') {
-        await db.run('UPDATE prospects SET rappel = NULL WHERE id = ?', [id]);
-      }
-      if ((oldStage === 'meeting_to_set' || oldStage === 'meeting_confirmed') && stage !== 'meeting_to_set' && stage !== 'meeting_confirmed') {
-        await db.run('UPDATE prospects SET meeting_date = NULL WHERE id = ?', [id]);
-      }
-      if (oldStage === 'refused' && stage !== 'refused') {
-        await db.run('UPDATE prospects SET objection = NULL WHERE id = ?', [id]);
-      }
-      // Track stage change in history
       try {
         await db.run(
           'INSERT INTO stage_history (prospect_id, from_stage, to_stage) VALUES (?, ?, ?)',
@@ -358,7 +348,7 @@ router.put('/:id/stage', async (req, res) => {
       } catch (_) { /* table might not exist yet */ }
     }
 
-    // Set fields when ENTERING a stage
+    // Optional extras
     if (stage === 'refused' && objection) {
       await db.run('UPDATE prospects SET objection = ? WHERE id = ?', [String(objection).trim().substring(0, 200), id]);
     }
@@ -381,36 +371,6 @@ router.put('/:id/stage', async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
-  }
-});
-
-// POST /api/prospects/email-finder/search — standalone email finder tool
-router.post('/email-finder/search', async (req, res) => {
-  try {
-    const { companyName, website, ownerName } = req.body;
-    if (!website) return res.status(400).json({ error: 'Le site web est requis.' });
-
-    const cleanWebsite = typeof website === 'string' ? validator.trim(website).substring(0, 500) : '';
-    const cleanCompany = typeof companyName === 'string' ? validator.trim(companyName).substring(0, 200) : '';
-    const cleanOwner = typeof ownerName === 'string' ? validator.trim(ownerName).substring(0, 200) : '';
-
-    if (!cleanWebsite) return res.status(400).json({ error: 'URL de site web invalide.' });
-
-    const result = await searchEmails({
-      companyName: cleanCompany,
-      website: cleanWebsite,
-      ownerName: cleanOwner,
-    });
-
-    // Log activity
-    try {
-      await db.run('INSERT INTO activity_log (user_id, action, details) VALUES (?, ?, ?)',
-        [req.user.id, 'email_finder_search', JSON.stringify({ domain: result.domain, resultsCount: result.results.length, company: cleanCompany })]);
-    } catch {}
-
-    res.json(result);
-  } catch (err) {
-    res.status(500).json({ error: 'Erreur lors de la recherche: ' + err.message });
   }
 });
 
@@ -564,6 +524,25 @@ router.delete('/bulk', async (req, res) => {
     res.json({ ok: true, deleted: r.rowCount });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/prospects/email-finder/search — deep email search for extension page
+router.post('/email-finder/search', async (req, res) => {
+  const { companyName, website, ownerName } = req.body;
+  if (!companyName && !website) {
+    return res.status(400).json({ error: 'Fournissez un nom d\'entreprise ou un site web.' });
+  }
+  try {
+    const cleanCompany = companyName ? validator.trim(companyName).substring(0, 200) : '';
+    const cleanWebsite = website ? validator.trim(website).substring(0, 500) : '';
+    const cleanOwner = ownerName ? validator.trim(ownerName).substring(0, 100) : '';
+    const domain = extractDomain(cleanWebsite);
+    const result = await deepEmailSearch({ companyName: cleanCompany, domain, website: cleanWebsite, ownerName: cleanOwner });
+    try { await db.run('INSERT INTO activity_log (user_id, action, details) VALUES (?, ?, ?)', [req.user.id, 'email_search', JSON.stringify({ company: cleanCompany, domain, found: result.emails.length })]); } catch {}
+    res.json({ ok: true, ...result });
+  } catch (err) {
+    res.status(500).json({ error: 'Erreur lors de la recherche d\'emails.' });
   }
 });
 

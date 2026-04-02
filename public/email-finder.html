@@ -2,291 +2,184 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Email Finder — Empire Leads</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
   --bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;--bg4:#222230;
   --border:#2a2a38;--text:#e0e0f0;--text2:#9090a8;--text3:#5a5a70;
-  --green:#00d084;--green2:#00b873;--red:#ff4444;--yellow:#fbbf24;
-  --radius:14px;--shadow:0 8px 32px rgba(0,0,0,.4);
+  --blue:#3b82f6;--blue2:#60a5fa;--green:#00d084;--red:#ef4444;
+  --accent:#7c3aed;--radius:12px;
 }
 html{font-size:16px}
-body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-
-/* Header */
-.header{background:linear-gradient(180deg,rgba(17,17,24,.98),rgba(10,10,15,.95));
-  border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:16px;
-  position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
-.header-logo{font-size:18px;font-weight:900;letter-spacing:-.5px;
-  background:linear-gradient(135deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap}
-.header-logo em{background:linear-gradient(135deg,var(--green),var(--green2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-style:normal}
-.header-title{flex:1;font-size:17px;font-weight:700;
-  background:linear-gradient(135deg,var(--green),var(--green2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.back-link{font-size:13px;color:var(--text2);text-decoration:none;padding:7px 12px;
-  border:1px solid var(--border);border-radius:8px;white-space:nowrap;transition:all .2s;
-  display:flex;align-items:center;gap:5px}
-.back-link:hover{border-color:var(--green);color:var(--green)}
-
-/* Container */
-.container{max-width:720px;margin:0 auto;padding:30px 20px 60px}
-
-/* Form card */
-.form-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px 24px;margin-bottom:24px}
-.form-card h2{font-size:20px;font-weight:800;margin-bottom:4px;
-  background:linear-gradient(135deg,#fff 30%,var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.form-card .subtitle{font-size:13px;color:var(--text2);margin-bottom:22px}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-.form-group{display:flex;flex-direction:column;gap:5px}
-.form-group.full{grid-column:1/-1}
-.form-group label{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px}
-.form-group input{padding:12px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;
-  color:var(--text);font-size:14px;outline:none;transition:border .2s}
-.form-group input:focus{border-color:var(--green)}
-.form-group input::placeholder{color:var(--text3)}
-.search-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--green),var(--green2));
-  color:#000;font-size:15px;font-weight:700;border:none;border-radius:10px;cursor:pointer;
-  transition:all .2s;margin-top:6px;display:flex;align-items:center;justify-content:center;gap:8px}
-.search-btn:hover{filter:brightness(1.1);transform:scale(1.01)}
-.search-btn:disabled{opacity:.5;cursor:wait;transform:none}
-
-/* Loader */
-.loader{display:none;text-align:center;padding:40px 20px}
-.loader.active{display:block}
-.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--green);
-  border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loader p{font-size:14px;color:var(--text2)}
-
-/* Results */
-.results{display:none}
-.results.active{display:block}
-.results-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
-.results-header h3{font-size:18px;font-weight:700}
-.results-stats{display:flex;gap:12px}
-.stat-pill{font-size:11px;padding:4px 12px;border-radius:20px;background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
-.stat-pill strong{color:var(--green)}
-
-/* Result items */
-.result-item{background:var(--bg2);border:1px solid var(--border);border-radius:12px;
-  padding:16px 18px;margin-bottom:10px;display:flex;align-items:center;gap:14px;
-  transition:all .2s}
-.result-item:hover{border-color:var(--green);background:var(--bg3)}
-.result-email{flex:1;font-size:14px;font-weight:600;color:#fff;word-break:break-all}
-.result-meta{display:flex;align-items:center;gap:10px;flex-shrink:0}
-.confidence-bar{width:60px;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden;position:relative}
-.confidence-fill{height:100%;border-radius:3px;transition:width .5s}
-.confidence-high{background:var(--green)}
-.confidence-mid{background:var(--yellow)}
-.confidence-low{background:var(--red)}
-.confidence-label{font-size:12px;font-weight:700;min-width:32px;text-align:right}
-.source-badge{font-size:10px;padding:3px 8px;border-radius:6px;background:var(--bg4);color:var(--text2);
-  text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
-.copy-btn{padding:6px 12px;background:transparent;border:1px solid var(--border);border-radius:8px;
-  color:var(--text2);font-size:12px;cursor:pointer;transition:all .2s;white-space:nowrap}
-.copy-btn:hover{border-color:var(--green);color:var(--green)}
-.copy-btn.copied{border-color:var(--green);color:var(--green)}
-
-/* Empty state */
-.empty-state{text-align:center;padding:40px 20px;color:var(--text2)}
-.empty-state .icon{font-size:40px;margin-bottom:10px}
-
-/* Error */
-.error-msg{display:none;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.3);
-  border-radius:10px;padding:12px 16px;color:var(--red);font-size:13px;margin-top:10px}
-.error-msg.active{display:block}
-
-/* Footer tip */
-.tip{text-align:center;padding:20px;font-size:12px;color:var(--text3);line-height:1.6}
-.tip strong{color:var(--text2)}
-
-@media(max-width:600px){
-  .form-row{grid-template-columns:1fr}
-  .result-item{flex-wrap:wrap;gap:10px}
-  .result-meta{width:100%;justify-content:space-between}
-}
+body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.header{background:linear-gradient(180deg,rgba(17,17,24,.98),rgba(10,10,15,.95));border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.header-logo{font-size:18px;font-weight:900;letter-spacing:-.5px;background:linear-gradient(135deg,#fff,#aaa);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-logo em{background:linear-gradient(135deg,var(--blue),var(--blue2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-style:normal}
+.header-title{flex:1;font-size:17px;font-weight:700;background:linear-gradient(135deg,var(--blue),var(--blue2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.back-link{font-size:13px;color:var(--text2);text-decoration:none;padding:7px 12px;border:1px solid var(--border);border-radius:8px;transition:all .2s}
+.back-link:hover{color:var(--text);border-color:var(--text3)}
+.container{max-width:900px;margin:0 auto;padding:24px 16px 80px}
+.how-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:24px}
+.how-section h2{font-size:16px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:16px}
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:700px){.steps-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:400px){.steps-grid{grid-template-columns:1fr}}
+.step-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:16px;display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+.step-num{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
+.step-title{font-size:14px;font-weight:600}
+.step-desc{font-size:13px;color:var(--text2);line-height:1.5}
+.search-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin-bottom:24px}
+.search-section h2{font-size:18px;font-weight:700;margin-bottom:6px;background:linear-gradient(135deg,var(--blue),var(--blue2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:inline-block}
+.search-note{font-size:13px;color:var(--text3);margin-bottom:18px}
+.form-row{display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.form-group{display:flex;flex-direction:column;gap:5px;flex:1;min-width:200px}
+.form-label{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.form-input{padding:14px 16px;background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-size:15px;outline:none;transition:border .2s;width:100%}
+.form-input:focus{border-color:var(--blue)}
+.form-input::placeholder{color:var(--text3)}
+.search-btn{width:100%;padding:16px 24px;background:linear-gradient(135deg,var(--blue),var(--blue2));color:#fff;font-size:16px;font-weight:700;border:none;border-radius:10px;cursor:pointer;transition:opacity .2s;box-shadow:0 4px 16px rgba(59,130,246,.3);margin-top:4px}
+.search-btn:hover{opacity:.9}
+.search-btn:disabled{opacity:.5;cursor:not-allowed}
+.progress-wrap{margin-top:16px;display:none}
+.progress-bar{height:4px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--blue2));transition:width .4s ease;border-radius:2px}
+.status-text{font-size:13px;color:var(--text2);margin-top:8px;min-height:20px}
+.results-section{display:none;margin-top:24px}
+.stats-row{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.stat-card{flex:1;min-width:110px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 16px}
+.stat-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.stat-val{font-size:22px;font-weight:700;color:var(--text)}
+.stat-val.blue{color:var(--blue)}
+.email-group{margin-bottom:20px}
+.email-group-title{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.email-group-title .badge{font-size:10px;padding:2px 8px;border-radius:20px;background:var(--bg4);color:var(--text3)}
+.email-card{display:flex;align-items:center;gap:14px;padding:14px 18px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;transition:border-color .2s}
+.email-card:hover{border-color:var(--blue)}
+.email-icon{font-size:20px;flex-shrink:0}
+.email-info{flex:1;min-width:0}
+.email-addr{font-size:15px;font-weight:600;color:var(--blue);word-break:break-all}
+.email-meta{font-size:12px;color:var(--text3);margin-top:2px;display:flex;gap:10px;flex-wrap:wrap}
+.confidence-bar{width:60px;height:5px;background:var(--bg4);border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle}
+.confidence-fill{height:100%;border-radius:3px}
+.confidence-fill.high{background:var(--green)}
+.confidence-fill.med{background:#f59e0b}
+.confidence-fill.low{background:var(--red)}
+.btn-copy{padding:8px 14px;background:var(--bg4);border:1px solid var(--border);color:var(--text);font-size:12px;font-weight:600;border-radius:8px;cursor:pointer;transition:all .2s}
+.btn-copy:hover{border-color:var(--blue);color:var(--blue)}
+.btn-copy.copied{border-color:var(--green);color:var(--green)}
+.patterns-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-top:18px}
+.patterns-section h3{font-size:14px;color:var(--text2);margin-bottom:12px}
+.pattern-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+.pattern-chip{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-size:13px;color:var(--text2);cursor:pointer;transition:all .2s}
+.pattern-chip:hover{border-color:var(--blue);color:var(--blue)}
+.pattern-type{font-size:10px;color:var(--text3);text-transform:uppercase}
+@media(max-width:480px){.container{padding:16px 12px 60px}.email-card{flex-direction:column;align-items:flex-start;gap:8px}}
 </style>
 </head>
 <body>
-
-<div class="header">
-  <div class="header-logo">Empire <em>Leads</em></div>
-  <div class="header-title">Email Finder</div>
-  <a href="/extensions.html" class="back-link">&#8592; Extensions</a>
-</div>
-
+<header class="header">
+  <div class="header-logo">EMPIRE<em>LEADS</em></div>
+  <div class="header-title">@ Email Finder</div>
+  <a class="back-link" href="/app">&#8592; App</a>
+</header>
 <div class="container">
-
-  <!-- Search form -->
-  <div class="form-card">
-    <h2>Trouver des emails</h2>
-    <p class="subtitle">Entre les infos de l'entreprise pour decouvrir les adresses email associees.</p>
-    <form id="search-form" onsubmit="handleSearch(event)">
-      <div class="form-row">
-        <div class="form-group">
-          <label>Nom de l'entreprise</label>
-          <input type="text" id="companyName" placeholder="Ex: Dupont SARL" autocomplete="off">
-        </div>
-        <div class="form-group">
-          <label>Nom du gerant</label>
-          <input type="text" id="ownerName" placeholder="Ex: Jean Dupont" autocomplete="off">
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group full">
-          <label>Site web *</label>
-          <input type="text" id="website" placeholder="Ex: dupont-services.fr" required autocomplete="off">
-        </div>
-      </div>
-      <button type="submit" class="search-btn" id="search-btn">
-        <span>&#128269;</span> Rechercher les emails
-      </button>
-      <div class="error-msg" id="error-msg"></div>
-    </form>
-  </div>
-
-  <!-- Loader -->
-  <div class="loader" id="loader">
-    <div class="spinner"></div>
-    <p>Analyse du site web en cours...</p>
-    <p style="font-size:12px;color:var(--text3);margin-top:6px">Scraping des pages, generation de patterns, calcul des scores...</p>
-  </div>
-
-  <!-- Results -->
-  <div class="results" id="results">
-    <div class="results-header">
-      <h3>Resultats</h3>
-      <div class="results-stats" id="results-stats"></div>
+  <div class="how-section">
+    <h2>Comment ca marche</h2>
+    <div class="steps-grid">
+      <div class="step-card"><div class="step-num">1</div><div class="step-title">Entrez l'entreprise</div><div class="step-desc">Nom et/ou site web.</div></div>
+      <div class="step-card"><div class="step-num">2</div><div class="step-title">Scan automatique</div><div class="step-desc">Scraping du site, Hunter.io, patterns.</div></div>
+      <div class="step-card"><div class="step-num">3</div><div class="step-title">Analyse</div><div class="step-desc">Emails classes par fiabilite.</div></div>
+      <div class="step-card"><div class="step-num">4</div><div class="step-title">Resultats</div><div class="step-desc">Copiez les emails trouves.</div></div>
     </div>
-    <div id="results-list"></div>
   </div>
-
-  <!-- Tip -->
-  <div class="tip">
-    <strong>Astuce :</strong> Plus tu fournis d'infos (nom du gerant + site web), plus les resultats seront precis.<br>
-    Les emails avec un score &gt; 80% sont generalement fiables.
+  <div class="search-section">
+    <h2>Trouver les emails</h2>
+    <p class="search-note">Remplissez au moins un champ.</p>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Nom de l'entreprise</label><input class="form-input" id="inp-company" type="text" placeholder="Ex: Boulangerie Martin" autocomplete="off"></div>
+      <div class="form-group"><label class="form-label">Site web</label><input class="form-input" id="inp-website" type="text" placeholder="Ex: boulangerie-martin.fr" autocomplete="off"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Nom du dirigeant (optionnel)</label><input class="form-input" id="inp-owner" type="text" placeholder="Ex: Jean Martin" autocomplete="off"></div>
+    </div>
+    <button class="search-btn" id="btn-search" onclick="launchSearch()">@ Rechercher les emails</button>
+    <div class="progress-wrap" id="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="status-text" id="status-text">Analyse en cours...</div>
+    </div>
   </div>
-
+  <div class="results-section" id="results-section">
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Emails trouves</div><div class="stat-val blue" id="stat-found">0</div></div>
+      <div class="stat-card"><div class="stat-label">Sources</div><div class="stat-val" id="stat-sources">0</div></div>
+      <div class="stat-card"><div class="stat-label">Domaine</div><div class="stat-val" id="stat-domain" style="font-size:14px;word-break:break-all">—</div></div>
+    </div>
+    <div class="email-group" id="emails-found" style="display:none">
+      <div class="email-group-title">Emails trouves <span class="badge" id="badge-found">0</span></div>
+      <div id="emails-list"></div>
+    </div>
+    <div class="patterns-section" id="patterns-section" style="display:none">
+      <h3>Suggestions de patterns (non verifies)</h3>
+      <div class="pattern-grid" id="patterns-grid"></div>
+    </div>
+  </div>
 </div>
-
 <script>
-var token = localStorage.getItem('ph_token') || localStorage.getItem('token') || sessionStorage.getItem('token') || '';
-
-async function handleSearch(e) {
-  e.preventDefault();
-  var website = document.getElementById('website').value.trim();
-  var companyName = document.getElementById('companyName').value.trim();
-  var ownerName = document.getElementById('ownerName').value.trim();
-  var errorEl = document.getElementById('error-msg');
-  var loader = document.getElementById('loader');
-  var results = document.getElementById('results');
-  var btn = document.getElementById('search-btn');
-
-  errorEl.className = 'error-msg';
-  errorEl.textContent = '';
-  results.className = 'results';
-
-  if (!website) {
-    errorEl.textContent = 'Le site web est requis.';
-    errorEl.className = 'error-msg active';
-    return;
-  }
-
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner" style="width:18px;height:18px;border-width:2px;margin:0"></span> Recherche...';
-  loader.className = 'loader active';
-
-  try {
-    var res = await fetch('/api/prospects/email-finder/search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ companyName: companyName, website: website, ownerName: ownerName })
-    });
-
-    var data = await res.json();
-    loader.className = 'loader';
-
-    if (!res.ok) {
-      errorEl.textContent = data.error || 'Erreur lors de la recherche.';
-      errorEl.className = 'error-msg active';
-      btn.disabled = false;
-      btn.innerHTML = '<span>&#128269;</span> Rechercher les emails';
-      return;
-    }
-
+var TOKEN = localStorage.getItem('token');
+if (!TOKEN) window.location.href = '/login';
+var AUTH = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN };
+function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function launchSearch() {
+  var company = document.getElementById('inp-company').value.trim();
+  var website = document.getElementById('inp-website').value.trim();
+  var owner = document.getElementById('inp-owner').value.trim();
+  if (!company && !website) { alert('Remplissez au moins le nom ou le site web.'); return; }
+  var btn = document.getElementById('btn-search');
+  var progress = document.getElementById('progress-wrap');
+  var fill = document.getElementById('progress-fill');
+  var status = document.getElementById('status-text');
+  btn.disabled = true; btn.textContent = '@ Recherche en cours...';
+  progress.style.display = 'block'; fill.style.width = '0%';
+  var steps = [{p:20,t:'Verification du domaine...'},{p:40,t:'Scan du site web...'},{p:60,t:'Recherche en cours...'},{p:80,t:'Analyse des resultats...'}];
+  var si = 0;
+  var iv = setInterval(function(){ if(si<steps.length){fill.style.width=steps[si].p+'%';status.textContent=steps[si].t;si++;} },800);
+  fetch('/api/prospects/email-finder/search', { method:'POST', headers:AUTH, body:JSON.stringify({companyName:company,website:website,ownerName:owner}) })
+  .then(function(r){ return r.json(); })
+  .then(function(data){
+    clearInterval(iv); fill.style.width='100%'; status.textContent='Termine !';
+    if(data.error && !data.ok){ alert(data.error); return; }
     renderResults(data);
-  } catch (err) {
-    loader.className = 'loader';
-    errorEl.textContent = 'Erreur reseau. Verifie ta connexion.';
-    errorEl.className = 'error-msg active';
-  }
-
-  btn.disabled = false;
-  btn.innerHTML = '<span>&#128269;</span> Rechercher les emails';
+  })
+  .catch(function(){ clearInterval(iv); alert('Erreur reseau.'); })
+  .finally(function(){ btn.disabled=false; btn.textContent='@ Rechercher les emails'; setTimeout(function(){progress.style.display='none';},1500); });
 }
-
 function renderResults(data) {
-  var results = document.getElementById('results');
-  var list = document.getElementById('results-list');
-  var stats = document.getElementById('results-stats');
-
-  results.className = 'results active';
-  list.innerHTML = '';
-
-  // Stats
-  stats.innerHTML =
-    '<span class="stat-pill">Domaine: <strong>' + (data.domain || '?') + '</strong></span>' +
-    '<span class="stat-pill">Scraping: <strong>' + (data.scrapedCount || 0) + '</strong></span>' +
-    '<span class="stat-pill">Patterns: <strong>' + (data.patternsCount || 0) + '</strong></span>' +
-    (data.hunterCount ? '<span class="stat-pill">Hunter: <strong>' + data.hunterCount + '</strong></span>' : '');
-
-  if (!data.results || data.results.length === 0) {
-    list.innerHTML = '<div class="empty-state"><div class="icon">&#128533;</div><p>Aucun email trouve. Essaie avec un autre site web.</p></div>';
-    return;
-  }
-
-  for (var i = 0; i < data.results.length; i++) {
-    var r = data.results[i];
-    var conf = r.confidence || 0;
-    var confClass = conf >= 75 ? 'confidence-high' : conf >= 45 ? 'confidence-mid' : 'confidence-low';
-    var confColor = conf >= 75 ? 'var(--green)' : conf >= 45 ? 'var(--yellow)' : 'var(--red)';
-
-    var item = document.createElement('div');
-    item.className = 'result-item';
-    item.innerHTML =
-      '<div class="result-email">' + escHtml(r.email) + '</div>' +
-      '<div class="result-meta">' +
-        '<span class="source-badge">' + escHtml(r.source || 'pattern') + '</span>' +
-        '<div class="confidence-bar"><div class="confidence-fill ' + confClass + '" style="width:' + conf + '%"></div></div>' +
-        '<span class="confidence-label" style="color:' + confColor + '">' + conf + '%</span>' +
-        '<button class="copy-btn" onclick="copyEmail(this,\'' + escAttr(r.email) + '\')">Copier</button>' +
-      '</div>';
-    list.appendChild(item);
-  }
+  var section = document.getElementById('results-section'); section.style.display = 'block';
+  document.getElementById('stat-found').textContent = (data.emails||[]).length;
+  document.getElementById('stat-sources').textContent = (data.sources||[]).length;
+  document.getElementById('stat-domain').textContent = data.domain || '—';
+  var eg = document.getElementById('emails-found'), el = document.getElementById('emails-list'), emails = data.emails||[];
+  if (emails.length > 0) {
+    eg.style.display = 'block'; document.getElementById('badge-found').textContent = emails.length;
+    el.innerHTML = emails.map(function(e){
+      var cc = e.confidence>=60?'high':e.confidence>=35?'med':'low';
+      var sl = {hunter:'Hunter.io',scraping:'Site web',google:'Google'}[e.source]||e.source;
+      return '<div class="email-card"><div class="email-icon">&#x1F4E7;</div><div class="email-info"><div class="email-addr">'+esc(e.email)+'</div><div class="email-meta"><span>Source: '+esc(sl)+'</span><span>Fiabilite: <span class="confidence-bar"><span class="confidence-fill '+cc+'" style="width:'+e.confidence+'%"></span></span> '+e.confidence+'%</span></div></div><div><button class="btn-copy" onclick="copyEmail(this,\''+esc(e.email)+'\')">Copier</button></div></div>';
+    }).join('');
+  } else { eg.style.display='none'; }
+  var ps = document.getElementById('patterns-section'), pg = document.getElementById('patterns-grid'), patterns = data.patterns||[];
+  if (patterns.length > 0) {
+    ps.style.display='block';
+    pg.innerHTML = patterns.slice(0,12).map(function(p){ var lb=p.type==='personal'?'Personnel':'Generique'; return '<div class="pattern-chip" onclick="copyEmail(this,\''+esc(p.email)+'\')"><span>'+esc(p.email)+'</span><span class="pattern-type">'+lb+'</span></div>'; }).join('');
+  } else { ps.style.display='none'; }
+  section.scrollIntoView({behavior:'smooth',block:'start'});
 }
-
 function copyEmail(btn, email) {
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(email);
-  } else {
-    var ta = document.createElement('textarea');
-    ta.value = email;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-  }
-  btn.textContent = 'Copie !';
-  btn.className = 'copy-btn copied';
-  setTimeout(function() { btn.textContent = 'Copier'; btn.className = 'copy-btn'; }, 1500);
+  if(navigator.clipboard){navigator.clipboard.writeText(email).then(function(){btn.textContent='Copie !';btn.classList.add('copied');setTimeout(function(){btn.textContent='Copier';btn.classList.remove('copied');},2000);});}
 }
-
-function escHtml(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-function escAttr(s) { return s.replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
-
-// Redirect if not logged in
-if (!token) { window.location.href = '/login'; }
+document.querySelectorAll('.form-input').forEach(function(inp){inp.addEventListener('keydown',function(e){if(e.key==='Enter')launchSearch();});});
 </script>
 </body>
 </html>
