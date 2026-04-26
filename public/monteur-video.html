@@ -6,7 +6,7 @@
 <title>Trouver des Monteurs Vidéo — Artiom</title>
 <script>
 (function(){
-  var token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  var token = localStorage.getItem('ph_token') || localStorage.getItem('token') || sessionStorage.getItem('token');
   if (!token) { window.location.href = '/login'; }
 })();
 </script>

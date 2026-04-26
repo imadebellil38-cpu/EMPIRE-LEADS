@@ -1,10 +1,38 @@
+# Empire Leads - robots.txt
+# https://empire-leads.fr
+
 User-agent: *
 Allow: /
-Allow: /landing
-Allow: /pricing
-Allow: /login
 Disallow: /api/
 Disallow: /admin
 Disallow: /app
+Disallow: /login
+Disallow: /*.json$
+Disallow: /extensions/
+Disallow: /internal/
 
-Sitemap: https://empireleads.fr/sitemap.xml
+# Bloquer les crawlers agressifs / aspirateurs de contenu
+User-agent: AhrefsBot
+Crawl-delay: 10
+
+User-agent: SemrushBot
+Crawl-delay: 10
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+# Google / Bing / DuckDuckGo : tout est OK
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+Sitemap: https://empire-leads.fr/sitemap.xml
+Host: https://empire-leads.fr

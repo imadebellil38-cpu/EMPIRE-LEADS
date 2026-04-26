@@ -213,12 +213,12 @@
   <div class="login-box">
     <div class="logo">
       <h1 style="font-size:2rem;font-weight:900;letter-spacing:1px;font-family:'Arial Black',sans-serif;text-transform:uppercase;color:var(--text1)">EMPIRE<span style="color:var(--accent)">LEADS</span></h1>
-      <p>Ton empire commence ici 👑</p>
+      <p>La prospection B2B, simplifiée.</p>
     </div>
 
     <div class="tabs">
-      <button class="tab on" onclick="showTab('login')">J'ai un compte 😎</button>
-      <button class="tab" onclick="showTab('register')">Je veux ma place 🔥</button>
+      <button class="tab on" onclick="showTab('login')">Connexion</button>
+      <button class="tab" onclick="showTab('register')">Créer un compte</button>
     </div>
 
     <div id="error" class="error"></div>
@@ -233,7 +233,7 @@
         <label>Mot de passe</label>
         <input class="inp" type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
       </div>
-      <button class="btn" id="btn-login" onclick="doLogin()">Let's go 🚀</button>
+      <button class="btn" id="btn-login" onclick="doLogin()">Se connecter</button>
     </div>
 
     <div id="form-register" class="form">
@@ -249,10 +249,23 @@
         <label>Confirmer</label>
         <input class="inp" type="password" id="reg-pass2" placeholder="Le même, confirme bb" autocomplete="new-password">
       </div>
-      <button class="btn" id="btn-register" onclick="doRegister()">Créer mon empire 👑</button>
+      <button class="btn" id="btn-register" onclick="doRegister()">Créer mon compte</button>
     </div>
 
-    <div class="login-footer">
+    <!-- Google Sign-In -->
+    <div id="google-signin-wrap" style="display:none;margin-top:1rem;text-align:center">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="flex:1;height:1px;background:rgba(255,255,255,.1)"></div>
+        <span style="font-size:.75rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.05em">ou</span>
+        <div style="flex:1;height:1px;background:rgba(255,255,255,.1)"></div>
+      </div>
+      <button id="btn-google" onclick="doGoogleLogin()" style="width:100%;padding:12px 20px;background:#fff;border:none;border-radius:10px;font-size:.9rem;font-weight:700;color:#333;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:box-shadow .2s">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#34A853" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#FBBC05" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Continuer avec Google
+      </button>
+    </div>
+
+    <div class="login-footer" id="login-footer">
       <a href="/">← Retour à l'accueil</a>
     </div>
   </div>
@@ -305,6 +318,18 @@ const refCode = urlParams.get('ref');
 if (urlParams.get('tab') === 'register') setTimeout(() => showTab('register'), 50);
 if (refCode) setTimeout(() => { showTab('register'); showSuccess('Ton pote t\'a invité ! +5 crédits gratuits 🎁'); }, 100);
 
+// ── DEMO MODE: hide "Retour à l'accueil" for mockup/beta links ──
+// Uses sessionStorage (tab-scoped) so it doesn't pollute the normal site
+// Cleanup old localStorage key if it exists (legacy)
+try { localStorage.removeItem('ph_demo'); } catch(e) {}
+if (urlParams.has('demo')) {
+  sessionStorage.setItem('ph_demo', '1');
+}
+if (sessionStorage.getItem('ph_demo') === '1') {
+  const footer = document.getElementById('login-footer');
+  if (footer) footer.style.display = 'none';
+}
+
 function showTab(tab) {
   document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('on', i === (tab === 'login' ? 0 : 1)));
   document.getElementById('form-login').classList.toggle('on', tab === 'login');
@@ -328,10 +353,10 @@ async function doLogin() {
     if (!res.ok) return showError(data.error || 'Email ou mot de passe incorrect.');
     localStorage.setItem('ph_token', data.token);
     localStorage.setItem('ph_user', JSON.stringify(data.user));
-    btn.textContent = '✅ Connexion réussie !';
+    btn.textContent = 'Connexion réussie';
     setTimeout(() => window.location.href = '/app', 400);
   } catch { showError('Pas de connexion. Vérifie ton réseau 📡'); }
-  finally { btn.disabled = false; if (btn.textContent === 'Connexion...') btn.textContent = 'Let\'s go 🚀'; }
+  finally { btn.disabled = false; if (btn.textContent === 'Connexion...') btn.textContent = 'Se connecter'; }
 }
 
 async function doRegister() {
@@ -350,9 +375,9 @@ async function doRegister() {
     if (!res.ok) return showError(data.error || 'Erreur lors de l\'inscription.');
     localStorage.setItem('ph_token', data.token);
     localStorage.setItem('ph_user', JSON.stringify(data.user));
-    btn.textContent = '👑 Bienvenue boss !';
+    btn.textContent = 'Bienvenue !';
     setTimeout(() => window.location.href = '/app', 500);
-  } catch { showError('Pas de réseau 📡'); }
+  } catch { showError('Problème de connexion réseau.'); }
   finally { btn.disabled = false; }
 }
 
@@ -362,6 +387,68 @@ document.addEventListener('keydown', e => {
     else doRegister();
   }
 });
+
+// ── GOOGLE SIGN-IN (standard OAuth 2.0 redirect — no GSI library needed) ──
+var _googleClientId = '';
+(function() {
+  // Handle Google redirect callback (token in URL params after successful login)
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('google_token')) {
+    localStorage.setItem('ph_token', params.get('google_token'));
+    var userData = decodeURIComponent(params.get('google_user') || '{}');
+    localStorage.setItem('ph_user', userData);
+    var isNew = params.get('new') === '1';
+    var userName = '';
+    try { userName = JSON.parse(userData).display_name || ''; } catch(e) {}
+    var firstName = userName.split(' ')[0] || '';
+    // Show welcome message
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:99999;flex-direction:column;gap:16px';
+    overlay.innerHTML = isNew
+      ? '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg><div style="font-size:28px;font-weight:800;color:#fff">Bienvenue' + (firstName ? ', ' + firstName : '') + '</div><div style="font-size:15px;color:#aaa">Votre espace Empire Leads est prêt.</div>'
+      : '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><div style="font-size:28px;font-weight:800;color:#fff">Connexion réussie</div><div style="font-size:15px;color:#aaa">' + (firstName || 'Content de vous revoir') + '</div>';
+    document.body.appendChild(overlay);
+    setTimeout(function() { window.location.href = '/app'; }, isNew ? 2500 : 1500);
+    return;
+  }
+  if (params.get('error')) {
+    var errMap = { google_missing: 'Code Google manquant.', google_disabled: 'Google Sign-In non configure.', google_invalid: 'Token Google invalide.', google_fail: 'Erreur connexion Google.', disabled: 'Compte desactive.', google_token_fail: 'Echange token echoue: ' + (params.get('detail') || ''), google_no_token: 'Google n\'a pas renvoye de token.', google_bad_jwt: 'JWT Google invalide.', google_no_email: 'Pas d\'email dans le compte Google.' };
+    showError(errMap[params.get('error')] || 'Erreur Google.');
+  }
+  // Check if Google OAuth is enabled
+  fetch('/api/auth/google-enabled').then(r => r.json()).then(d => {
+    if (!d.enabled) return;
+    _googleClientId = d.clientId;
+    var wrap = document.getElementById('google-signin-wrap');
+    if (wrap) wrap.style.display = '';
+  }).catch(function(){});
+})();
+
+function doGoogleLogin() {
+  if (!_googleClientId) return showError('Google Sign-In non configure.');
+  var redirectUri = encodeURIComponent(window.location.origin + '/api/auth/google/redirect');
+  window.location.href = 'https://accounts.google.com/o/oauth2/v2/auth?client_id=' + encodeURIComponent(_googleClientId) + '&redirect_uri=' + redirectUri + '&response_type=code&scope=openid%20email%20profile&prompt=select_account';
+}
+
+async function handleGoogleResponse(response) {
+  if (!response.credential) return showError('Erreur Google Sign-In.');
+  var btn = document.getElementById('btn-google');
+  if (btn) { btn.disabled = true; btn.textContent = 'Connexion...'; }
+  try {
+    var res = await fetch('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential: response.credential })
+    });
+    var data = await res.json();
+    if (!res.ok) { showError(data.error || 'Erreur connexion Google.'); return; }
+    localStorage.setItem('ph_token', data.token);
+    localStorage.setItem('ph_user', JSON.stringify(data.user));
+    if (btn) btn.textContent = 'Connecté';
+    setTimeout(function() { window.location.href = '/app'; }, 400);
+  } catch { showError('Erreur reseau.'); }
+  finally { if (btn) { btn.disabled = false; } }
+}
 </script>
 </body>
 </html>

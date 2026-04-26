@@ -16,7 +16,9 @@ input:focus{border-color:#E1306C}
 input::placeholder{color:#5a5a70;letter-spacing:0}
 button{width:100%;padding:14px;background:linear-gradient(135deg,#E1306C,#F77737);color:#fff;font-size:15px;font-weight:700;border:none;border-radius:10px;cursor:pointer;transition:opacity .2s}
 button:hover{opacity:.9}
+button:disabled{opacity:.5;cursor:wait}
 .error{font-size:13px;color:#ff4444;margin-top:10px;display:none}
+.success{font-size:13px;color:#22c55e;margin-top:10px;display:none}
 .back{margin-top:20px;font-size:13px;color:#5a5a70}
 .back a{color:#9090a8;text-decoration:none}
 .back a:hover{color:#E1306C}
@@ -28,30 +30,57 @@ button:hover{opacity:.9}
   <h1>Accès restreint</h1>
   <p>Cette extension est réservée. Entre ton code d'accès pour continuer.</p>
   <input type="text" id="key-input" placeholder="Code d'accès" autocomplete="off" spellcheck="false">
-  <button onclick="submitKey()">Accéder à l'extension</button>
+  <button id="submit-btn" onclick="submitKey()">Accéder à l'extension</button>
   <div class="error" id="error-msg">Code incorrect. Contacte l'administrateur.</div>
+  <div class="success" id="success-msg">Code accepté ! Redirection...</div>
   <div class="back"><a href="/app">← Retour à l'app</a></div>
 </div>
 <script>
-// Vérif JWT
-var token = localStorage.getItem('token') || sessionStorage.getItem('token');
-if (!token) window.location.href = '/login';
+var token = localStorage.getItem('ph_token') || localStorage.getItem('token') || sessionStorage.getItem('token') || '';
+
+// Detect which extension from the current URL path or referrer
+var extensionPath = '/monteur-video';
+var ref = document.referrer || '';
+if (ref.includes('/monteur-video')) extensionPath = '/monteur-video';
+// Future: add more extensions here
 
 function submitKey() {
   var key = document.getElementById('key-input').value.trim();
   if (!key) return;
-  var token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
-  window.location.href = '/monteur-video?key=' + encodeURIComponent(key) + '&token=' + encodeURIComponent(token);
+  var btn = document.getElementById('submit-btn');
+  var errEl = document.getElementById('error-msg');
+  var successEl = document.getElementById('success-msg');
+  errEl.style.display = 'none';
+  btn.disabled = true;
+  btn.textContent = 'Vérification...';
+
+  // Verify key via API first
+  fetch('/api/verify-extension-key', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ key: key, extension: extensionPath })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.granted) {
+      successEl.style.display = 'block';
+      btn.textContent = 'Redirection...';
+      window.location.href = extensionPath + '?key=' + encodeURIComponent(key) + '&token=' + encodeURIComponent(token);
+    } else {
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Accéder à l\'extension';
+    }
+  })
+  .catch(function() {
+    // Fallback: redirect directly
+    window.location.href = extensionPath + '?key=' + encodeURIComponent(key) + '&token=' + encodeURIComponent(token);
+  });
 }
+
 document.getElementById('key-input').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') submitKey();
 });
-
-// Vérifier si on vient d'une tentative échouée (présence du param key dans l'URL précédente)
-var ref = document.referrer;
-if (ref && ref.includes('/monteur-video') && ref.includes('key=')) {
-  document.getElementById('error-msg').style.display = 'block';
-}
 </script>
 </body>
 </html>

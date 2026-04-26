@@ -17,6 +17,24 @@ function createToken(user) {
   );
 }
 
+// In-memory throttle for last_activity_at updates (fires at most once per 5 min per user)
+const _lastActivityTouched = new Map();
+async function touchLastActivity(userId) {
+  const now = Date.now();
+  const last = _lastActivityTouched.get(userId) || 0;
+  if (now - last < 5 * 60 * 1000) return; // throttle 5 min
+  _lastActivityTouched.set(userId, now);
+  try {
+    const db = require('./db');
+    await db.run('UPDATE users SET last_activity_at = ? WHERE id = ?', [new Date().toISOString(), userId]);
+  } catch (_) {}
+  // Prune old entries periodically to avoid memory leak
+  if (_lastActivityTouched.size > 5000) {
+    const cutoff = now - 30 * 60 * 1000;
+    for (const [k, v] of _lastActivityTouched) if (v < cutoff) _lastActivityTouched.delete(k);
+  }
+}
+
 // Middleware: require auth
 function requireAuth(req, res, next) {
   const header = req.headers.authorization;
@@ -26,6 +44,8 @@ function requireAuth(req, res, next) {
   try {
     const decoded = jwt.verify(header.slice(7), JWT_SECRET);
     req.user = decoded;
+    // Fire-and-forget update of last_activity_at (throttled)
+    if (decoded.id) touchLastActivity(decoded.id);
     next();
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
@@ -59,4 +79,4 @@ async function requireAdminFromDB(req, res, next) {
   }
 }
 
-module.exports = { createToken, requireAuth, requireAdmin, requireAdminFromDB };
+module.exports = { createToken, requireAuth, requireAdmin, requireAdminFromDB, touchLastActivity };

@@ -1,0 +1,3460 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Luxury Brands Digital — Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #000000;
+  --bg2: #050505;
+  --bg3: #0c0c0c;
+  --card: #0e0e0e;
+  --card-h: #161616;
+  --border: rgba(255,255,255,0.08);
+  --border-b: rgba(255,255,255,0.18);
+  --orange: #ffffff;
+  --orange-l: #f4f4f4;
+  --gold: #ffffff;
+  --text: #ffffff;
+  --muted: #8a8a8a;
+  --muted2: #555555;
+  --biotech: #ffffff;
+  --medtech: #d0d0d0;
+  --agritech: #b0b0b0;
+  --deeptech: #ffffff;
+  --silvertech: #c0c0c0;
+  --green: #ffffff;
+  --red: #ff4444;
+  --blue: #ffffff;
+  --st-todo: #8a8a8a;
+  --st-contacte: #ffffff;
+  --st-rdv: #ffffff;
+  --st-closed: #ffffff;
+  --st-refused: #ff4444;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at top left, rgba(255,255,255,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(255,255,255,0.03) 0%, transparent 50%);
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== TOP HEADER ===== */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(7,7,15,0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand-logo {
+  width: 42px; height: 42px;
+  border-radius: 2px;
+  background:
+    repeating-linear-gradient(45deg, #fff 0 3px, #000 3px 6px),
+    repeating-linear-gradient(-45deg, #fff 0 3px, #000 3px 6px);
+  background-blend-mode: difference;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.brand-name {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.brand-name .grad {
+  color: #ffffff;
+}
+.brand-sub {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px;
+  color: var(--muted);
+  font-weight: 400;
+  letter-spacing: 0.32em;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+.topnav {
+  display: flex; gap: 4px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  padding: 4px;
+  border-radius: 12px;
+}
+.tab {
+  padding: 9px 18px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.tab:hover { color: var(--text); }
+.tab.active {
+  background: #ffffff;
+  color: #000000;
+}
+.tab .badge-num {
+  background: rgba(255,255,255,0.18);
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.user-pill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px 7px 7px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+.user-pill .av {
+  width: 28px; height: 28px;
+  border-radius: 2px;
+  background: #ffffff;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px; font-weight: 700; color: #000;
+  letter-spacing: 0.05em;
+}
+.user-pill .info { font-size: 11px; line-height: 1.2; font-family: 'Montserrat', sans-serif; }
+.user-pill .info .n { font-weight: 600; color: var(--text); letter-spacing: 0.08em; text-transform: uppercase; font-size: 10px; }
+.user-pill .info .p { color: var(--muted); font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.18em; margin-top: 2px; }
+
+/* ===== STATS STRIP ===== */
+.stats-strip {
+  max-width: 1600px;
+  margin: 24px auto 0;
+  padding: 0 28px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+  gap: 12px;
+}
+.s-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+.s-card:hover { border-color: var(--border-b); transform: translateY(-2px); }
+.s-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--orange);
+  opacity: 0.5;
+}
+.s-card.green::before { background: var(--green); }
+.s-card.blue::before { background: var(--blue); }
+.s-card.orange::before { background: var(--orange); }
+.s-card.purple::before { background: var(--deeptech); }
+.s-card.pink::before { background: var(--silvertech); }
+.s-num {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1;
+}
+.s-card.green .s-num { color: var(--green); }
+.s-card.blue .s-num { color: var(--blue); }
+.s-card.orange .s-num { color: var(--orange); }
+.s-card.purple .s-num { color: var(--deeptech); }
+.s-card.pink .s-num { color: var(--silvertech); }
+.s-lab {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+/* ===== MAIN LAYOUT ===== */
+.main {
+  max-width: 1600px;
+  margin: 22px auto 80px;
+  padding: 0 28px;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 22px;
+  align-items: start;
+}
+.sidebar {
+  position: sticky;
+  top: 90px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+}
+.s-title {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+  padding: 0 4px;
+}
+.s-title:not(:first-child) { margin-top: 18px; }
+.s-row { display: flex; flex-direction: column; gap: 4px; }
+.s-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+  font-family: inherit;
+}
+.s-btn:hover { background: var(--bg3); color: var(--text); border-color: var(--border); }
+.s-btn.active {
+  background: linear-gradient(135deg, rgba(255,255,255,0.10), rgba(255,255,255,0.06));
+  color: var(--orange);
+  border-color: rgba(255,255,255,0.25);
+  font-weight: 700;
+}
+.s-btn .ct {
+  background: rgba(255,255,255,0.06);
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+}
+.s-btn.active .ct { background: rgba(255,255,255,0.12); color: var(--orange); }
+.s-btn .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.s-btn.b-biotech.active { background: rgba(255,255,255,0.10); color: var(--biotech); border-color: rgba(255,255,255,0.10); }
+.s-btn.b-medtech.active { background: rgba(255,255,255,0.10); color: var(--medtech); border-color: rgba(255,255,255,0.10); }
+.s-btn.b-agritech.active { background: rgba(255,255,255,0.10); color: var(--agritech); border-color: rgba(255,255,255,0.10); }
+.s-btn.b-deeptech.active { background: rgba(255,255,255,0.10); color: var(--deeptech); border-color: rgba(255,255,255,0.10); }
+.s-btn.b-silvertech.active { background: rgba(255,255,255,0.10); color: var(--silvertech); border-color: rgba(255,255,255,0.10); }
+
+.s-search {
+  display: flex;
+  align-items: center;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 0 12px;
+}
+.s-search input {
+  flex: 1;
+  padding: 9px 6px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 12px;
+  font-family: inherit;
+}
+.s-search input::placeholder { color: var(--muted2); }
+.s-icon { color: var(--muted); font-size: 13px; }
+
+/* ===== CONTENT AREA ===== */
+.content { min-width: 0; }
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.tb-info { display: flex; align-items: center; gap: 14px; }
+.tb-info .ct {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--orange);
+}
+.tb-info .lab { font-size: 12px; color: var(--muted); }
+.tb-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+  padding: 9px 14px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn:hover { background: var(--card-h); color: var(--text); border-color: var(--border-b); }
+.btn.primary {
+  background: #ffffff;
+  border-color: var(--orange);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(255,255,255,0.20);
+}
+.btn.primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(255,255,255,0.30); }
+.btn.lock::after {
+  content: '🔒';
+  font-size: 10px;
+  margin-left: 2px;
+}
+
+/* ===== GRID ===== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 14px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.2s;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--orange);
+}
+.card.s-biotech::before { background: var(--biotech); }
+.card.s-medtech::before { background: var(--medtech); }
+.card.s-agritech::before { background: var(--agritech); }
+.card.s-deeptech::before { background: var(--deeptech); }
+.card.s-silvertech::before { background: var(--silvertech); }
+.card:hover {
+  border-color: var(--border-b);
+  background: var(--card-h);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 36px rgba(0,0,0,0.45);
+}
+.card.fav::after {
+  content: '⭐';
+  position: absolute;
+  top: 14px; right: 14px;
+  font-size: 16px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  z-index: 2;
+}
+
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.av-circle {
+  width: 46px; height: 46px;
+  border-radius: 12px;
+  background: #ffffff;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 18px; font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.3);
+}
+.card.s-biotech .av-circle { background: #ffffff; box-shadow: 0 6px 14px rgba(255,255,255,0.10); }
+.card.s-medtech .av-circle { background: #ffffff; box-shadow: 0 6px 14px rgba(255,255,255,0.10); }
+.card.s-agritech .av-circle { background: #ffffff; box-shadow: 0 6px 14px rgba(255,255,255,0.10); }
+.card.s-deeptech .av-circle { background: #ffffff; box-shadow: 0 6px 14px rgba(255,255,255,0.10); }
+.card.s-silvertech .av-circle { background: #ffffff; box-shadow: 0 6px 14px rgba(255,255,255,0.10); }
+
+.card-info { flex: 1; min-width: 0; padding-right: 22px; }
+.card-name {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.card-meta-line {
+  font-size: 11px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.card-meta-line .flag { font-size: 13px; }
+
+.card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+.b {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.b-biotech { background: rgba(255,255,255,0.10); color: var(--biotech); }
+.b-medtech { background: rgba(255,255,255,0.10); color: var(--medtech); }
+.b-agritech { background: rgba(255,255,255,0.10); color: var(--agritech); }
+.b-deeptech { background: rgba(255,255,255,0.10); color: var(--deeptech); }
+.b-silvertech { background: rgba(255,255,255,0.10); color: var(--silvertech); }
+.b-site { background: rgba(255,255,255,0.10); color: var(--green); }
+.b-nosite { background: rgba(255,68,68,0.15); color: var(--red); }
+.b-eff { background: rgba(255,255,255,0.05); color: var(--muted); }
+
+.card-dirig {
+  font-size: 12px;
+  color: var(--text);
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+.card-dirig .role { color: var(--muted); font-weight: 500; font-size: 11px; }
+.card-dirig .empty { color: var(--muted2); font-style: italic; font-weight: 400; }
+
+.card-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 12px 0 10px;
+}
+.act {
+  padding: 8px 6px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-family: inherit;
+}
+.act:hover { background: rgba(255,255,255,0.07); border-color: var(--border-b); color: var(--text); transform: translateY(-1px); }
+.act.web { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.20); color: var(--orange); }
+.act.tel { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.10); color: var(--green); }
+.act.linkedin { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.10); color: #ffffff; }
+.act.maps { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.10); color: #ffffff; }
+.act.mail { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.05); color: var(--gold); position: relative; }
+.act.note { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.10); color: var(--deeptech); }
+.act.disabled { opacity: 0.45; cursor: not-allowed; }
+.act.locked { position: relative; }
+.act.locked::after {
+  content: '🔒';
+  position: absolute;
+  top: -2px;
+  right: 2px;
+  font-size: 8px;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+}
+.status-row .lab {
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 4px;
+}
+.status-pill {
+  padding: 5px 10px;
+  border-radius: 7px;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: rgba(255,255,255,0.04);
+  color: var(--muted);
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.status-pill:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+.status-pill.active { box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
+.status-pill.active.todo { background: rgba(135,136,168,0.20); color: var(--st-todo); border-color: var(--st-todo); }
+.status-pill.active.contacte { background: rgba(255,160,66,0.20); color: var(--st-contacte); border-color: var(--st-contacte); }
+.status-pill.active.rdv { background: rgba(255,255,255,0.10); color: var(--st-rdv); border-color: var(--st-rdv); }
+.status-pill.active.closed { background: rgba(255,255,255,0.10); color: var(--st-closed); border-color: var(--st-closed); }
+.status-pill.active.refused { background: rgba(255,68,68,0.20); color: var(--st-refused); border-color: var(--st-refused); }
+
+.fav-btn {
+  position: absolute;
+  top: 12px; right: 12px;
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  transition: all 0.15s;
+}
+.fav-btn:hover { background: rgba(255,255,255,0.05); color: var(--gold); border-color: rgba(255,215,0,0.4); }
+.fav-btn.on { background: rgba(255,215,0,0.20); color: var(--gold); border-color: rgba(255,215,0,0.5); }
+
+/* ===== KANBAN ===== */
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(240px, 1fr));
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 18px;
+}
+.kcol {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 12px;
+  min-height: 600px;
+}
+.kcol h3 {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+}
+.kcol h3 .num {
+  background: rgba(255,255,255,0.07);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+}
+.kcol.todo h3 { color: var(--st-todo); } .kcol.todo h3 .num { background: rgba(135,136,168,0.18); color: var(--st-todo); }
+.kcol.contacte h3 { color: var(--st-contacte); } .kcol.contacte h3 .num { background: rgba(255,160,66,0.18); color: var(--st-contacte); }
+.kcol.rdv h3 { color: var(--st-rdv); } .kcol.rdv h3 .num { background: rgba(255,255,255,0.10); color: var(--st-rdv); }
+.kcol.closed h3 { color: var(--st-closed); } .kcol.closed h3 .num { background: rgba(255,255,255,0.10); color: var(--st-closed); }
+.kcol.refused h3 { color: var(--st-refused); } .kcol.refused h3 .num { background: rgba(255,68,68,0.18); color: var(--st-refused); }
+.kitem {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 11px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.kitem:hover { border-color: var(--border-b); transform: translateX(2px); background: var(--card-h); }
+.kitem .n { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; line-height: 1.25; }
+.kitem .m { font-size: 10px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+.kempty { color: var(--muted2); font-size: 11px; font-style: italic; padding: 14px 4px; text-align: center; }
+
+/* ===== CALENDAR ===== */
+.cal-list { display: flex; flex-direction: column; gap: 10px; }
+.cal-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.cal-date {
+  background: #ffffff;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 800;
+  text-align: center;
+  min-width: 70px;
+}
+.cal-date .d { font-size: 22px; line-height: 1; font-family: 'Montserrat', sans-serif; }
+.cal-date .m { font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.9; }
+.cal-info { flex: 1; }
+.cal-info .n { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.cal-info .m { font-size: 12px; color: var(--muted); }
+.cal-empty { padding: 60px 20px; text-align: center; color: var(--muted); background: var(--card); border: 1px dashed var(--border); border-radius: 14px; }
+
+/* ===== MODAL ===== */
+.modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+.modal {
+  background: var(--card);
+  border: 1px solid var(--border-b);
+  border-radius: 18px;
+  padding: 28px;
+  max-width: 520px;
+  width: 100%;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  position: relative;
+  animation: modalIn 0.2s ease;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+.modal .sub { font-size: 12px; color: var(--muted); margin-bottom: 18px; }
+.modal .x {
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 32px; height: 32px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
+}
+.modal .x:hover { color: var(--text); border-color: var(--border-b); }
+.modal textarea, .modal input[type="date"], .modal input[type="text"] {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+  transition: all 0.15s;
+}
+.modal textarea:focus, .modal input:focus { border-color: var(--orange); }
+.modal textarea { min-height: 120px; }
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+  justify-content: flex-end;
+}
+.modal-actions .btn { padding: 11px 18px; font-size: 12px; }
+
+/* PAYWALL */
+.paywall .icon-circle {
+  width: 70px; height: 70px;
+  margin: 0 auto 18px;
+  border-radius: 18px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  box-shadow: 0 14px 30px rgba(255,255,255,0.30);
+}
+.paywall { text-align: center; }
+.paywall h2 { font-size: 24px; }
+.paywall .feat-list {
+  text-align: left;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  margin: 18px 0;
+}
+.paywall .feat-list li {
+  list-style: none;
+  padding: 8px 0;
+  font-size: 13px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.paywall .feat-list li::before { content: '✓'; color: var(--green); font-weight: 800; font-size: 14px; }
+.paywall .price-box {
+  background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+.paywall .price-box .p { font-family: 'Montserrat', sans-serif; font-size: 30px; font-weight: 800; color: var(--orange); }
+.paywall .price-box .l { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+/* MAILS */
+.blurred-email {
+  filter: blur(6px);
+  user-select: none;
+  pointer-events: none;
+  display: inline-block;
+}
+
+.empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--muted);
+  background: var(--card);
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+}
+.empty .ic { font-size: 56px; margin-bottom: 12px; }
+
+/* FOOTER */
+.footer {
+  max-width: 1600px;
+  margin: 30px auto 0;
+  padding: 26px 28px;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  color: var(--muted2);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.footer strong { color: var(--orange); }
+.footer a { color: var(--muted); text-decoration: none; }
+.footer a:hover { color: var(--orange); }
+
+/* RESPONSIVE */
+@media (max-width: 980px) {
+  .main { grid-template-columns: 1fr; }
+  .sidebar { position: static; }
+  .topnav .tab { padding: 8px 12px; font-size: 11px; }
+}
+@media (max-width: 640px) {
+  .topbar, .stats-strip, .main, .footer { padding-left: 16px; padding-right: 16px; }
+  .grid { grid-template-columns: 1fr; }
+  .kanban { grid-template-columns: 1fr; }
+}
+
+/* === HEAT BADGE === */
+.heat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 1px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: 1px solid;
+}
+.heat.burning { background: #ffffff; color: #000000; border-color: #ffffff; animation: heatPulse 2s ease-in-out infinite; }
+.heat.hot { background: rgba(255,255,255,0.18); color: #ffffff; border-color: rgba(255,255,255,0.35); }
+.heat.warm { background: rgba(255,255,255,0.08); color: #d0d0d0; border-color: rgba(255,255,255,0.18); }
+.heat.cold { background: transparent; color: #888; border-color: rgba(255,255,255,0.10); }
+@keyframes heatPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.5); }
+  50% { box-shadow: 0 0 0 6px rgba(255,255,255,0); }
+}
+
+/* === BIG PHONE NUMBER (clickable, pulsing) === */
+.phone-big {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 1px;
+  color: #ffffff;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.phone-big::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent);
+  transform: translateX(-100%);
+  animation: phoneShine 3.5s ease-in-out infinite;
+}
+@keyframes phoneShine {
+  0%, 80% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.phone-big:hover {
+  background: #ffffff;
+  color: #000000;
+  border-color: #ffffff;
+  transform: translateY(-1px);
+}
+.phone-big .icon { font-size: 13px; animation: phoneRing 4s ease-in-out infinite; display: inline-block; }
+@keyframes phoneRing {
+  0%, 90%, 100% { transform: rotate(0); }
+  92% { transform: rotate(-15deg); }
+  94% { transform: rotate(15deg); }
+  96% { transform: rotate(-15deg); }
+  98% { transform: rotate(15deg); }
+}
+
+/* === COACH PHRASE BADGE === */
+.coach {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.03);
+  border-left: 2px solid #ffffff;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-style: italic;
+  color: #b0b0b0;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+}
+
+/* === DETAIL MODAL (4 tabs) === */
+.dmodal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 999;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 16px;
+  overflow-y: auto;
+  animation: modalFadeIn 0.2s ease;
+}
+@keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.dmodal {
+  background: #0b0b0b;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 2px;
+  width: 100%;
+  max-width: 760px;
+  position: relative;
+  animation: modalSlide 0.25s ease;
+}
+@keyframes modalSlide { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.dmodal-head {
+  padding: 28px 30px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+.dmodal-head .info { flex: 1; min-width: 0; }
+.dmodal-head h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+.dmodal-head .meta {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  color: #888;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.dmodal .close-x {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+.dmodal .close-x:hover { background: rgba(255,255,255,0.12); }
+
+.dmodal-tabs {
+  display: flex;
+  padding: 0 30px;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+  gap: 0;
+  overflow-x: auto;
+}
+.dmodal-tab {
+  padding: 16px 22px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #888;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.dmodal-tab:hover { color: #fff; }
+.dmodal-tab.active { color: #ffffff; border-bottom-color: #ffffff; }
+.dmodal-tab .lock-mini { font-size: 9px; opacity: 0.6; margin-left: 4px; }
+
+.dmodal-body { padding: 28px 30px 36px; min-height: 320px; }
+.dmodal-panel { display: none; }
+.dmodal-panel.active { display: block; animation: panelFade 0.2s ease; }
+@keyframes panelFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  margin-bottom: 22px;
+}
+.detail-item .lab {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px;
+  color: #888;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.detail-item .val {
+  font-size: 13px;
+  color: #ffffff;
+  word-break: break-word;
+}
+.detail-item .val a { color: #ffffff; text-decoration: underline; text-decoration-color: rgba(255,255,255,0.3); }
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px dashed rgba(255,255,255,0.12);
+}
+
+/* PITCH IA tab */
+.pitch-types {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.pitch-type-btn {
+  padding: 9px 16px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #888;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 1px;
+  transition: all 0.15s;
+}
+.pitch-type-btn:hover { color: #fff; border-color: rgba(255,255,255,0.35); }
+.pitch-type-btn.active { background: #fff; color: #000; border-color: #fff; }
+.pitch-locked-area {
+  background: rgba(255,255,255,0.03);
+  border: 1px dashed rgba(255,255,255,0.18);
+  padding: 36px 28px;
+  text-align: center;
+  border-radius: 1px;
+  position: relative;
+  overflow: hidden;
+}
+.pitch-locked-area::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(45deg, transparent 0 8px, rgba(255,255,255,0.02) 8px 16px);
+}
+.pitch-locked-area .lock-icon {
+  font-size: 30px;
+  margin-bottom: 14px;
+  position: relative;
+}
+.pitch-locked-area .lock-text {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: #fff;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  position: relative;
+}
+.pitch-locked-area .lock-sub {
+  font-size: 11px;
+  color: #888;
+  margin-bottom: 18px;
+  position: relative;
+}
+.pitch-locked-area .blurred {
+  filter: blur(5px);
+  opacity: 0.5;
+  font-size: 12px;
+  color: #ccc;
+  line-height: 1.7;
+  text-align: left;
+  margin-top: 14px;
+  position: relative;
+}
+
+/* NOTES tab */
+.attempt-log {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.10);
+  padding: 16px;
+  border-radius: 1px;
+  margin-bottom: 22px;
+}
+.attempt-log .lab {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px;
+  color: #888;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.chip-row button {
+  padding: 7px 12px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #aaa;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  border-radius: 1px;
+  transition: all 0.15s;
+}
+.chip-row button:hover { color: #fff; border-color: rgba(255,255,255,0.35); }
+.chip-row button.sel { background: #ffffff; color: #000; border-color: #fff; }
+.notes-textarea {
+  width: 100%;
+  background: #000;
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #fff;
+  padding: 12px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  border-radius: 1px;
+  min-height: 90px;
+  resize: vertical;
+  outline: none;
+  margin-top: 8px;
+}
+.notes-textarea:focus { border-color: #fff; }
+.voice-locked {
+  background: rgba(255,255,255,0.03);
+  border: 1px dashed rgba(255,255,255,0.18);
+  padding: 14px 18px;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 1px;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  color: #888;
+  letter-spacing: 0.05em;
+}
+.voice-locked:hover { background: rgba(255,255,255,0.06); color: #fff; }
+.attempt-history {
+  margin-top: 18px;
+}
+.attempt-history h4 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px;
+  color: #888;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+.attempt-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  font-size: 12px;
+}
+.attempt-row .icon { font-size: 16px; flex-shrink: 0; opacity: 0.7; }
+.attempt-row .body { flex: 1; }
+.attempt-row .body strong { color: #fff; font-weight: 700; }
+.attempt-row .body em { color: #888; font-style: italic; display: block; margin-top: 3px; font-size: 11px; }
+.attempt-row .when { font-family: 'Montserrat', sans-serif; font-size: 10px; color: #666; letter-spacing: 0.05em; flex-shrink: 0; }
+.empty-history {
+  text-align: center;
+  padding: 28px 14px;
+  color: #555;
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* DEVIS tab (locked) */
+.devis-locked {
+  text-align: center;
+  padding: 60px 30px;
+  background: rgba(255,255,255,0.03);
+  border: 1px dashed rgba(255,255,255,0.18);
+  border-radius: 1px;
+}
+.devis-locked .ic { font-size: 36px; margin-bottom: 14px; }
+.devis-locked h3 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.devis-locked p { font-size: 12px; color: #888; margin-bottom: 18px; }
+
+/* === ANALYTICS VIEW === */
+.an-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.an-card {
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 1px;
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+}
+.an-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: #ffffff;
+}
+.an-card .lab {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px;
+  color: #888;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.an-card .num {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 36px;
+  font-weight: 200;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.an-card .delta {
+  font-size: 10px;
+  color: #888;
+  margin-top: 6px;
+  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 0.05em;
+}
+
+.an-section {
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 1px;
+  padding: 26px;
+  margin-bottom: 18px;
+}
+.an-section h3 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.an-section h3 .total { color: #888; font-weight: 500; font-size: 10px; }
+
+/* CONVERSION FUNNEL */
+.funnel { display: flex; flex-direction: column; gap: 8px; }
+.funnel-step { display: flex; align-items: center; gap: 16px; }
+.funnel-step .name {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #aaa;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  width: 130px;
+  flex-shrink: 0;
+}
+.funnel-step .bar {
+  flex: 1;
+  height: 32px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+  position: relative;
+  overflow: hidden;
+}
+.funnel-step .fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255,255,255,0.20), rgba(255,255,255,0.40));
+  transition: width 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+.funnel-step .ct {
+  position: absolute;
+  right: 12px; top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.05em;
+  z-index: 2;
+}
+.funnel-step .pct {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  color: #888;
+  width: 50px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* OBJECTIONS BREAKDOWN */
+.obj-list { display: flex; flex-direction: column; gap: 10px; }
+.obj-item { display: flex; align-items: center; gap: 14px; }
+.obj-item .name {
+  font-size: 12px;
+  color: #ccc;
+  width: 160px;
+  flex-shrink: 0;
+}
+.obj-item .bar {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.05);
+  position: relative;
+  overflow: hidden;
+}
+.obj-item .fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  background: #ffffff;
+  opacity: 0.6;
+}
+.obj-item .ct {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  color: #fff;
+  font-weight: 700;
+  width: 40px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* GOALS WIDGET */
+.goals { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+.goal-item .gname {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px;
+  color: #888;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.goal-item .gvals {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  color: #fff;
+  font-weight: 600;
+  margin-bottom: 8px;
+  letter-spacing: 0.04em;
+}
+.goal-item .gvals .target { color: #888; font-size: 11px; }
+.goal-item .gbar { height: 4px; background: rgba(255,255,255,0.05); position: relative; }
+.goal-item .gfill { position: absolute; left: 0; top: 0; bottom: 0; background: #fff; }
+
+/* === CONFETTI === */
+.confetti-piece {
+  position: fixed;
+  top: -10px;
+  width: 8px;
+  height: 14px;
+  background: #fff;
+  z-index: 9999;
+  pointer-events: none;
+  animation: confettiFall 2.4s ease-in forwards;
+}
+@keyframes confettiFall {
+  to { transform: translateY(110vh) rotate(720deg); opacity: 0.2; }
+}
+
+/* === TOAST === */
+.toast-host {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 998;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+.toast {
+  background: #fff;
+  color: #000;
+  padding: 12px 22px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 1px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.6);
+  animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+}
+@keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateY(-10px); } }
+
+/* === HOT LEADS BANNER === */
+.hot-banner {
+  background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 14px 22px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-radius: 1px;
+}
+.hot-banner .icon {
+  font-size: 22px;
+  animation: heatPulse 2s ease-in-out infinite;
+}
+.hot-banner .info { flex: 1; }
+.hot-banner .lab {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px;
+  color: #888;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.hot-banner .text {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  color: #fff;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+/* === CARD NAME CLICKABLE === */
+.card-name { cursor: pointer; transition: color 0.15s; }
+.card-name:hover { color: rgba(255,255,255,0.7); }
+
+/* Detail btn group */
+.btn-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.btn-row .btn { padding: 9px 14px; font-size: 10px; }
+
+/* === LBD LUXURY OVERRIDES === */
+.tab, .s-btn, .btn, .b, .status-pill, .stat-cell .l, .s-lab, .s-title, .ct, .badge-num, .feat-num {
+  font-family: 'Montserrat', sans-serif !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.s-title { letter-spacing: 0.18em; font-weight: 700; }
+.tab { letter-spacing: 0.15em; font-weight: 600; font-size: 10px; }
+.s-btn { letter-spacing: 0.05em; font-size: 11px; font-weight: 500; text-transform: none; }
+.btn { letter-spacing: 0.15em; font-weight: 600; font-size: 10px; border-radius: 2px; }
+.btn.primary { background: #ffffff; color: #000; border-color: #ffffff; box-shadow: none; }
+.btn.primary:hover { background: #000; color: #fff; box-shadow: inset 0 0 0 1px #fff; transform: none; }
+.b { letter-spacing: 0.08em; font-size: 9px; border-radius: 1px; }
+.status-pill { border-radius: 1px; letter-spacing: 0.05em; }
+.s-card { border-radius: 2px; }
+.s-card::before { background: #ffffff !important; opacity: 0.6; }
+.card { border-radius: 2px; }
+.card::before { background: #ffffff !important; opacity: 0.6; }
+.fav-btn { border-radius: 1px; }
+.av-circle { border-radius: 2px !important; background: #ffffff !important; color: #000 !important; box-shadow: none !important; font-weight: 700; }
+.modal { border-radius: 2px; }
+.paywall .icon-circle { border-radius: 2px; background: #ffffff !important; color: #000; box-shadow: none !important; font-size: 26px; }
+.paywall h2 { font-family: 'Montserrat', sans-serif !important; letter-spacing: 0.1em; }
+.paywall .price-box { border-radius: 2px; background: rgba(255,255,255,0.05) !important; border-color: rgba(255,255,255,0.18) !important; }
+.paywall .price-box .p { color: #ffffff !important; font-weight: 200; letter-spacing: 0.04em; }
+.kcol { border-radius: 2px; }
+.kitem { border-radius: 2px; }
+.toolbar { border-radius: 2px; }
+.sidebar { border-radius: 2px; }
+.s-search { border-radius: 1px; }
+input, textarea { border-radius: 1px !important; }
+.act { border-radius: 1px; letter-spacing: 0.04em; }
+.cal-item { border-radius: 2px; }
+.cal-date { border-radius: 1px; background: #ffffff !important; color: #000 !important; }
+
+/* Override all "stage" colors to white */
+.s-card.green .s-num,
+.s-card.blue .s-num,
+.s-card.orange .s-num,
+.s-card.purple .s-num,
+.s-card.pink .s-num { color: #ffffff !important; }
+.s-card.green::before,
+.s-card.blue::before,
+.s-card.orange::before,
+.s-card.purple::before,
+.s-card.pink::before { background: #ffffff !important; }
+.kcol.todo h3, .kcol.contacte h3, .kcol.rdv h3, .kcol.closed h3 { color: #ffffff !important; }
+.kcol.todo h3 .num, .kcol.contacte h3 .num, .kcol.rdv h3 .num, .kcol.closed h3 .num { background: rgba(255,255,255,0.10) !important; color: #ffffff !important; }
+.kcol.refused h3 { color: var(--red) !important; }
+.kcol.refused h3 .num { background: rgba(255,68,68,0.18) !important; color: var(--red) !important; }
+
+.footer strong { color: #ffffff !important; }
+.footer { letter-spacing: 0.15em; font-size: 10px; }
+
+.tb-info .ct { color: #ffffff !important; font-family: 'Montserrat', sans-serif !important; font-weight: 200; }
+.s-num { letter-spacing: -0.01em; font-weight: 200; }
+
+/* ===== PIPELINE TABS (ported from remi-innovation, B&W luxe style) ===== */
+.pipeline-tabs {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin: 0 auto 20px; padding: 10px;
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: 2px;
+  max-width: 1600px;
+}
+.ptab {
+  flex: 1; min-width: 130px;
+  padding: 12px 14px;
+  background: transparent; border: 1px solid transparent;
+  color: var(--muted);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  border-radius: 2px; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  transition: all .15s;
+}
+.ptab:hover { color: #fff; border-color: rgba(255,255,255,0.12); }
+.ptab.active { background: #ffffff; color: #000000; border-color: #ffffff; }
+.ptab .ptab-count {
+  background: rgba(0,0,0,0.12); color: inherit;
+  font-size: 10px; font-weight: 800;
+  padding: 2px 8px; border-radius: 999px;
+  min-width: 22px; text-align: center;
+}
+.ptab.active .ptab-count { background: rgba(0,0,0,0.18); }
+
+/* ===== STAGE TAG (on each card) ===== */
+.stage-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 11px; border-radius: 2px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px; font-weight: 800;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #fff;
+  white-space: nowrap;
+}
+.stage-tag[data-s="cold_call"] { background: rgba(136,153,187,0.10); border-color: rgba(136,153,187,0.45); color: #b6c4d9; }
+.stage-tag[data-s="to_recall"] { background: rgba(255,184,77,0.10); border-color: rgba(255,184,77,0.45); color: #ffcd80; }
+.stage-tag[data-s="no_answer"] { background: rgba(136,153,187,0.10); border-color: rgba(136,153,187,0.45); color: #b6c4d9; }
+.stage-tag[data-s="meeting_to_set"] { background: rgba(77,166,255,0.10); border-color: rgba(77,166,255,0.45); color: #a3cfff; }
+.stage-tag[data-s="meeting_confirmed"] { background: rgba(168,85,247,0.10); border-color: rgba(168,85,247,0.45); color: #d5b4ff; }
+.stage-tag[data-s="closed"] { background: rgba(0,200,150,0.10); border-color: rgba(0,200,150,0.45); color: #7ee9bf; }
+.stage-tag[data-s="refused"] { background: rgba(255,107,107,0.10); border-color: rgba(255,107,107,0.45); color: #ff9d9d; }
+
+/* ===== META BADGES (rappel/rdv/deal/objection on card) ===== */
+.meta-badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 4px; }
+.badge-meta {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 2px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #ddd;
+}
+.badge-meta.recall { border-color: rgba(255,184,77,0.45); color: #ffcd80; }
+.badge-meta.meeting { border-color: rgba(77,166,255,0.45); color: #a3cfff; }
+.badge-meta.deal { border-color: rgba(0,200,150,0.45); color: #7ee9bf; }
+.badge-meta.refused { border-color: rgba(255,107,107,0.45); color: #ff9d9d; }
+
+/* ===== PIPELINE ACTION BUTTONS (per card) ===== */
+.pipeline-actions {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-top: 10px; padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+.pact {
+  flex: 1; min-width: 90px;
+  padding: 9px 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #ddd;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  border-radius: 2px; cursor: pointer;
+  transition: all .15s;
+}
+.pact:hover { background: rgba(255,255,255,0.10); color: #fff; border-color: rgba(255,255,255,0.30); }
+.pact-interested { border-color: rgba(0,200,150,0.5); color: #7ee9bf; }
+.pact-interested:hover { background: rgba(0,200,150,0.14); border-color: rgba(0,200,150,0.8); }
+.pact-meeting, .pact-confirm { border-color: rgba(77,166,255,0.5); color: #a3cfff; }
+.pact-meeting:hover, .pact-confirm:hover { background: rgba(77,166,255,0.14); border-color: rgba(77,166,255,0.8); }
+.pact-close { border-color: rgba(168,85,247,0.5); color: #d5b4ff; }
+.pact-close:hover { background: rgba(168,85,247,0.14); border-color: rgba(168,85,247,0.8); }
+.pact-refuse { border-color: rgba(255,107,107,0.45); color: #ff9d9d; }
+.pact-refuse:hover { background: rgba(255,107,107,0.14); border-color: rgba(255,107,107,0.75); }
+.pact-noreply { border-color: rgba(255,184,77,0.45); color: #ffcd80; }
+.pact-noreply:hover { background: rgba(255,184,77,0.14); border-color: rgba(255,184,77,0.8); }
+.pact-back, .pact-relance { max-width: 70px; flex: 0 0 auto; }
+
+/* ===== INLINE NOTES on card ===== */
+.card-notes-inline {
+  width: 100%;
+  min-height: 52px; max-height: 140px;
+  margin-top: 10px; padding: 9px 11px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #eee;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px; line-height: 1.5;
+  border-radius: 2px;
+  resize: vertical;
+}
+.card-notes-inline:focus { outline: none; border-color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.06); }
+.card-notes-inline::placeholder { color: rgba(255,255,255,0.25); font-style: italic; }
+
+/* ===== PIPELINE MODALS (objection / deal / stage) ===== */
+.pmodal-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,0.75); backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.pmodal-overlay.open { display: flex; }
+.pmodal {
+  background: var(--bg2); border: 1px solid var(--border-b);
+  border-radius: 2px;
+  padding: 28px; max-width: 520px; width: 100%;
+  max-height: 90vh; overflow-y: auto;
+  animation: pmodalIn .22s ease;
+}
+@keyframes pmodalIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+.pmodal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.pmodal-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 15px; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: #fff;
+}
+.pmodal-close {
+  background: none; border: 1px solid rgba(255,255,255,0.18);
+  color: #ccc; width: 32px; height: 32px;
+  border-radius: 2px; cursor: pointer;
+  font-size: 16px; line-height: 1;
+}
+.pmodal-close:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.pmodal .prospect-head {
+  padding: 12px 14px; margin-bottom: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 2px;
+  font-size: 12px; color: #ddd; line-height: 1.5;
+}
+.pmodal-hint { font-size: 11px; color: var(--muted); margin-bottom: 10px; letter-spacing: 0.04em; }
+.pmodal .field-label {
+  display: block;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--muted);
+  margin: 14px 0 6px;
+}
+.pmodal .m-input {
+  width: 100%; padding: 11px 13px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #fff;
+  font-family: 'Inter', sans-serif; font-size: 13px;
+  border-radius: 2px;
+}
+.pmodal .m-input:focus { outline: none; border-color: #fff; }
+.pmodal .m-textarea { min-height: 84px; resize: vertical; }
+.pmodal .obj-chips, .pmodal .deal-chips, .pmodal .date-shortcuts {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;
+}
+.pmodal .obj-chip, .pmodal .deal-chip, .pmodal .date-shortcut {
+  padding: 9px 13px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #ddd;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.08em;
+  border-radius: 2px; cursor: pointer;
+  transition: all .15s;
+}
+.pmodal .obj-chip:hover, .pmodal .deal-chip:hover, .pmodal .date-shortcut:hover { background: rgba(255,255,255,0.10); color: #fff; }
+.pmodal .obj-chip.active, .pmodal .deal-chip.active, .pmodal .date-shortcut.active { background: #fff; color: #000; border-color: #fff; }
+.pmodal-actions { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
+.pmodal-actions .btn-secondary, .pmodal-actions .btn-primary {
+  padding: 11px 20px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px; font-weight: 800;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  border-radius: 2px; cursor: pointer;
+}
+.pmodal-actions .btn-secondary {
+  background: transparent; border: 1px solid rgba(255,255,255,0.25); color: #ccc;
+}
+.pmodal-actions .btn-secondary:hover { background: rgba(255,255,255,0.06); color: #fff; }
+.pmodal-actions .btn-primary {
+  background: #fff; border: 1px solid #fff; color: #000;
+}
+.pmodal-actions .btn-primary:hover { background: #e8e8e8; }
+.pmodal-actions .btn-primary.refuse { background: #ff6b6b; border-color: #ff6b6b; color: #fff; }
+.pmodal-actions .btn-primary.deal { background: #00c896; border-color: #00c896; color: #000; }
+
+/* ===== TOAST ===== */
+.toast-container {
+  position: fixed; bottom: 24px; right: 24px; z-index: 10000;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.toast {
+  background: rgba(20,20,30,0.95);
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 2px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.08em;
+  min-width: 220px;
+  animation: toastIn .25s ease;
+  transition: opacity .3s;
+}
+.toast.success { border-color: rgba(0,200,150,0.55); }
+.toast.error { border-color: rgba(255,107,107,0.55); }
+@keyframes toastIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-logo"></div>
+    <div>
+      <div class="brand-name">LUXURY BRANDS <span class="grad">DIGITAL</span></div>
+      <div class="brand-sub">INTELLIGENCE PLATFORM</div>
+    </div>
+  </div>
+  <div class="topnav">
+    <button class="tab active" data-view="list">PORTFOLIO <span class="badge-num" id="tab-list-ct">100</span></button>
+    <button class="tab" data-view="pipeline">PIPELINE</button>
+    <button class="tab" data-view="calendar">AGENDA <span class="badge-num" id="tab-cal-ct">0</span></button>
+    <button class="tab" data-view="analytics">ANALYTICS</button>
+  </div>
+  <div class="user-pill">
+    <div class="av">LB</div>
+    <div class="info">
+      <div class="n">LUXURY BRANDS</div>
+      <div class="p">DEMO ACCESS</div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS STRIP -->
+<div class="stats-strip" id="stats-strip"></div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="s-title">Recherche</div>
+    <div class="s-search">
+      <span class="s-icon">🔍</span>
+      <input type="text" id="search-input" placeholder="Nom, ville, dirigeant..." />
+    </div>
+
+    <div class="s-title">Statut</div>
+    <div class="s-row">
+      <button class="s-btn active" data-filter="status" data-val="all">Tous <span class="ct" id="ct-status-all">100</span></button>
+      <button class="s-btn" data-filter="status" data-val="todo">⚪ À contacter <span class="ct" id="ct-status-todo">0</span></button>
+      <button class="s-btn" data-filter="status" data-val="contacte">🟠 Contactés <span class="ct" id="ct-status-contacte">0</span></button>
+      <button class="s-btn" data-filter="status" data-val="rdv">🔵 RDV pris <span class="ct" id="ct-status-rdv">0</span></button>
+      <button class="s-btn" data-filter="status" data-val="closed">🟢 Closed <span class="ct" id="ct-status-closed">0</span></button>
+      <button class="s-btn" data-filter="status" data-val="refused">🔴 Refusés <span class="ct" id="ct-status-refused">0</span></button>
+    </div>
+
+    <div class="s-title">Secteur</div>
+    <div class="s-row">
+      <button class="s-btn active" data-filter="sector" data-val="all">Tous <span class="ct">100</span></button>
+      <button class="s-btn b-biotech" data-filter="sector" data-val="biotech">🧬 Biotech <span class="ct">24</span></button>
+      <button class="s-btn b-medtech" data-filter="sector" data-val="medtech">⚕️ Medtech <span class="ct">23</span></button>
+      <button class="s-btn b-agritech" data-filter="sector" data-val="agritech">🌱 Agritech <span class="ct">18</span></button>
+      <button class="s-btn b-deeptech" data-filter="sector" data-val="deeptech">🧠 Deeptech <span class="ct">21</span></button>
+      <button class="s-btn b-silvertech" data-filter="sector" data-val="silvertech">👴 Silvertech <span class="ct">14</span></button>
+    </div>
+
+    <div class="s-title">Pays</div>
+    <div class="s-row">
+      <button class="s-btn active" data-filter="country" data-val="all">Tous <span class="ct">100</span></button>
+      <button class="s-btn" data-filter="country" data-val="fr">🇫🇷 France <span class="ct">71</span></button>
+      <button class="s-btn" data-filter="country" data-val="ch">🇨🇭 Suisse <span class="ct">29</span></button>
+    </div>
+
+    <div class="s-title">Site web</div>
+    <div class="s-row">
+      <button class="s-btn active" data-filter="site" data-val="all">Tous <span class="ct">100</span></button>
+      <button class="s-btn" data-filter="site" data-val="yes">✅ Avec site <span class="ct">97</span></button>
+      <button class="s-btn" data-filter="site" data-val="no">❌ Sans site <span class="ct">3</span></button>
+    </div>
+
+    <div class="s-title">Chaleur</div>
+    <div class="s-row">
+      <button class="s-btn active" data-filter="heat" data-val="all">Tous niveaux</button>
+      <button class="s-btn" data-filter="heat" data-val="burning">🔥🔥 Brûlant <span class="ct" id="ct-heat-burning">0</span></button>
+      <button class="s-btn" data-filter="heat" data-val="hot">🔥 Chaud <span class="ct" id="ct-heat-hot">0</span></button>
+      <button class="s-btn" data-filter="heat" data-val="warm">🌡️ Tiède <span class="ct" id="ct-heat-warm">0</span></button>
+      <button class="s-btn" data-filter="heat" data-val="cold">❄️ Froid <span class="ct" id="ct-heat-cold">0</span></button>
+    </div>
+
+    <div class="s-title">Tri</div>
+    <div class="s-row">
+      <button class="s-btn active" data-filter="sort" data-val="heat">🔥 Chaleur (défaut)</button>
+      <button class="s-btn" data-filter="sort" data-val="name">A → Z</button>
+      <button class="s-btn" data-filter="sort" data-val="effectif">Plus gros effectif</button>
+      <button class="s-btn" data-filter="sort" data-val="recent">Derniers ajoutés</button>
+    </div>
+
+    <div class="s-title">Favoris</div>
+    <div class="s-row">
+      <button class="s-btn" data-filter="fav" data-val="yes">⭐ Mes favoris <span class="ct" id="ct-fav">0</span></button>
+    </div>
+  </aside>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <div class="toolbar">
+      <div class="tb-info">
+        <div class="ct" id="visible-count">100</div>
+        <div class="lab">leads affichés</div>
+      </div>
+      <div class="tb-actions">
+        <button class="btn" id="btn-clear-filters">🔄 Reset filtres</button>
+        <button class="btn lock" id="btn-export">📥 Export CSV</button>
+        <button class="btn lock" id="btn-bulk">⚡ Actions groupées</button>
+        <button class="btn primary lock" id="btn-unlock">🚀 Débloquer tout</button>
+      </div>
+    </div>
+
+    <!-- Hot leads banner -->
+    <div id="hot-banner-host"></div>
+
+    <!-- Pipeline tabs (visible only in list view) -->
+    <div class="pipeline-tabs" id="pipeline-tabs">
+      <button class="ptab active" data-ptab="all">
+        <span>📋 Tous</span>
+        <span class="ptab-count" id="cnt-all">0</span>
+      </button>
+      <button class="ptab" data-ptab="cold_call">
+        <span>📞 À appeler</span>
+        <span class="ptab-count" id="cnt-cold_call">0</span>
+      </button>
+      <button class="ptab" data-ptab="to_recall">
+        <span>🔁 À rappeler</span>
+        <span class="ptab-count" id="cnt-to_recall">0</span>
+      </button>
+      <button class="ptab" data-ptab="meeting">
+        <span>📅 Rendez-vous</span>
+        <span class="ptab-count" id="cnt-meeting">0</span>
+      </button>
+      <button class="ptab" data-ptab="closed">
+        <span>💰 Clients</span>
+        <span class="ptab-count" id="cnt-closed">0</span>
+      </button>
+      <button class="ptab" data-ptab="refused">
+        <span>🚫 Refus</span>
+        <span class="ptab-count" id="cnt-refused">0</span>
+      </button>
+    </div>
+
+    <!-- View: LIST -->
+    <div id="view-list" class="grid"></div>
+
+    <!-- View: PIPELINE (kanban) -->
+    <div id="view-pipeline" class="kanban" style="display:none;"></div>
+
+    <!-- View: CALENDAR -->
+    <div id="view-calendar" class="cal-list" style="display:none;"></div>
+
+    <!-- View: ANALYTICS -->
+    <div id="view-analytics" style="display:none;"></div>
+
+  </div>
+</div>
+
+<div class="footer">
+  EXCLUSIVE INTELLIGENCE PLATFORM · BUILT FOR <strong>LUXURY BRANDS DIGITAL</strong><br>
+  100 CURATED INNOVATION LEADS · FRANCE + SWITZERLAND + MONACO · DEMO ACCESS<br>
+  © 2026 LUXURY BRANDS DIGITAL · BRAND EXPERIENCE × DIGITAL ECOSYSTEM
+</div>
+
+<!-- ===== PIPELINE MODALS ===== -->
+
+<!-- Objection modal -->
+<div class="pmodal-overlay" id="pmodal-objection" onclick="if(event.target===this)closePModal('objection')">
+  <div class="pmodal">
+    <div class="pmodal-header">
+      <div class="pmodal-title">❌ Raison du refus</div>
+      <button type="button" class="pmodal-close" onclick="closePModal('objection')">✕</button>
+    </div>
+    <div class="prospect-head" id="obj-head"></div>
+    <p class="pmodal-hint">Sélectionne ou tape une objection :</p>
+    <div class="obj-chips" id="obj-chips">
+      <button type="button" class="obj-chip">Pas intéressé</button>
+      <button type="button" class="obj-chip">Trop cher</button>
+      <button type="button" class="obj-chip">On a déjà quelqu'un qui s'en occupe</button>
+      <button type="button" class="obj-chip">Déjà un site web</button>
+      <button type="button" class="obj-chip">Pas le temps</button>
+      <button type="button" class="obj-chip">Bouche à oreille ça suffit</button>
+      <button type="button" class="obj-chip">Croit pas au projet</button>
+    </div>
+    <input type="text" class="m-input" id="obj-custom" placeholder="Autre — tape une objection...">
+    <div class="pmodal-actions">
+      <button type="button" class="btn-secondary" onclick="closePModal('objection')">Annuler</button>
+      <button type="button" class="btn-primary refuse" id="obj-confirm">✅ Confirmer le refus</button>
+    </div>
+  </div>
+</div>
+
+<!-- Deal modal -->
+<div class="pmodal-overlay" id="pmodal-deal" onclick="if(event.target===this)closePModal('deal')">
+  <div class="pmodal">
+    <div class="pmodal-header">
+      <div class="pmodal-title">💰 Deal signé !</div>
+      <button type="button" class="pmodal-close" onclick="closePModal('deal')">✕</button>
+    </div>
+    <div class="prospect-head" id="deal-head"></div>
+    <p class="pmodal-hint">Type de prestation :</p>
+    <div class="deal-chips" id="deal-type-chips">
+      <button type="button" class="deal-chip" data-v="site_vitrine">🌐 Site vitrine</button>
+      <button type="button" class="deal-chip" data-v="brand">✨ Brand / Design</button>
+      <button type="button" class="deal-chip" data-v="seo">🔍 SEO</button>
+      <button type="button" class="deal-chip" data-v="pack">📦 Pack complet</button>
+      <button type="button" class="deal-chip" data-v="autre">✏️ Autre</button>
+    </div>
+    <label class="field-label">📅 Date de signature</label>
+    <input type="date" class="m-input" id="deal-date">
+    <label class="field-label">💶 Montant (€)</label>
+    <input type="number" class="m-input" id="deal-value" placeholder="0" min="0" step="100">
+    <label class="field-label">🔁 Facturation</label>
+    <div class="deal-chips" id="deal-rec-chips">
+      <button type="button" class="deal-chip" data-v="one_shot">1️⃣ One-shot</button>
+      <button type="button" class="deal-chip" data-v="mensuel">🔁 Mensuel</button>
+      <button type="button" class="deal-chip" data-v="trimestriel">📆 Trimestriel</button>
+    </div>
+    <div class="pmodal-actions">
+      <button type="button" class="btn-secondary" onclick="closePModal('deal')">Annuler</button>
+      <button type="button" class="btn-primary deal" id="deal-confirm">✅ Confirmer le deal</button>
+    </div>
+  </div>
+</div>
+
+<!-- Stage modal (rappel / rdv) -->
+<div class="pmodal-overlay" id="pmodal-stage" onclick="if(event.target===this)closePModal('stage')">
+  <div class="pmodal">
+    <div class="pmodal-header">
+      <div class="pmodal-title" id="stage-title">📅 Poser un rendez-vous</div>
+      <button type="button" class="pmodal-close" onclick="closePModal('stage')">✕</button>
+    </div>
+    <div class="prospect-head" id="stage-head"></div>
+    <label class="field-label" id="stage-date-label">📅 Date</label>
+    <div class="date-shortcuts" id="stage-shortcuts">
+      <button type="button" class="date-shortcut" data-d="0">Aujourd'hui</button>
+      <button type="button" class="date-shortcut" data-d="1">Demain</button>
+      <button type="button" class="date-shortcut" data-d="2">Dans 2 jours</button>
+      <button type="button" class="date-shortcut" data-d="7">Semaine pro</button>
+    </div>
+    <input type="date" class="m-input" id="stage-date">
+    <div id="stage-time-wrap" style="display:none">
+      <label class="field-label">🕐 Heure</label>
+      <input type="time" class="m-input" id="stage-time" value="14:00">
+    </div>
+    <label class="field-label">📝 Notes</label>
+    <textarea class="m-input m-textarea" id="stage-notes" placeholder="Contexte, prochaines étapes..."></textarea>
+    <div class="pmodal-actions">
+      <button type="button" class="btn-secondary" onclick="closePModal('stage')">Annuler</button>
+      <button type="button" class="btn-primary" id="stage-confirm">✅ Valider</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="pipeline-toasts"></div>
+
+<!-- MODAL CONTAINER -->
+<div id="modal-container"></div>
+
+<!-- DETAIL MODAL CONTAINER -->
+<div id="detail-modal-host"></div>
+
+<!-- TOAST HOST -->
+<div class="toast-host" id="toast-host"></div>
+
+<!-- CONFETTI HOST -->
+<div id="confetti-host"></div>
+
+<script>
+// ===========================
+// DATA — 100 LEADS INNOVATION
+// ===========================
+const PROSPECTS_DATA = [
+  // ============ BIOTECH FR (15) ============
+  { name: "Cellectis", sector: "biotech", country: "fr", city: "Paris", website: "https://www.cellectis.com", phone: "+33 1 81 69 16 00", dirigeant: "André Choulika", role: "PDG & co-fondateur", effectif: "200+" },
+  { name: "Carmat", sector: "biotech", country: "fr", city: "Vélizy-Villacoublay", website: "https://www.carmatsa.com", phone: "+33 1 39 45 64 50", dirigeant: "Stéphane Piat", role: "CEO", effectif: "150" },
+  { name: "DBV Technologies", sector: "biotech", country: "fr", city: "Montrouge", website: "https://www.dbv-technologies.com", phone: "+33 1 55 42 78 78", dirigeant: "Daniel Tassé", role: "CEO", effectif: "180" },
+  { name: "Innate Pharma", sector: "biotech", country: "fr", city: "Marseille", website: "https://www.innate-pharma.com", phone: "+33 4 30 30 30 30", dirigeant: "Mondher Mahjoubi", role: "CEO", effectif: "210" },
+  { name: "Genfit", sector: "biotech", country: "fr", city: "Loos", website: "https://www.genfit.com", phone: "+33 3 20 16 40 00", dirigeant: "Pascal Prigent", role: "CEO", effectif: "120" },
+  { name: "Erytech Pharma", sector: "biotech", country: "fr", city: "Lyon", website: "https://www.erytech.com", phone: "+33 4 78 74 44 38", dirigeant: "Gil Beyen", role: "CEO", effectif: "85" },
+  { name: "Theranexus", sector: "biotech", country: "fr", city: "Lyon", website: "https://www.theranexus.com", phone: "+33 4 81 13 20 60", dirigeant: "Mathieu Charvériat", role: "CEO & co-fondateur", effectif: "30" },
+  { name: "Inventiva", sector: "biotech", country: "fr", city: "Daix", website: "https://www.inventivapharma.com", phone: "+33 3 80 44 75 00", dirigeant: "Frédéric Cren", role: "CEO & co-fondateur", effectif: "120" },
+  { name: "Poxel", sector: "biotech", country: "fr", city: "Lyon", website: "https://www.poxelpharma.com", phone: "+33 4 37 37 20 10", dirigeant: "Thomas Kuhn", role: "CEO", effectif: "40" },
+  { name: "Onxeo", sector: "biotech", country: "fr", city: "Paris", website: "https://www.onxeo.com", phone: "+33 1 45 58 76 00", dirigeant: "Shefali Agarwal", role: "CEO", effectif: "20" },
+  { name: "Nicox", sector: "biotech", country: "fr", city: "Sophia Antipolis", website: "https://www.nicox.com", phone: "+33 4 97 24 53 00", dirigeant: "Michele Garufi", role: "CEO", effectif: "30" },
+  { name: "Valneva", sector: "biotech", country: "fr", city: "Saint-Herblain", website: "https://www.valneva.com", phone: "+33 2 28 07 37 10", dirigeant: "Thomas Lingelbach", role: "CEO", effectif: "750" },
+  { name: "Adocia", sector: "biotech", country: "fr", city: "Lyon", website: "https://www.adocia.com", phone: "+33 4 72 61 06 10", dirigeant: "Olivier Soula", role: "Directeur Général", effectif: "55" },
+  { name: "Pherecydes Pharma", sector: "biotech", country: "fr", city: "Romainville", website: "https://www.pherecydes-pharma.com", phone: "+33 2 40 13 38 50", dirigeant: "Guy-Charles Fanneau", role: "CEO", effectif: "30" },
+  { name: "Lysogene", sector: "biotech", country: "fr", city: "Neuilly-sur-Seine", website: "https://www.lysogene.com", phone: "+33 1 41 43 03 99", dirigeant: "Karen Aiach", role: "CEO & fondatrice", effectif: "25" },
+
+  // ============ MEDTECH FR (15) ============
+  { name: "Mauna Kea Technologies", sector: "medtech", country: "fr", city: "Paris", website: "https://www.maunakeatech.com", phone: "+33 1 48 24 03 45", dirigeant: "Robert L. Gershon", role: "CEO", effectif: "70" },
+  { name: "Implanet", sector: "medtech", country: "fr", city: "Bordeaux", website: "https://www.implanet.com", phone: "+33 5 57 99 55 55", dirigeant: "Ludovic Lastennet", role: "CEO", effectif: "50" },
+  { name: "Surge", sector: "medtech", country: "fr", city: "Paris", website: null, phone: null, dirigeant: "Julien Hédou", role: "Président & co-fondateur", effectif: "10" },
+  { name: "Pixium Vision", sector: "medtech", country: "fr", city: "Paris", website: "https://www.pixium-vision.com", phone: "+33 1 76 21 47 47", dirigeant: "Lloyd Diamond", role: "CEO", effectif: "35" },
+  { name: "Median Technologies", sector: "medtech", country: "fr", city: "Sophia Antipolis", website: "https://www.mediantechnologies.com", phone: "+33 4 92 90 65 00", dirigeant: "Fredrik Brag", role: "CEO & co-fondateur", effectif: "180" },
+  { name: "Diabeloop", sector: "medtech", country: "fr", city: "Grenoble", website: "https://www.diabeloop.com", phone: "+33 4 76 88 89 90", dirigeant: "Erik Huneker", role: "CEO & co-fondateur", effectif: "120" },
+  { name: "Owkin", sector: "medtech", country: "fr", city: "Paris", website: "https://www.owkin.com", phone: null, dirigeant: "Thomas Clozel", role: "CEO & co-fondateur", effectif: "300" },
+  { name: "Therapixel", sector: "medtech", country: "fr", city: "Nice", website: "https://www.therapixel.com", phone: "+33 9 72 38 87 12", dirigeant: "Pierre Fillard", role: "CEO & co-fondateur", effectif: "30" },
+  { name: "Quantum Surgical", sector: "medtech", country: "fr", city: "Montpellier", website: "https://www.quantumsurgical.com", phone: "+33 4 67 67 30 00", dirigeant: "Bertin Nahum", role: "CEO & fondateur", effectif: "100" },
+  { name: "Cardiologs", sector: "medtech", country: "fr", city: "Paris", website: "https://www.cardiologs.com", phone: null, dirigeant: "Yann Fleureau", role: "CEO & co-fondateur", effectif: "80" },
+  { name: "Doctolib", sector: "medtech", country: "fr", city: "Levallois-Perret", website: "https://www.doctolib.fr", phone: null, dirigeant: "Stanislas Niox-Chateau", role: "CEO & co-fondateur", effectif: "2500" },
+  { name: "Withings", sector: "medtech", country: "fr", city: "Issy-les-Moulineaux", website: "https://www.withings.com", phone: "+33 1 84 17 00 00", dirigeant: "Mathieu Letombe", role: "CEO", effectif: "300" },
+  { name: "EOS imaging", sector: "medtech", country: "fr", city: "Paris", website: "https://www.eos-imaging.com", phone: "+33 1 55 25 60 60", dirigeant: "Mike Lobinsky", role: "CEO", effectif: "180" },
+  { name: "Voluntis", sector: "medtech", country: "fr", city: "Suresnes", website: "https://www.voluntis.com", phone: "+33 1 41 38 39 80", dirigeant: "Pierre Leurent", role: "CEO & co-fondateur", effectif: "100" },
+  { name: "Carmat", sector: "medtech", country: "fr", city: "Vélizy-Villacoublay", website: "https://www.carmat.com", phone: "+33 1 39 45 64 50", dirigeant: "Stéphane Piat", role: "CEO", effectif: "200" },
+
+  // ============ AGRITECH FR (15) ============
+  { name: "Ÿnsect", sector: "agritech", country: "fr", city: "Évry-Courcouronnes", website: "https://www.ynsect.com", phone: "+33 1 76 21 99 29", dirigeant: "Antoine Hubert", role: "CEO & co-fondateur", effectif: "300" },
+  { name: "Carbios", sector: "agritech", country: "fr", city: "Saint-Beauzire", website: "https://www.carbios.com", phone: "+33 4 73 33 13 51", dirigeant: "Emmanuel Ladent", role: "CEO", effectif: "85" },
+  { name: "InnovaFeed", sector: "agritech", country: "fr", city: "Paris", website: "https://www.innovafeed.com", phone: null, dirigeant: "Clément Ray", role: "CEO & co-fondateur", effectif: "350" },
+  { name: "Agriconomie", sector: "agritech", country: "fr", city: "Dijon", website: "https://www.agriconomie.com", phone: "+33 9 70 80 12 00", dirigeant: "Paolin Pascot", role: "CEO & co-fondateur", effectif: "120" },
+  { name: "Naïo Technologies", sector: "agritech", country: "fr", city: "Toulouse", website: "https://www.naio-technologies.com", phone: "+33 5 31 60 23 00", dirigeant: "Aymeric Barthes", role: "CEO & co-fondateur", effectif: "100" },
+  { name: "Weenat", sector: "agritech", country: "fr", city: "Nantes", website: "https://www.weenat.com", phone: "+33 2 85 52 21 02", dirigeant: "Jérôme Le Roy", role: "CEO & fondateur", effectif: "50" },
+  { name: "Promethee Earth Intelligence", sector: "agritech", country: "fr", city: "Toulouse", website: "https://www.promethee.earth", phone: null, dirigeant: "Olivier Piepsz", role: "CEO", effectif: "30" },
+  { name: "Phytocontrol", sector: "agritech", country: "fr", city: "Nîmes", website: "https://www.phytocontrol.com", phone: "+33 4 66 79 64 30", dirigeant: "Mylène Lashermes", role: "Présidente", effectif: "300" },
+  { name: "Afyren", sector: "agritech", country: "fr", city: "Saint-Beauzire", website: "https://www.afyren.com", phone: "+33 4 73 64 43 60", dirigeant: "Nicolas Sordet", role: "CEO & co-fondateur", effectif: "60" },
+  { name: "Vitirover", sector: "agritech", country: "fr", city: "Saint-Émilion", website: "https://www.vitirover.com", phone: "+33 5 57 24 60 87", dirigeant: "Xavier David Beaulieu", role: "CEO & fondateur", effectif: "25" },
+  { name: "La Ruche Qui Dit Oui", sector: "agritech", country: "fr", city: "Paris", website: "https://www.laruchequiditoui.fr", phone: null, dirigeant: "Guilhem Chéron", role: "Co-fondateur", effectif: "100" },
+  { name: "MiiMOSA", sector: "agritech", country: "fr", city: "Paris", website: "https://www.miimosa.com", phone: null, dirigeant: "Florian Breton", role: "CEO & fondateur", effectif: "40" },
+  { name: "Ombrea", sector: "agritech", country: "fr", city: "Aix-en-Provence", website: "https://www.ombrea.fr", phone: "+33 4 86 76 82 32", dirigeant: "Julie Davico-Pahin", role: "CEO & co-fondatrice", effectif: "50" },
+  { name: "Toopi Organics", sector: "agritech", country: "fr", city: "La Réole", website: "https://www.toopi-organics.com", phone: null, dirigeant: "Michael Roes", role: "CEO & fondateur", effectif: "30" },
+  { name: "Biotech Dental", sector: "biotech", country: "fr", city: "Salon-de-Provence", website: null, phone: "+33 4 90 44 60 60", dirigeant: "Philippe Veran", role: "Président", effectif: "200" },
+
+  // ============ DEEPTECH FR (15) ============
+  { name: "Pasqal", sector: "deeptech", country: "fr", city: "Massy", website: "https://www.pasqal.com", phone: null, dirigeant: "Georges-Olivier Reymond", role: "CEO & co-fondateur", effectif: "150" },
+  { name: "Alice & Bob", sector: "deeptech", country: "fr", city: "Paris", website: "https://alice-bob.com", phone: null, dirigeant: "Théau Peronnin", role: "CEO & co-fondateur", effectif: "60" },
+  { name: "Quandela", sector: "deeptech", country: "fr", city: "Massy", website: "https://www.quandela.com", phone: null, dirigeant: "Valérian Giesz", role: "CEO & co-fondateur", effectif: "80" },
+  { name: "LightOn", sector: "deeptech", country: "fr", city: "Paris", website: "https://www.lighton.ai", phone: null, dirigeant: "Igor Carron", role: "CEO & co-fondateur", effectif: "40" },
+  { name: "Mistral AI", sector: "deeptech", country: "fr", city: "Paris", website: "https://mistral.ai", phone: null, dirigeant: "Arthur Mensch", role: "CEO & co-fondateur", effectif: "70" },
+  { name: "Hugging Face", sector: "deeptech", country: "fr", city: "Paris", website: "https://huggingface.co", phone: null, dirigeant: "Clément Delangue", role: "CEO & co-fondateur", effectif: "300" },
+  { name: "Cailabs", sector: "deeptech", country: "fr", city: "Rennes", website: "https://www.cailabs.com", phone: "+33 2 23 25 11 60", dirigeant: "Jean-François Morizur", role: "CEO & co-fondateur", effectif: "70" },
+  { name: "Exotec", sector: "deeptech", country: "fr", city: "Croix", website: "https://www.exotec.com", phone: "+33 3 20 65 04 95", dirigeant: "Romain Moulin", role: "CEO & co-fondateur", effectif: "700" },
+  { name: "C12 Quantum Electronics", sector: "deeptech", country: "fr", city: "Paris", website: "https://www.c12qe.com", phone: null, dirigeant: "Pierre Desjardins", role: "CEO & co-fondateur", effectif: "30" },
+  { name: "Dataiku", sector: "deeptech", country: "fr", city: "Paris", website: "https://www.dataiku.com", phone: null, dirigeant: "Florian Douetteau", role: "CEO & co-fondateur", effectif: "1100" },
+  { name: "Algolia", sector: "deeptech", country: "fr", city: "Paris", website: "https://www.algolia.com", phone: null, dirigeant: "Bernadette Nixon", role: "CEO", effectif: "700" },
+  { name: "Scaleway", sector: "deeptech", country: "fr", city: "Paris", website: "https://www.scaleway.com", phone: "+33 1 84 13 00 00", dirigeant: "Damien Lucas", role: "CEO", effectif: "500" },
+  { name: "Dust", sector: "deeptech", country: "fr", city: "Paris", website: null, phone: null, dirigeant: "Stanislas Polu", role: "CEO & co-fondateur", effectif: "15" },
+  { name: "Sigfox", sector: "deeptech", country: "fr", city: "Labège", website: "https://www.sigfox.com", phone: "+33 5 81 76 03 00", dirigeant: "Jérémy Prince", role: "CEO", effectif: "300" },
+  { name: "Aledia", sector: "deeptech", country: "fr", city: "Échirolles", website: "https://www.aledia.com", phone: "+33 4 76 02 75 00", dirigeant: "Giorgio Anania", role: "CEO & co-fondateur", effectif: "180" },
+
+  // ============ SILVERTECH FR (10) ============
+  { name: "Famileo", sector: "silvertech", country: "fr", city: "Saint-Malo", website: "https://www.famileo.com", phone: "+33 2 23 16 38 00", dirigeant: "Armel de Lesquen", role: "CEO & fondateur", effectif: "40" },
+  { name: "Tikeasy", sector: "silvertech", country: "fr", city: "Paris", website: "https://www.tikeasy.com", phone: "+33 1 84 25 64 00", dirigeant: "Olivier Gateau", role: "CEO", effectif: "20" },
+  { name: "Medissimo", sector: "silvertech", country: "fr", city: "Castries", website: "https://www.medissimo.fr", phone: "+33 4 67 91 14 14", dirigeant: "Pascal Bonnefoi", role: "CEO", effectif: "30" },
+  { name: "Auticiel", sector: "silvertech", country: "fr", city: "Paris", website: "https://www.auticiel.com", phone: "+33 1 80 88 47 70", dirigeant: "Stephanie Treillet", role: "CEO", effectif: "15" },
+  { name: "Domalys", sector: "silvertech", country: "fr", city: "Vivonne", website: "https://www.domalys.com", phone: "+33 5 49 56 02 50", dirigeant: "Adrien Ducluzeau", role: "CEO & co-fondateur", effectif: "20" },
+  { name: "Otono-Me", sector: "silvertech", country: "fr", city: "Lyon", website: "https://www.otono-me.com", phone: null, dirigeant: "Anne-Sophie Joly", role: "CEO", effectif: "10" },
+  { name: "Ela Innovation", sector: "silvertech", country: "fr", city: "Montpellier", website: "https://www.ela.fr", phone: "+33 4 67 86 27 70", dirigeant: "Sébastien Dunoyer", role: "CEO", effectif: "60" },
+  { name: "Dynseo", sector: "silvertech", country: "fr", city: "Paris", website: "https://www.dynseo.com", phone: null, dirigeant: "Justine Sauquet", role: "CEO & co-fondatrice", effectif: "15" },
+  { name: "Présence Verte", sector: "silvertech", country: "fr", city: "Paris", website: "https://www.presenceverte.fr", phone: "+33 1 56 21 23 00", dirigeant: "Frédéric Coppin", role: "Directeur", effectif: "200" },
+  { name: "Senior Adom", sector: "silvertech", country: "fr", city: "Paris", website: "https://www.senioradom.com", phone: "+33 1 47 01 84 84", dirigeant: "Jean-Marc Galliano", role: "CEO", effectif: "25" },
+
+  // ============ BIOTECH CH (8) ============
+  { name: "AC Immune", sector: "biotech", country: "ch", city: "Lausanne", website: "https://www.acimmune.com", phone: "+41 21 345 91 21", dirigeant: "Andrea Pfeifer", role: "CEO & co-fondatrice", effectif: "150" },
+  { name: "Idorsia Pharmaceuticals", sector: "biotech", country: "ch", city: "Allschwil", website: "https://www.idorsia.com", phone: "+41 58 844 00 00", dirigeant: "Jean-Paul Clozel", role: "CEO & co-fondateur", effectif: "850" },
+  { name: "Molecular Partners", sector: "biotech", country: "ch", city: "Schlieren", website: "https://www.molecularpartners.com", phone: "+41 44 755 77 00", dirigeant: "Patrick Amstutz", role: "CEO", effectif: "150" },
+  { name: "Relief Therapeutics", sector: "biotech", country: "ch", city: "Genève", website: "https://www.relieftherapeutics.com", phone: "+41 22 545 11 16", dirigeant: "Jack Weinstein", role: "CFO/CEO", effectif: "20" },
+  { name: "Santhera Pharmaceuticals", sector: "biotech", country: "ch", city: "Pratteln", website: "https://www.santhera.com", phone: "+41 61 906 89 50", dirigeant: "Dario Eklund", role: "CEO", effectif: "70" },
+  { name: "Newron Pharmaceuticals", sector: "biotech", country: "ch", city: "Bresso", website: "https://www.newron.com", phone: "+41 61 951 16 30", dirigeant: "Stefan Weber", role: "CEO", effectif: "40" },
+  { name: "Addex Therapeutics", sector: "biotech", country: "ch", city: "Plan-les-Ouates", website: "https://www.addextherapeutics.com", phone: "+41 22 884 15 55", dirigeant: "Tim Dyer", role: "CEO", effectif: "30" },
+  { name: "Basilea Pharmaceutica", sector: "biotech", country: "ch", city: "Allschwil", website: "https://www.basilea.com", phone: "+41 61 606 11 11", dirigeant: "David Veitch", role: "CEO", effectif: "150" },
+
+  // ============ MEDTECH CH (8) ============
+  { name: "Sonova", sector: "medtech", country: "ch", city: "Stäfa", website: "https://www.sonova.com", phone: "+41 58 928 33 33", dirigeant: "Arnd Kaldowski", role: "CEO", effectif: "17000" },
+  { name: "Straumann Group", sector: "medtech", country: "ch", city: "Bâle", website: "https://www.straumann.com", phone: "+41 61 965 11 11", dirigeant: "Guillaume Daniellot", role: "CEO", effectif: "10000" },
+  { name: "Ypsomed", sector: "medtech", country: "ch", city: "Burgdorf", website: "https://www.ypsomed.com", phone: "+41 34 424 41 11", dirigeant: "Simon Michel", role: "CEO", effectif: "2500" },
+  { name: "Medartis", sector: "medtech", country: "ch", city: "Bâle", website: "https://www.medartis.com", phone: "+41 61 633 34 34", dirigeant: "Christoph Brönnimann", role: "CEO", effectif: "750" },
+  { name: "Sensirion", sector: "medtech", country: "ch", city: "Stäfa", website: "https://www.sensirion.com", phone: "+41 44 306 40 00", dirigeant: "Marc von Waldkirch", role: "CEO", effectif: "1000" },
+  { name: "Distalmotion", sector: "medtech", country: "ch", city: "Epalinges", website: "https://www.distalmotion.com", phone: "+41 21 311 50 30", dirigeant: "Greg Roche", role: "CEO", effectif: "200" },
+  { name: "Mindmaze", sector: "medtech", country: "ch", city: "Lausanne", website: "https://www.mindmaze.com", phone: "+41 21 311 50 60", dirigeant: "Tej Tadi", role: "CEO & fondateur", effectif: "180" },
+  { name: "Nanolive", sector: "medtech", country: "ch", city: "Tolochenaz", website: "https://www.nanolive.ch", phone: "+41 21 802 11 50", dirigeant: "Yann Cotte", role: "CEO & co-fondateur", effectif: "30" },
+
+  // ============ AGRITECH CH (5) ============
+  { name: "Gamaya", sector: "agritech", country: "ch", city: "Lausanne", website: "https://www.gamaya.com", phone: "+41 21 552 02 80", dirigeant: "Yosef Akhtman", role: "CEO & co-fondateur", effectif: "40" },
+  { name: "Ecorobotix", sector: "agritech", country: "ch", city: "Yverdon-les-Bains", website: "https://www.ecorobotix.com", phone: "+41 24 588 20 50", dirigeant: "Aurélien Demaurex", role: "CEO & co-fondateur", effectif: "60" },
+  { name: "Climeworks", sector: "agritech", country: "ch", city: "Zurich", website: "https://www.climeworks.com", phone: "+41 44 533 29 99", dirigeant: "Christoph Gebald", role: "CEO & co-fondateur", effectif: "300" },
+  { name: "Alogia", sector: "silvertech", country: "fr", city: "Paris", website: "https://alogiacare.fr", phone: "+33 1 89 71 25 88", dirigeant: "Alexandre Petit", role: "CEO & fondateur", effectif: "20" },
+  { name: "Picterra", sector: "agritech", country: "ch", city: "Lausanne", website: "https://picterra.ch", phone: null, dirigeant: "Pierrick Poulenas", role: "CEO & co-fondateur", effectif: "20" },
+
+  // ============ DEEPTECH CH (6) ============
+  { name: "Sophia Genetics", sector: "deeptech", country: "ch", city: "Saint-Sulpice", website: "https://www.sophiagenetics.com", phone: "+41 21 533 10 30", dirigeant: "Jurgi Camblong", role: "CEO & co-fondateur", effectif: "450" },
+  { name: "Nexthink", sector: "deeptech", country: "ch", city: "Prilly", website: "https://www.nexthink.com", phone: "+41 21 802 20 60", dirigeant: "Pedro Bados", role: "CEO & co-fondateur", effectif: "1000" },
+  { name: "Beekeeper", sector: "deeptech", country: "ch", city: "Zurich", website: "https://www.beekeeper.io", phone: "+41 44 510 21 90", dirigeant: "Cristian Grossmann", role: "CEO & co-fondateur", effectif: "300" },
+  { name: "Daedalean", sector: "deeptech", country: "ch", city: "Zurich", website: "https://www.daedalean.ai", phone: null, dirigeant: "Luuk van Dijk", role: "CEO & co-fondateur", effectif: "60" },
+  { name: "Anybotics", sector: "deeptech", country: "ch", city: "Zurich", website: "https://www.anybotics.com", phone: "+41 44 552 36 50", dirigeant: "Péter Fankhauser", role: "CEO & co-fondateur", effectif: "150" },
+  { name: "Scandit", sector: "deeptech", country: "ch", city: "Zurich", website: "https://www.scandit.com", phone: "+41 43 505 11 11", dirigeant: "Samuel Mueller", role: "CEO & co-fondateur", effectif: "400" },
+
+  // ============ SILVERTECH CH (3) ============
+  { name: "Senevita", sector: "silvertech", country: "ch", city: "Münchenbuchsee", website: "https://www.senevita.ch", phone: "+41 31 868 88 88", dirigeant: "Patric Bhend", role: "CEO", effectif: "2000" },
+  { name: "RetinAI Medical", sector: "silvertech", country: "ch", city: "Berne", website: "https://www.retinai.com", phone: null, dirigeant: "Carlos Ciller", role: "CEO & co-fondateur", effectif: "30" },
+  { name: "Pix4D", sector: "silvertech", country: "ch", city: "Prilly", website: "https://www.pix4d.com", phone: "+41 21 552 05 90", dirigeant: "Christoph Strecha", role: "Founder", effectif: "180" },
+];
+
+// Add an id + initialize lead state from localStorage
+PROSPECTS_DATA.forEach((p, i) => { p.id = i + 1; });
+
+// ===========================
+// LOCALSTORAGE STATE
+// ===========================
+const LS_KEY = 'lbd_intelligence_state_v1';
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch (e) { return {}; }
+}
+function saveState() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) {}
+}
+let state = Object.assign({
+  leads: {}, // { id: { status, note, fav, rdvDate } }
+}, loadState());
+
+function getLead(id) {
+  if (!state.leads[id]) state.leads[id] = { status: 'todo', note: '', fav: false, rdvDate: '' };
+  const ld = state.leads[id];
+  // Migrate old status → new stage (one-time, in-place)
+  if (!ld.stage) {
+    const map = { todo: 'cold_call', contacte: 'to_recall', rdv: 'meeting_confirmed', closed: 'closed', refused: 'refused' };
+    ld.stage = map[ld.status] || 'cold_call';
+  }
+  // Ensure all pipeline fields exist
+  if (ld.objection === undefined) ld.objection = '';
+  if (ld.rappel === undefined) ld.rappel = '';
+  if (ld.meetingDate === undefined) ld.meetingDate = ld.rdvDate || '';
+  if (ld.meetingTime === undefined) ld.meetingTime = '';
+  if (ld.dealType === undefined) ld.dealType = '';
+  if (ld.dealValue === undefined) ld.dealValue = 0;
+  if (ld.dealRecurrence === undefined) ld.dealRecurrence = '';
+  if (ld.dealDate === undefined) ld.dealDate = '';
+  return ld;
+}
+
+// ===========================
+// PIPELINE STAGES
+// ===========================
+const STAGE_GROUPS = {
+  all:       null,
+  cold_call: ['cold_call'],
+  to_recall: ['to_recall', 'no_answer'],
+  meeting:   ['meeting_to_set', 'meeting_confirmed'],
+  closed:    ['closed'],
+  refused:   ['refused'],
+};
+const STAGE_LABELS = {
+  cold_call:         'À appeler',
+  to_recall:         'À rappeler',
+  no_answer:         'Pas de réponse',
+  meeting_to_set:    'RDV à poser',
+  meeting_confirmed: 'RDV confirmé',
+  closed:            'Client',
+  refused:           'Refus',
+};
+const DEAL_TYPE_LABELS = { site_vitrine:'🌐 Site', brand:'✨ Brand', seo:'🔍 SEO', pack:'📦 Pack', autre:'✏️ Autre' };
+const DEAL_REC_LABELS = { one_shot:'One-shot', mensuel:'Mensuel', trimestriel:'Trimestriel' };
+function currentStage(id) { return getLead(id).stage || 'cold_call'; }
+function moveStage(id, newStage, patch) {
+  const ld = getLead(id);
+  ld.stage = newStage;
+  if (patch) Object.assign(ld, patch);
+  // Keep old status in sync for backward compat
+  const revMap = { cold_call: 'todo', to_recall: 'contacte', no_answer: 'contacte', meeting_to_set: 'rdv', meeting_confirmed: 'rdv', closed: 'closed', refused: 'refused' };
+  ld.status = revMap[newStage] || 'todo';
+  saveState();
+  pipelineToast('✓ → ' + (STAGE_LABELS[newStage] || newStage), 'success');
+  renderListView();
+  renderStats();
+  updatePipelineTabCounts();
+}
+function formatDateFr(iso) {
+  if (!iso) return '';
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+function pipelineToast(msg, type) {
+  const c = document.getElementById('pipeline-toasts');
+  if (!c) return;
+  const t = document.createElement('div');
+  t.className = 'toast ' + (type || '');
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2200);
+}
+function updatePipelineTabCounts() {
+  const byStage = {};
+  PROSPECTS_DATA.forEach(p => {
+    const s = currentStage(p.id);
+    byStage[s] = (byStage[s] || 0) + 1;
+  });
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set('cnt-all', PROSPECTS_DATA.length);
+  set('cnt-cold_call', byStage.cold_call || 0);
+  set('cnt-to_recall', (byStage.to_recall || 0) + (byStage.no_answer || 0));
+  set('cnt-meeting', (byStage.meeting_to_set || 0) + (byStage.meeting_confirmed || 0));
+  set('cnt-closed', byStage.closed || 0);
+  set('cnt-refused', byStage.refused || 0);
+}
+
+// ===========================
+// HELPERS
+// ===========================
+const filters = { sector: 'all', country: 'all', site: 'all', status: 'all', fav: 'all', search: '', heat: 'all', sort: 'heat', pipelineTab: 'all' };
+let currentView = 'list';
+
+// === HEAT SCORE — calcule la chaleur d'un lead (0-10) ===
+// Facteurs : pas de site, petit effectif (TPE/PME idéales), secteur high-value, pays prioritaire
+function calcHeat(p) {
+  let s = 0;
+  // Pas de site = +4 (énorme opportunité refonte/création)
+  if (!p.website) s += 4;
+  // Effectif idéal 10-100 = +3, 5-10 = +2, autres = +1
+  const eff = parseInt(String(p.effectif||'0').replace(/\D/g,''), 10) || 0;
+  if (eff >= 10 && eff <= 100) s += 3;
+  else if (eff >= 5 && eff < 10) s += 2;
+  else if (eff > 0) s += 1;
+  // Secteurs high-value : biotech/medtech (gros budgets) = +2
+  if (p.sector === 'biotech' || p.sector === 'medtech') s += 2;
+  else if (p.sector === 'deeptech' || p.sector === 'agritech') s += 1;
+  // FR = +1 (plus accessible démarchage)
+  if (p.country === 'fr') s += 1;
+  // Dirigeant connu = +1 (point de contact identifié)
+  if (p.dirigeant) s += 1;
+  // Téléphone = +1
+  if (p.phone) s += 1;
+  return Math.min(s, 12);
+}
+function heatLevel(s) {
+  if (s >= 9) return 'burning';
+  if (s >= 6) return 'hot';
+  if (s >= 3) return 'warm';
+  return 'cold';
+}
+function heatLabel(level) {
+  return { burning: '🔥🔥 BRÛLANT', hot: '🔥 CHAUD', warm: '🌡️ TIÈDE', cold: '❄️ FROID' }[level] || '';
+}
+function buildHeatBadge(p) {
+  const score = calcHeat(p);
+  const lvl = heatLevel(score);
+  return `<span class="heat ${lvl}" title="Score chaleur ${score}/12">${heatLabel(lvl)}</span>`;
+}
+
+// === COACH PHRASES — phrases motivantes par stage ===
+const COACH = {
+  todo: [
+    "Spoiler : il va pas se rappeler tout seul.",
+    "Chaque appel = un concurrent qui ne le fait pas.",
+    "Le téléphone, c'est ton arme. Dégaine.",
+    "Il a un problème. T'as la solution. Vas-y.",
+    "Les millionnaires ont commencé par des coups de fil.",
+  ],
+  contacte: [
+    "Bien joué. Maintenant ne le laisse pas refroidir.",
+    "Le 1er contact c'est planter. Le 2ème c'est arroser.",
+    "80% des deals se ferment au 5ème touch.",
+    "Relance dans 48h max sinon il t'oublie.",
+  ],
+  rdv: [
+    "Un RDV dans l'agenda = du cash dans ta poche.",
+    "Prépare le call. Il sera pas comme les autres.",
+    "Closer un RDV c'est une science. Tu maîtrises.",
+  ],
+  closed: [
+    "Deal closé. T'es un monstre.",
+    "Premier de ce mois. Y'en aura d'autres.",
+    "Cash collecté. On passe au suivant.",
+  ],
+  refused: [
+    "Michael Jordan a été recalé aussi. Suite.",
+    "Un NO c'est juste un YES en attente.",
+    "Note l'objection. Reviens dans 6 mois.",
+  ],
+};
+function pickCoach(stage) {
+  const pool = COACH[stage] || COACH.todo;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// === CONFETTI ===
+function launchConfetti() {
+  const host = document.getElementById('confetti-host') || document.body;
+  for (let i = 0; i < 50; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-piece';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.animationDelay = (Math.random() * 0.3) + 's';
+    p.style.animationDuration = (1.8 + Math.random() * 1.2) + 's';
+    p.style.opacity = 0.4 + Math.random() * 0.6;
+    p.style.transform = `rotate(${Math.random() * 360}deg)`;
+    host.appendChild(p);
+    setTimeout(() => p.remove(), 3500);
+  }
+}
+
+// === TOAST ===
+function toast(msg, ms) {
+  const host = document.getElementById('toast-host');
+  if (!host) return;
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  host.appendChild(el);
+  setTimeout(() => el.remove(), ms || 3000);
+}
+
+function escAttr(s) { return String(s||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function flag(c) { return c === 'fr' ? '🇫🇷' : c === 'ch' ? '🇨🇭' : '🌍'; }
+function ini(s) {
+  if (!s) return '?';
+  const w = s.split(/\s+/).filter(Boolean);
+  return ((w[0]||'').charAt(0) + (w[1]||'').charAt(0)).toUpperCase() || s.charAt(0).toUpperCase();
+}
+function linkedinUrl(p) {
+  // Native LinkedIn search (not Google) — opens directly on linkedin.com
+  if (p.dirigeant) {
+    return 'https://www.linkedin.com/search/results/people/?keywords=' + encodeURIComponent(p.dirigeant + ' ' + p.name);
+  }
+  return 'https://www.linkedin.com/search/results/companies/?keywords=' + encodeURIComponent(p.name);
+}
+function mapsUrl(p) {
+  return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.name + ' ' + p.city + ' ' + (p.country === 'ch' ? 'Suisse' : 'France'));
+}
+function statusLabel(s) {
+  return { todo: '⚪ À contacter', contacte: '🟠 Contacté', rdv: '🔵 RDV pris', closed: '🟢 Closed', refused: '🔴 Refusé' }[s] || s;
+}
+
+// ===========================
+// FILTERING + SORTING
+// ===========================
+function applyFilters() {
+  let arr = PROSPECTS_DATA.filter(p => {
+    const ld = getLead(p.id);
+    if (filters.sector !== 'all' && p.sector !== filters.sector) return false;
+    if (filters.country !== 'all' && p.country !== filters.country) return false;
+    if (filters.site === 'yes' && !p.website) return false;
+    if (filters.site === 'no' && p.website) return false;
+    if (filters.status !== 'all' && ld.status !== filters.status) return false;
+    // Pipeline tab filter (stage-based)
+    if (filters.pipelineTab && filters.pipelineTab !== 'all') {
+      const allowed = STAGE_GROUPS[filters.pipelineTab] || [];
+      if (!allowed.includes(ld.stage || 'cold_call')) return false;
+    }
+    if (filters.fav === 'yes' && !ld.fav) return false;
+    if (filters.heat !== 'all' && heatLevel(calcHeat(p)) !== filters.heat) return false;
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      const hay = (p.name + ' ' + p.city + ' ' + (p.dirigeant||'') + ' ' + p.sector).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+  // Sort
+  if (filters.sort === 'heat') {
+    arr.sort((a, b) => calcHeat(b) - calcHeat(a));
+  } else if (filters.sort === 'name') {
+    arr.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'fr'));
+  } else if (filters.sort === 'effectif') {
+    arr.sort((a, b) => (parseInt(String(b.effectif||0).replace(/\D/g,''))||0) - (parseInt(String(a.effectif||0).replace(/\D/g,''))||0));
+  } else if (filters.sort === 'recent') {
+    arr.sort((a, b) => b.id - a.id);
+  }
+  return arr;
+}
+
+// ===========================
+// STATS RENDER
+// ===========================
+function renderStats() {
+  const total = PROSPECTS_DATA.length;
+  let contacted = 0, rdv = 0, closed = 0, fav = 0, todo = 0, refused = 0;
+  PROSPECTS_DATA.forEach(p => {
+    const ld = getLead(p.id);
+    if (ld.status === 'contacte') contacted++;
+    if (ld.status === 'rdv') rdv++;
+    if (ld.status === 'closed') closed++;
+    if (ld.status === 'todo') todo++;
+    if (ld.status === 'refused') refused++;
+    if (ld.fav) fav++;
+  });
+  const stats = [
+    { num: total, lab: 'Leads totaux', cls: '' },
+    { num: todo, lab: 'À contacter', cls: '' },
+    { num: contacted, lab: 'Contactés', cls: 'orange' },
+    { num: rdv, lab: 'RDV pris', cls: 'blue' },
+    { num: closed, lab: 'Closed', cls: 'green' },
+    { num: fav, lab: '⭐ Favoris', cls: 'pink' },
+  ];
+  document.getElementById('stats-strip').innerHTML = stats.map(s =>
+    `<div class="s-card ${s.cls}"><div class="s-num">${s.num}</div><div class="s-lab">${s.lab}</div></div>`
+  ).join('');
+
+  // Sidebar counters
+  document.getElementById('ct-status-all').textContent = total;
+  document.getElementById('ct-status-todo').textContent = todo;
+  document.getElementById('ct-status-contacte').textContent = contacted;
+  document.getElementById('ct-status-rdv').textContent = rdv;
+  document.getElementById('ct-status-closed').textContent = closed;
+  document.getElementById('ct-status-refused').textContent = refused;
+  document.getElementById('ct-fav').textContent = fav;
+  // Heat counters
+  let hb=0,hh=0,hw=0,hc=0;
+  PROSPECTS_DATA.forEach(p=>{const l=heatLevel(calcHeat(p));if(l==='burning')hb++;else if(l==='hot')hh++;else if(l==='warm')hw++;else hc++;});
+  const setIfExists = (id,v) => { const el=document.getElementById(id); if(el) el.textContent = v; };
+  setIfExists('ct-heat-burning', hb);
+  setIfExists('ct-heat-hot', hh);
+  setIfExists('ct-heat-warm', hw);
+  setIfExists('ct-heat-cold', hc);
+  // Tab counters
+  document.getElementById('tab-list-ct').textContent = applyFilters().length;
+  document.getElementById('tab-cal-ct').textContent = rdv;
+}
+
+// ===========================
+// CARD BUILDER
+// ===========================
+function buildCard(p) {
+  const ld = getLead(p.id);
+  const webAct = p.website
+    ? `<a class="act web" href="${escAttr(p.website)}" target="_blank" rel="noopener">🌐 Site</a>`
+    : `<span class="act web disabled">❌ Site</span>`;
+  const lkAct = `<a class="act linkedin" href="${escAttr(linkedinUrl(p))}" target="_blank" rel="noopener">🔗 LinkedIn</a>`;
+  // Maps: unlocked only for biotech (demo teaser). Locked + greyed for all other sectors.
+  const mapsAct = (p.sector === 'biotech')
+    ? `<a class="act maps" href="${escAttr(mapsUrl(p))}" target="_blank" rel="noopener">📍 Maps</a>`
+    : `<button class="act maps disabled locked" data-paywall="maps" data-id="${p.id}" title="Débloquer Google Maps pour tous les secteurs">📍 Maps</button>`;
+  const mailAct = `<button class="act mail locked" data-paywall="email" data-id="${p.id}">✉️ Email</button>`;
+  const noteAct = `<button class="act note" data-action="open-detail" data-id="${p.id}" data-tab="notes">📝 ${ld.note ? 'Notes ✓' : 'Notes'}</button>`;
+  const ficheAct = `<button class="act web" data-action="open-detail" data-id="${p.id}" data-tab="info">📋 Fiche</button>`;
+
+  const siteBadge = p.website
+    ? `<span class="b b-site">✅ Site</span>`
+    : `<span class="b b-nosite">❌ Sans site</span>`;
+
+  // Big phone number block (clickable, pulsing)
+  const phoneBlock = p.phone
+    ? `<a class="phone-big" href="tel:${escAttr(p.phone.replace(/\s/g,''))}"><span class="icon">📞</span> ${escHtml(p.phone)}</a>`
+    : `<span class="phone-big" style="opacity:.4;cursor:default"><span class="icon">📞</span> Pas de numéro</span>`;
+
+  // Current pipeline stage + tag + actions + meta badges
+  const stage = ld.stage || 'cold_call';
+  const stageTagHtml = `<span class="stage-tag" data-s="${stage}">${escHtml(STAGE_LABELS[stage] || stage)}</span>`;
+  const actionsHtml = buildPipelineActions(p.id, stage);
+  const metaBadgesHtml = buildPipelineMetaBadges(ld);
+
+  // Coach phrase based on current status
+  const coachText = pickCoach(ld.status);
+
+  return `
+    <div class="card s-${p.sector} ${ld.fav ? 'fav' : ''}" data-id="${p.id}">
+      <button class="fav-btn ${ld.fav ? 'on' : ''}" data-action="fav" data-id="${p.id}" title="Favori">${ld.fav ? '★' : '☆'}</button>
+      <div class="card-top">
+        <div class="av-circle">${escHtml(ini(p.name))}</div>
+        <div class="card-info">
+          <div class="card-name" data-action="open-detail" data-id="${p.id}" data-tab="info" title="${escAttr(p.name)}">${escHtml(p.name)}</div>
+          <div class="card-meta-line"><span class="flag">${flag(p.country)}</span> ${escHtml(p.city)}</div>
+        </div>
+        ${stageTagHtml}
+      </div>
+      <div class="card-badges">
+        ${buildHeatBadge(p)}
+        <span class="b b-${p.sector}">${escHtml(p.sector)}</span>
+        ${siteBadge}
+        ${p.effectif ? `<span class="b b-eff">👥 ${escHtml(p.effectif)}</span>` : ''}
+      </div>
+      ${metaBadgesHtml ? `<div class="meta-badges">${metaBadgesHtml}</div>` : ''}
+      <div class="card-dirig">
+        ${p.dirigeant
+          ? `👤 <strong>${escHtml(p.dirigeant)}</strong>${p.role ? ' <span class="role">— '+escHtml(p.role)+'</span>' : ''}`
+          : `<span class="empty">Dirigeant à trouver</span>`}
+      </div>
+      <div style="margin: 12px 0 4px">${phoneBlock}</div>
+      <div class="card-actions">
+        ${webAct}${lkAct}${mapsAct}${ficheAct}
+        ${mailAct}
+      </div>
+      <textarea class="card-notes-inline" data-note-id="${p.id}" placeholder="📝 Notes : contexte, prochaines étapes, objections...">${escHtml(ld.note || '')}</textarea>
+      <div class="pipeline-actions">
+        ${actionsHtml}
+      </div>
+    </div>
+  `;
+}
+
+// Build the stage-specific action buttons for a card
+function buildPipelineActions(id, stage) {
+  if (stage === 'cold_call') {
+    return `
+      <button type="button" class="pact pact-interested" data-pact="interested" data-id="${id}">✅ Intéressé</button>
+      <button type="button" class="pact pact-noreply" data-pact="noreply" data-id="${id}">📵 Pas de réponse</button>
+      <button type="button" class="pact pact-refuse" data-pact="refuse" data-id="${id}">🚫 Pas intéressé</button>`;
+  }
+  if (stage === 'to_recall') {
+    return `
+      <button type="button" class="pact pact-back" data-pact="back-cold" data-id="${id}" title="Retour à appeler">◀</button>
+      <button type="button" class="pact pact-meeting" data-pact="set-meeting" data-id="${id}">📅 Poser RDV</button>
+      <button type="button" class="pact pact-refuse" data-pact="refuse" data-id="${id}">🚫 Refus</button>`;
+  }
+  if (stage === 'no_answer') {
+    return `
+      <button type="button" class="pact pact-back" data-pact="back-cold" data-id="${id}" title="Relancer en cold">◀ Relance</button>
+      <button type="button" class="pact pact-interested" data-pact="interested" data-id="${id}">✅ A répondu</button>
+      <button type="button" class="pact pact-refuse" data-pact="refuse" data-id="${id}">🚫 Refus</button>`;
+  }
+  if (stage === 'meeting_to_set') {
+    return `
+      <button type="button" class="pact pact-back" data-pact="back-to_recall" data-id="${id}">◀</button>
+      <button type="button" class="pact pact-confirm" data-pact="confirm-meeting" data-id="${id}">✅ RDV confirmé</button>
+      <button type="button" class="pact pact-refuse" data-pact="refuse" data-id="${id}">🚫 Annulé</button>`;
+  }
+  if (stage === 'meeting_confirmed') {
+    return `
+      <button type="button" class="pact pact-back" data-pact="back-meeting_to_set" data-id="${id}">◀</button>
+      <button type="button" class="pact pact-close" data-pact="close-deal" data-id="${id}">💰 Client closé</button>
+      <button type="button" class="pact pact-refuse" data-pact="refuse" data-id="${id}">🚫 Perdu</button>`;
+  }
+  if (stage === 'closed') {
+    return `
+      <button type="button" class="pact pact-back" data-pact="back-meeting_confirmed" data-id="${id}">◀</button>
+      <button type="button" class="pact pact-close" data-pact="edit-deal" data-id="${id}">✏️ Éditer deal</button>`;
+  }
+  if (stage === 'refused') {
+    return `
+      <button type="button" class="pact pact-relance" data-pact="relance" data-id="${id}">◀ Relancer</button>
+      <button type="button" class="pact pact-refuse" data-pact="edit-refuse" data-id="${id}">✏️ Objection</button>`;
+  }
+  return '';
+}
+
+// Build meta badges (rappel, rdv, deal, objection) shown on the card
+function buildPipelineMetaBadges(ld) {
+  const badges = [];
+  if (ld.stage === 'refused' && ld.objection) {
+    badges.push(`<span class="badge-meta refused">❌ ${escHtml(ld.objection)}</span>`);
+  }
+  if ((ld.stage === 'to_recall' || ld.stage === 'no_answer') && ld.rappel) {
+    badges.push(`<span class="badge-meta recall">🔔 Rappel : ${formatDateFr(ld.rappel)}</span>`);
+  }
+  if ((ld.stage === 'meeting_to_set' || ld.stage === 'meeting_confirmed') && ld.meetingDate) {
+    badges.push(`<span class="badge-meta meeting">📅 RDV : ${formatDateFr(ld.meetingDate)}${ld.meetingTime ? ' · ' + ld.meetingTime : ''}</span>`);
+  }
+  if (ld.stage === 'closed' && (ld.dealValue || ld.dealType)) {
+    const parts = [];
+    if (ld.dealValue) parts.push(ld.dealValue + ' €');
+    if (ld.dealType) parts.push(DEAL_TYPE_LABELS[ld.dealType] || ld.dealType);
+    if (ld.dealRecurrence) parts.push(DEAL_REC_LABELS[ld.dealRecurrence] || ld.dealRecurrence);
+    badges.push(`<span class="badge-meta deal">💰 ${parts.join(' · ')}</span>`);
+  }
+  return badges.join('');
+}
+
+// ===========================
+// VIEW RENDERERS
+// ===========================
+function renderListView() {
+  const list = applyFilters();
+  document.getElementById('visible-count').textContent = list.length;
+  const grid = document.getElementById('view-list');
+  if (!list.length) {
+    grid.innerHTML = '<div class="empty"><div class="ic">🔍</div><div>Aucun lead ne correspond à tes filtres.</div></div>';
+    return;
+  }
+  grid.innerHTML = list.map(buildCard).join('');
+}
+
+function renderPipelineView() {
+  const cols = [
+    { key: 'todo', label: '⚪ À contacter' },
+    { key: 'contacte', label: '🟠 Contactés' },
+    { key: 'rdv', label: '🔵 RDV pris' },
+    { key: 'closed', label: '🟢 Closed' },
+    { key: 'refused', label: '🔴 Refusés' },
+  ];
+  const list = applyFilters();
+  document.getElementById('visible-count').textContent = list.length;
+  const html = cols.map(col => {
+    const items = list.filter(p => getLead(p.id).status === col.key);
+    return `
+      <div class="kcol ${col.key}">
+        <h3>${col.label} <span class="num">${items.length}</span></h3>
+        ${items.length ? items.map(p => `
+          <div class="kitem" data-id="${p.id}">
+            <div class="n">${escHtml(p.name)}</div>
+            <div class="m">${flag(p.country)} ${escHtml(p.city)} · ${escHtml(p.sector)}</div>
+          </div>
+        `).join('') : '<div class="kempty">Vide</div>'}
+      </div>
+    `;
+  }).join('');
+  document.getElementById('view-pipeline').innerHTML = html;
+}
+
+function renderCalendarView() {
+  const list = PROSPECTS_DATA.filter(p => getLead(p.id).status === 'rdv');
+  document.getElementById('visible-count').textContent = list.length;
+  const cal = document.getElementById('view-calendar');
+  if (!list.length) {
+    cal.innerHTML = '<div class="cal-empty"><div style="font-size:50px;margin-bottom:12px">📅</div><div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px">Aucun RDV programmé</div><div>Passe un lead en statut "🔵 RDV pris" pour le voir ici.</div></div>';
+    return;
+  }
+  cal.innerHTML = list.map(p => {
+    const ld = getLead(p.id);
+    let dStr = ld.rdvDate || '';
+    let day = '?', mon = '';
+    if (dStr) {
+      const d = new Date(dStr);
+      day = d.getDate();
+      mon = d.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', '');
+    }
+    return `
+      <div class="cal-item">
+        <div class="cal-date"><div class="d">${day}</div><div class="m">${mon || '—'}</div></div>
+        <div class="cal-info">
+          <div class="n">${escHtml(p.name)} · ${flag(p.country)} ${escHtml(p.city)}</div>
+          <div class="m">${p.dirigeant ? '👤 '+escHtml(p.dirigeant)+' · ' : ''}${escHtml(statusLabel('rdv'))}</div>
+        </div>
+        <button class="btn" data-action="open-card" data-id="${p.id}">Ouvrir</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderCurrent() {
+  if (currentView === 'list') renderListView();
+  else if (currentView === 'pipeline') renderPipelineView();
+  else if (currentView === 'calendar') renderCalendarView();
+  else if (currentView === 'analytics') renderAnalyticsView();
+  renderStats();
+  renderHotBanner();
+}
+
+// === HOT BANNER (top burning leads insight) ===
+function renderHotBanner() {
+  const host = document.getElementById('hot-banner-host');
+  if (!host) return;
+  if (currentView !== 'list') { host.innerHTML = ''; return; }
+  const burning = PROSPECTS_DATA.filter(p => heatLevel(calcHeat(p)) === 'burning').length;
+  const hot = PROSPECTS_DATA.filter(p => heatLevel(calcHeat(p)) === 'hot').length;
+  host.innerHTML = `
+    <div class="hot-banner">
+      <div class="icon">🔥</div>
+      <div class="info">
+        <div class="lab">— Insight du jour —</div>
+        <div class="text">${burning} leads <strong style="color:#fff">BRÛLANTS</strong> et ${hot} <strong style="color:#fff">CHAUDS</strong> à appeler en priorité aujourd'hui.</div>
+      </div>
+    </div>
+  `;
+}
+
+// === ANALYTICS VIEW ===
+function renderAnalyticsView() {
+  const total = PROSPECTS_DATA.length;
+  let contacted = 0, rdv = 0, closed = 0, refused = 0, todo = 0;
+  PROSPECTS_DATA.forEach(p => {
+    const ld = getLead(p.id);
+    if (ld.status === 'contacte') contacted++;
+    if (ld.status === 'rdv') rdv++;
+    if (ld.status === 'closed') closed++;
+    if (ld.status === 'refused') refused++;
+    if (ld.status === 'todo') todo++;
+  });
+  // Total touched = anyone who left "todo"
+  const touched = contacted + rdv + closed + refused;
+  const conversion = total > 0 ? ((closed / total) * 100).toFixed(1) : '0.0';
+
+  // KPIs
+  const kpis = [
+    { lab: 'Total leads', num: total },
+    { lab: 'À contacter', num: todo },
+    { lab: 'Contactés', num: contacted },
+    { lab: 'RDV pris', num: rdv },
+    { lab: 'Closés', num: closed },
+    { lab: 'Conversion', num: conversion + '%' },
+  ];
+
+  // Funnel
+  const steps = [
+    { name: 'Trouvés', ct: total, ref: total },
+    { name: 'Contactés', ct: touched, ref: total },
+    { name: 'RDV', ct: rdv + closed, ref: total },
+    { name: 'Closés', ct: closed, ref: total },
+  ];
+  const funnelHtml = steps.map(s => {
+    const pct = s.ref > 0 ? Math.round((s.ct / s.ref) * 100) : 0;
+    return `
+      <div class="funnel-step">
+        <div class="name">${s.name}</div>
+        <div class="bar">
+          <div class="fill" style="width:${pct}%"></div>
+          <div class="ct">${s.ct}</div>
+        </div>
+        <div class="pct">${pct}%</div>
+      </div>
+    `;
+  }).join('');
+
+  // Objections (mocked + real refused)
+  const objMock = [
+    { name: 'Pas de budget', ct: Math.max(2, Math.floor(refused * 0.35) + 2) },
+    { name: 'Mauvais timing', ct: Math.max(1, Math.floor(refused * 0.25) + 1) },
+    { name: 'Déjà un fournisseur', ct: Math.max(1, Math.floor(refused * 0.20) + 1) },
+    { name: 'Pas la bonne personne', ct: Math.max(1, Math.floor(refused * 0.10) + 1) },
+    { name: 'Autre', ct: Math.max(1, Math.floor(refused * 0.10)) },
+  ];
+  const objMax = Math.max(...objMock.map(o => o.ct));
+  const objHtml = objMock.map(o => {
+    const w = objMax > 0 ? (o.ct / objMax) * 100 : 0;
+    return `
+      <div class="obj-item">
+        <div class="name">${escHtml(o.name)}</div>
+        <div class="bar"><div class="fill" style="width:${w}%"></div></div>
+        <div class="ct">${o.ct}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Goals
+  const goals = [
+    { name: 'Contacts / sem', cur: contacted, target: 30 },
+    { name: 'RDV / sem', cur: rdv, target: 8 },
+    { name: 'Closés / sem', cur: closed, target: 3 },
+    { name: 'CA / sem', cur: closed * 1500, target: 5000, fmt: 'eur' },
+  ];
+  const goalsHtml = goals.map(g => {
+    const pct = Math.min(100, Math.round((g.cur / g.target) * 100));
+    const fmt = (v) => g.fmt === 'eur' ? new Intl.NumberFormat('fr-FR').format(v) + '€' : v;
+    return `
+      <div class="goal-item">
+        <div class="gname">${g.name}</div>
+        <div class="gvals">${fmt(g.cur)} <span class="target">/ ${fmt(g.target)}</span></div>
+        <div class="gbar"><div class="gfill" style="width:${pct}%"></div></div>
+      </div>
+    `;
+  }).join('');
+
+  // Heat distribution
+  const heatDist = { burning: 0, hot: 0, warm: 0, cold: 0 };
+  PROSPECTS_DATA.forEach(p => { heatDist[heatLevel(calcHeat(p))]++; });
+
+  document.getElementById('view-analytics').innerHTML = `
+    <div class="an-grid">
+      ${kpis.map(k => `<div class="an-card"><div class="lab">${k.lab}</div><div class="num">${k.num}</div></div>`).join('')}
+    </div>
+
+    <div class="an-section">
+      <h3>— Funnel de conversion — <span class="total">${total} prospects</span></h3>
+      <div class="funnel">${funnelHtml}</div>
+    </div>
+
+    <div class="an-section">
+      <h3>— Objections les plus fréquentes — <span class="total">${refused} refus</span></h3>
+      <div class="obj-list">${objHtml}</div>
+      <p style="margin-top:18px;font-size:11px;color:#888;font-style:italic;line-height:1.6">💡 Travaille en priorité l'objection "Pas de budget" → ajoute un module pricing flexible dans ton pitch.</p>
+    </div>
+
+    <div class="an-section">
+      <h3>— Objectifs de la semaine —</h3>
+      <div class="goals">${goalsHtml}</div>
+    </div>
+
+    <div class="an-section">
+      <h3>— Distribution par chaleur —</h3>
+      <div class="goals">
+        <div class="goal-item"><div class="gname">🔥🔥 Brûlants</div><div class="gvals">${heatDist.burning}</div><div class="gbar"><div class="gfill" style="width:${total>0?(heatDist.burning/total)*100:0}%"></div></div></div>
+        <div class="goal-item"><div class="gname">🔥 Chauds</div><div class="gvals">${heatDist.hot}</div><div class="gbar"><div class="gfill" style="width:${total>0?(heatDist.hot/total)*100:0}%"></div></div></div>
+        <div class="goal-item"><div class="gname">🌡️ Tièdes</div><div class="gvals">${heatDist.warm}</div><div class="gbar"><div class="gfill" style="width:${total>0?(heatDist.warm/total)*100:0}%"></div></div></div>
+        <div class="goal-item"><div class="gname">❄️ Froids</div><div class="gvals">${heatDist.cold}</div><div class="gbar"><div class="gfill" style="width:${total>0?(heatDist.cold/total)*100:0}%"></div></div></div>
+      </div>
+    </div>
+  `;
+}
+
+// === DETAIL MODAL (4 tabs : Fiche / Pitch IA / Notes / Devis) ===
+let _detailCurrentId = null;
+let _detailCurrentTab = 'info';
+function openDetailModal(id, startTab) {
+  const p = PROSPECTS_DATA.find(x => x.id === id);
+  if (!p) return;
+  _detailCurrentId = id;
+  _detailCurrentTab = startTab || 'info';
+  renderDetailModal();
+}
+function closeDetailModal() {
+  _detailCurrentId = null;
+  document.getElementById('detail-modal-host').innerHTML = '';
+}
+function switchDetailTab(tab) {
+  _detailCurrentTab = tab;
+  renderDetailModal();
+}
+function renderDetailModal() {
+  const id = _detailCurrentId;
+  if (!id) return;
+  const p = PROSPECTS_DATA.find(x => x.id === id);
+  const ld = getLead(id);
+  if (!p) return;
+
+  const meta = [
+    `${flag(p.country)} ${escHtml(p.city)}`,
+    escHtml(p.sector).toUpperCase(),
+    p.effectif ? `${escHtml(p.effectif)} salariés` : null,
+    `Score chaleur ${calcHeat(p)}/12`,
+  ].filter(Boolean).join(' · ');
+
+  const ficheBody = `
+    <div class="detail-grid">
+      <div class="detail-item"><div class="lab">Entreprise</div><div class="val">${escHtml(p.name)}</div></div>
+      <div class="detail-item"><div class="lab">Secteur</div><div class="val">${escHtml(p.sector)}</div></div>
+      <div class="detail-item"><div class="lab">Ville</div><div class="val">${escHtml(p.city)}</div></div>
+      <div class="detail-item"><div class="lab">Effectif</div><div class="val">${escHtml(p.effectif||'—')}</div></div>
+      <div class="detail-item"><div class="lab">Dirigeant</div><div class="val">${escHtml(p.dirigeant||'—')}</div></div>
+      <div class="detail-item"><div class="lab">Rôle</div><div class="val">${escHtml(p.role||'—')}</div></div>
+      <div class="detail-item"><div class="lab">Téléphone</div><div class="val">${p.phone ? `<a href="tel:${escAttr(p.phone.replace(/\s/g,''))}">${escHtml(p.phone)}</a>` : '—'}</div></div>
+      <div class="detail-item"><div class="lab">Site web</div><div class="val">${p.website ? `<a href="${escAttr(p.website)}" target="_blank" rel="noopener">${escHtml(p.website.replace(/^https?:\/\//,''))}</a>` : '<span style="color:#888">Aucun site (opportunité refonte)</span>'}</div></div>
+    </div>
+    <div class="detail-actions">
+      ${p.phone ? `<a class="btn primary" href="tel:${escAttr(p.phone.replace(/\s/g,''))}">📞 Appeler</a>` : ''}
+      <a class="btn" href="${escAttr(linkedinUrl(p))}" target="_blank" rel="noopener">🔗 LinkedIn</a>
+      <a class="btn" href="${escAttr(mapsUrl(p))}" target="_blank" rel="noopener">📍 Google Maps</a>
+      <button class="btn lock" data-paywall="email">✉️ Trouver email</button>
+      <button class="btn" data-action="fav-detail" data-id="${id}">${ld.fav ? '⭐ Favori ✓' : '☆ Ajouter favoris'}</button>
+    </div>
+  `;
+
+  // Pitch IA tab — locked but show what it would be
+  const pitchBody = `
+    <div class="pitch-types">
+      <button class="pitch-type-btn active">📞 Appel</button>
+      <button class="pitch-type-btn">📧 Email</button>
+      <button class="pitch-type-btn">💬 SMS</button>
+      <button class="pitch-type-btn">📱 LinkedIn DM</button>
+    </div>
+    <div class="pitch-locked-area" data-paywall="pitch">
+      <div class="lock-icon">🔒</div>
+      <div class="lock-text">Pitch IA verrouillé</div>
+      <div class="lock-sub">Génère un pitch personnalisé pour ${escHtml(p.dirigeant || p.name)} en 1 clic</div>
+      <button class="btn primary" data-paywall="pitch">⚡ Débloquer Pitch IA</button>
+      <div class="blurred">
+        Bonjour ${escHtml(p.dirigeant || 'Madame, Monsieur')}, je dirige ${'{{your_company}}'} et je travaille avec des entreprises ${escHtml(p.sector)} comme ${escHtml(p.name)}. J'ai vu que vous êtes basés à ${escHtml(p.city)} et vos résultats récents sont impressionnants. J'aimerais vous proposer 15 minutes pour échanger sur...
+      </div>
+    </div>
+  `;
+
+  // Notes tab
+  const notesBody = `
+    <div class="attempt-log">
+      <div class="lab">— Logger un contact —</div>
+      <div class="chip-row">
+        <button>📞 Appel</button>
+        <button>💬 SMS</button>
+        <button>📧 Email</button>
+        <button>📱 DM</button>
+      </div>
+      <div class="chip-row">
+        <button>📵 Pas répondu</button>
+        <button>📬 Messagerie</button>
+        <button>🔄 Rappel demandé</button>
+        <button>✅ Positif</button>
+        <button>❌ Négatif</button>
+      </div>
+      <textarea class="notes-textarea" id="lead-note-input" placeholder="Note libre — sauvegardée dans ton compte...">${escHtml(ld.note || '')}</textarea>
+      <div class="voice-locked" data-paywall="voice">
+        🎤 <span>Note vocale (verrouillée — débloque pour enregistrer ton appel)</span> 🔒
+      </div>
+      <div style="margin-top:14px;display:flex;gap:8px">
+        <button class="btn primary" data-action="save-note" data-id="${id}">💾 Sauvegarder la note</button>
+      </div>
+    </div>
+    <div class="attempt-history">
+      <h4>— Historique des contacts —</h4>
+      <div class="empty-history">Aucun contact loggué pour l'instant.</div>
+    </div>
+  `;
+
+  // Devis tab — locked
+  const devisBody = `
+    <div class="devis-locked" data-paywall="devis">
+      <div class="ic">📄</div>
+      <h3>Builder de devis verrouillé</h3>
+      <p>Crée et envoie des devis signés en ligne directement depuis ${escHtml(p.name)}</p>
+      <button class="btn primary" data-paywall="devis">⚡ Débloquer Devis</button>
+    </div>
+  `;
+
+  const tabs = [
+    { id: 'info', label: 'Fiche' },
+    { id: 'pitch', label: 'Pitch IA', locked: true },
+    { id: 'notes', label: 'Notes' },
+    { id: 'devis', label: 'Devis', locked: true },
+  ];
+
+  const tabsHtml = tabs.map(t =>
+    `<button class="dmodal-tab ${_detailCurrentTab === t.id ? 'active' : ''}" data-action="dtab" data-tab="${t.id}">${t.label}${t.locked ? '<span class="lock-mini">🔒</span>' : ''}</button>`
+  ).join('');
+
+  const bodyMap = { info: ficheBody, pitch: pitchBody, notes: notesBody, devis: devisBody };
+  const body = bodyMap[_detailCurrentTab] || ficheBody;
+
+  document.getElementById('detail-modal-host').innerHTML = `
+    <div class="dmodal-bg" id="dmodal-bg">
+      <div class="dmodal">
+        <div class="dmodal-head">
+          <div class="info">
+            <h2>${escHtml(p.name)}</h2>
+            <div class="meta">${meta}</div>
+          </div>
+          <button class="close-x" data-action="close-detail">✕</button>
+        </div>
+        <div class="dmodal-tabs">${tabsHtml}</div>
+        <div class="dmodal-body">
+          <div class="dmodal-panel active">${body}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ===========================
+// MODALS
+// ===========================
+function closeModal() {
+  document.getElementById('modal-container').innerHTML = '';
+}
+function showModal(html) {
+  document.getElementById('modal-container').innerHTML = `<div class="modal-bg" id="modal-bg">${html}</div>`;
+  document.getElementById('modal-bg').addEventListener('click', (e) => {
+    if (e.target.id === 'modal-bg') closeModal();
+  });
+}
+
+function openNoteModal(id) {
+  const p = PROSPECTS_DATA.find(x => x.id === id);
+  const ld = getLead(id);
+  showModal(`
+    <div class="modal">
+      <button class="x" onclick="closeModal()">✕</button>
+      <h2>📝 Note · ${escHtml(p.name)}</h2>
+      <div class="sub">Ajoute tes notes privées pour ce lead. Sauvegardé dans ton navigateur.</div>
+      <textarea id="note-input" placeholder="Ex: appelé le 15/04, à rappeler dans 1 semaine, intéressé par refonte site..."></textarea>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal()">Annuler</button>
+        <button class="btn primary" id="save-note">💾 Sauvegarder</button>
+      </div>
+    </div>
+  `);
+  document.getElementById('note-input').value = ld.note || '';
+  document.getElementById('save-note').onclick = () => {
+    ld.note = document.getElementById('note-input').value;
+    saveState();
+    closeModal();
+    renderCurrent();
+  };
+}
+
+function openRdvModal(id) {
+  const p = PROSPECTS_DATA.find(x => x.id === id);
+  const ld = getLead(id);
+  const today = new Date().toISOString().slice(0, 10);
+  showModal(`
+    <div class="modal">
+      <button class="x" onclick="closeModal()">✕</button>
+      <h2>📅 RDV · ${escHtml(p.name)}</h2>
+      <div class="sub">Programme un rendez-vous avec ${escHtml(p.dirigeant || 'ce lead')}. Sauvegardé dans ton navigateur.</div>
+      <input type="date" id="rdv-date" min="${today}" value="${ld.rdvDate || today}" />
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal()">Annuler</button>
+        <button class="btn primary" id="save-rdv">💾 Confirmer le RDV</button>
+      </div>
+    </div>
+  `);
+  document.getElementById('save-rdv').onclick = () => {
+    ld.rdvDate = document.getElementById('rdv-date').value;
+    ld.status = 'rdv';
+    saveState();
+    closeModal();
+    renderCurrent();
+  };
+}
+
+function openPaywall(feature) {
+  const features = {
+    email: { icon: '◆', title: 'VERIFIED EMAILS', desc: 'Access verified decision-maker emails in one click.' },
+    maps: { icon: '◆', title: 'GOOGLE MAPS INTEL', desc: 'Open every lead directly on Google Maps — full geo intel.' },
+    export: { icon: '◆', title: 'CSV EXPORT', desc: 'Export your filtered leads with every field.' },
+    bulk: { icon: '◆', title: 'BULK ACTIONS', desc: 'Apply actions to multiple leads at once.' },
+    pitch: { icon: '◆', title: 'AI PITCH ENGINE', desc: 'Generate personalized pitches in your brand voice.' },
+    voice: { icon: '◆', title: 'VOICE NOTES', desc: 'Record your calls and attach them to each lead.' },
+    devis: { icon: '◆', title: 'QUOTE BUILDER', desc: 'Create and e-sign quotes directly inside the platform.' },
+    unlock: { icon: '◆', title: 'FULL ACCESS', desc: 'Unlock the complete Intelligence Platform.' },
+  };
+  const f = features[feature] || features.unlock;
+  showModal(`
+    <div class="modal paywall">
+      <button class="x" onclick="closeModal()">✕</button>
+      <div class="icon-circle">${f.icon}</div>
+      <h2>${f.title}</h2>
+      <div class="sub">${f.desc}</div>
+      <ul class="feat-list">
+        <li>Verified executive emails &amp; phone numbers</li>
+        <li>Unlimited CSV export with every data field</li>
+        <li>AI outreach (email · SMS · LinkedIn)</li>
+        <li>Full pipeline · meetings · quotes · e-signature</li>
+        <li>500 to 1 000 fresh leads delivered each month</li>
+        <li>Priority support &amp; dedicated account manager</li>
+      </ul>
+      <div class="price-box">
+        <div class="p">CONTACT</div>
+        <div class="l">EXCLUSIVE ACCESS · ON REQUEST</div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal()">LATER</button>
+        <a class="btn primary" href="/lbd#access">REQUEST ACCESS →</a>
+      </div>
+    </div>
+  `);
+}
+
+// ===========================
+// EVENT DELEGATION
+// ===========================
+document.body.addEventListener('click', (e) => {
+  const t = e.target;
+
+  // Status pill
+  const statusBtn = t.closest('[data-action="status"]');
+  if (statusBtn) {
+    const id = parseInt(statusBtn.dataset.id);
+    const newStatus = statusBtn.dataset.status;
+    const ld = getLead(id);
+    const wasClosed = ld.status === 'closed';
+    if (newStatus === 'rdv' && ld.status !== 'rdv') {
+      openRdvModal(id);
+      return;
+    }
+    ld.status = newStatus;
+    if (newStatus !== 'rdv') ld.rdvDate = '';
+    saveState();
+    // Confetti + toast on first close!
+    if (newStatus === 'closed' && !wasClosed) {
+      launchConfetti();
+      const p = PROSPECTS_DATA.find(x => x.id === id);
+      toast('💰 ' + (p ? p.name : 'Lead') + ' closé !');
+    } else if (newStatus === 'contacte') {
+      toast('📞 Marqué contacté');
+    } else if (newStatus === 'refused') {
+      toast('Marqué refusé');
+    }
+    renderCurrent();
+    return;
+  }
+
+  // Favorite
+  const favBtn = t.closest('[data-action="fav"]');
+  if (favBtn) {
+    const id = parseInt(favBtn.dataset.id);
+    const ld = getLead(id);
+    ld.fav = !ld.fav;
+    saveState();
+    renderCurrent();
+    return;
+  }
+
+  // Note (legacy quick modal)
+  const noteBtn = t.closest('[data-action="note"]');
+  if (noteBtn) {
+    openNoteModal(parseInt(noteBtn.dataset.id));
+    return;
+  }
+
+  // Open detail modal (4 tabs)
+  const openDetailBtn = t.closest('[data-action="open-detail"]');
+  if (openDetailBtn) {
+    e.stopPropagation();
+    openDetailModal(parseInt(openDetailBtn.dataset.id), openDetailBtn.dataset.tab || 'info');
+    return;
+  }
+  // Detail modal close
+  if (t.id === 'dmodal-bg' || t.closest('[data-action="close-detail"]')) {
+    closeDetailModal();
+    return;
+  }
+  // Detail modal tab switch
+  const dtabBtn = t.closest('[data-action="dtab"]');
+  if (dtabBtn) {
+    switchDetailTab(dtabBtn.dataset.tab);
+    return;
+  }
+  // Save note from detail modal
+  const saveNoteBtn = t.closest('[data-action="save-note"]');
+  if (saveNoteBtn) {
+    const id = parseInt(saveNoteBtn.dataset.id);
+    const ld = getLead(id);
+    const inp = document.getElementById('lead-note-input');
+    if (inp) ld.note = inp.value;
+    saveState();
+    toast('✅ Note sauvegardée');
+    return;
+  }
+  // Fav from detail modal
+  const favDetailBtn = t.closest('[data-action="fav-detail"]');
+  if (favDetailBtn) {
+    const id = parseInt(favDetailBtn.dataset.id);
+    const ld = getLead(id);
+    ld.fav = !ld.fav;
+    saveState();
+    renderDetailModal();
+    renderStats();
+    toast(ld.fav ? '⭐ Ajouté aux favoris' : 'Retiré des favoris');
+    return;
+  }
+
+  // Open card from kanban or calendar
+  const openBtn = t.closest('[data-action="open-card"]');
+  if (openBtn) {
+    openDetailModal(parseInt(openBtn.dataset.id), 'info');
+    return;
+  }
+
+  // Paywall
+  const pwBtn = t.closest('[data-paywall]');
+  if (pwBtn) {
+    openPaywall(pwBtn.dataset.paywall);
+    return;
+  }
+
+  // Sidebar filter
+  const sBtn = t.closest('.s-btn[data-filter]');
+  if (sBtn) {
+    const f = sBtn.dataset.filter;
+    const v = sBtn.dataset.val;
+    if (f === 'fav') {
+      filters.fav = (filters.fav === 'yes') ? 'all' : 'yes';
+      sBtn.classList.toggle('active');
+    } else {
+      filters[f] = v;
+      document.querySelectorAll(`.s-btn[data-filter="${f}"]`).forEach(b => b.classList.remove('active'));
+      sBtn.classList.add('active');
+    }
+    renderCurrent();
+    return;
+  }
+
+  // Tab switch
+  const tabBtn = t.closest('.tab[data-view]');
+  if (tabBtn) {
+    currentView = tabBtn.dataset.view;
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    tabBtn.classList.add('active');
+    switchView();
+    return;
+  }
+
+  // Toolbar buttons
+  if (t.closest('#btn-export')) { openPaywall('export'); return; }
+  if (t.closest('#btn-bulk')) { openPaywall('bulk'); return; }
+  if (t.closest('#btn-unlock')) { openPaywall('unlock'); return; }
+  if (t.closest('#btn-clear-filters')) {
+    filters.sector = 'all'; filters.country = 'all'; filters.site = 'all'; filters.status = 'all'; filters.fav = 'all'; filters.search = ''; filters.heat = 'all'; filters.sort = 'heat';
+    document.getElementById('search-input').value = '';
+    document.querySelectorAll('.s-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.s-btn[data-val="all"]').forEach(b => b.classList.add('active'));
+    document.querySelector('.s-btn[data-filter="sort"][data-val="heat"]')?.classList.add('active');
+    renderCurrent();
+    toast('Filtres réinitialisés');
+    return;
+  }
+});
+
+// ===========================
+// PIPELINE EVENT HANDLERS
+// ===========================
+
+// Pipeline tab click → filter by stage group
+document.addEventListener('click', (e) => {
+  const ptab = e.target.closest && e.target.closest('.ptab[data-ptab]');
+  if (!ptab) return;
+  document.querySelectorAll('.ptab').forEach(t => t.classList.remove('active'));
+  ptab.classList.add('active');
+  filters.pipelineTab = ptab.dataset.ptab;
+  renderListView();
+});
+
+// Pipeline action buttons (delegated on grid)
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest && e.target.closest('.pact[data-pact]');
+  if (!btn) return;
+  const id = parseInt(btn.dataset.id);
+  const act = btn.dataset.pact;
+  const p = PROSPECTS_DATA.find(x => x.id === id);
+  if (!p) return;
+  handlePipelineAction(p, id, act);
+});
+
+// Inline notes save (delegated on grid, debounced)
+document.addEventListener('input', (e) => {
+  const ta = e.target.closest && e.target.closest('.card-notes-inline[data-note-id]');
+  if (!ta) return;
+  const id = parseInt(ta.dataset.noteId);
+  const ld = getLead(id);
+  clearTimeout(ta._saveTimer);
+  ta._saveTimer = setTimeout(() => {
+    ld.note = ta.value;
+    saveState();
+    pipelineToast('📝 Note sauvegardée', 'success');
+  }, 600);
+});
+
+function handlePipelineAction(p, id, act) {
+  switch (act) {
+    case 'interested':
+      openStagePModal(p, id, 'rappel', (data) => {
+        moveStage(id, 'to_recall', { rappel: data.date, note: data.notes || getLead(id).note });
+      });
+      break;
+    case 'noreply':
+      moveStage(id, 'no_answer');
+      break;
+    case 'refuse':
+    case 'edit-refuse':
+      openObjectionPModal(p, id);
+      break;
+    case 'back-cold':
+      moveStage(id, 'cold_call');
+      break;
+    case 'back-to_recall':
+      moveStage(id, 'to_recall');
+      break;
+    case 'back-meeting_to_set':
+      moveStage(id, 'meeting_to_set');
+      break;
+    case 'back-meeting_confirmed':
+      moveStage(id, 'meeting_confirmed');
+      break;
+    case 'set-meeting':
+      openStagePModal(p, id, 'meeting', (data) => {
+        moveStage(id, 'meeting_to_set', { meetingDate: data.date, meetingTime: data.time, note: data.notes || getLead(id).note });
+      });
+      break;
+    case 'confirm-meeting':
+      moveStage(id, 'meeting_confirmed');
+      break;
+    case 'close-deal':
+    case 'edit-deal':
+      openDealPModal(p, id);
+      break;
+    case 'relance':
+      moveStage(id, 'cold_call', { objection: '' });
+      break;
+  }
+}
+
+// ===== MODAL: Objection =====
+let _pObjTarget = null;
+let _pObjValue = '';
+function openObjectionPModal(p, id) {
+  _pObjTarget = id;
+  const ld = getLead(id);
+  _pObjValue = ld.objection || '';
+  const dirig = p.dirigeant ? `${p.dirigeant}${p.role ? ' — ' + p.role : ''}` : '(dirigeant non renseigné)';
+  document.getElementById('obj-head').innerHTML = `<b>${escHtml(p.name)}</b><br>${escHtml(dirig)}`;
+  document.getElementById('obj-custom').value = _pObjValue && !Array.from(document.querySelectorAll('#obj-chips .obj-chip')).some(c => c.textContent.trim() === _pObjValue) ? _pObjValue : '';
+  document.querySelectorAll('#obj-chips .obj-chip').forEach(c => {
+    c.classList.toggle('active', c.textContent.trim() === _pObjValue);
+  });
+  document.getElementById('pmodal-objection').classList.add('open');
+}
+document.querySelectorAll('#obj-chips .obj-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#obj-chips .obj-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    _pObjValue = chip.textContent.trim();
+    document.getElementById('obj-custom').value = '';
+  });
+});
+document.getElementById('obj-custom').addEventListener('input', (e) => {
+  document.querySelectorAll('#obj-chips .obj-chip').forEach(c => c.classList.remove('active'));
+  _pObjValue = e.target.value.trim();
+});
+document.getElementById('obj-confirm').addEventListener('click', () => {
+  if (_pObjTarget == null) return;
+  const val = _pObjValue || 'Non précisé';
+  moveStage(_pObjTarget, 'refused', { objection: val });
+  closePModal('objection');
+});
+
+// ===== MODAL: Deal =====
+let _pDealTarget = null;
+let _pDealType = '';
+let _pDealRec = '';
+function openDealPModal(p, id) {
+  _pDealTarget = id;
+  const ld = getLead(id);
+  _pDealType = ld.dealType || '';
+  _pDealRec = ld.dealRecurrence || '';
+  const dirig = p.dirigeant ? `${p.dirigeant}${p.role ? ' — ' + p.role : ''}` : '';
+  document.getElementById('deal-head').innerHTML = `<b>${escHtml(p.name)}</b><br>${escHtml(dirig)}`;
+  document.getElementById('deal-date').value = ld.dealDate || new Date().toISOString().slice(0,10);
+  document.getElementById('deal-value').value = ld.dealValue || '';
+  document.querySelectorAll('#deal-type-chips .deal-chip').forEach(c => c.classList.toggle('active', c.getAttribute('data-v') === _pDealType));
+  document.querySelectorAll('#deal-rec-chips .deal-chip').forEach(c => c.classList.toggle('active', c.getAttribute('data-v') === _pDealRec));
+  document.getElementById('pmodal-deal').classList.add('open');
+}
+document.querySelectorAll('#deal-type-chips .deal-chip').forEach(c => {
+  c.addEventListener('click', () => {
+    document.querySelectorAll('#deal-type-chips .deal-chip').forEach(x => x.classList.remove('active'));
+    c.classList.add('active');
+    _pDealType = c.getAttribute('data-v');
+  });
+});
+document.querySelectorAll('#deal-rec-chips .deal-chip').forEach(c => {
+  c.addEventListener('click', () => {
+    document.querySelectorAll('#deal-rec-chips .deal-chip').forEach(x => x.classList.remove('active'));
+    c.classList.add('active');
+    _pDealRec = c.getAttribute('data-v');
+  });
+});
+document.getElementById('deal-confirm').addEventListener('click', () => {
+  if (_pDealTarget == null) return;
+  const val = Number(document.getElementById('deal-value').value) || 0;
+  const date = document.getElementById('deal-date').value;
+  if (!_pDealType) { pipelineToast('Choisis un type de prestation', 'error'); return; }
+  moveStage(_pDealTarget, 'closed', {
+    dealType: _pDealType,
+    dealRecurrence: _pDealRec || 'one_shot',
+    dealValue: val,
+    dealDate: date,
+  });
+  closePModal('deal');
+});
+
+// ===== MODAL: Stage (rappel / rdv) =====
+let _pStageTarget = null;
+let _pStageKind = 'rappel';
+let _pStageCb = null;
+function openStagePModal(p, id, kind, onConfirm) {
+  _pStageTarget = id;
+  _pStageKind = kind;
+  _pStageCb = onConfirm;
+  const ld = getLead(id);
+  const dirig = p.dirigeant ? `${p.dirigeant}${p.role ? ' — ' + p.role : ''}` : '';
+  document.getElementById('stage-title').textContent = kind === 'meeting' ? '📅 Poser un rendez-vous' : '🔔 Poser un rappel';
+  document.getElementById('stage-date-label').textContent = kind === 'meeting' ? '📅 Date du RDV' : '📅 Date du rappel';
+  document.getElementById('stage-head').innerHTML = `<b>${escHtml(p.name)}</b><br>${escHtml(dirig)}`;
+  const today = new Date();
+  const defaultDate = kind === 'meeting'
+    ? (ld.meetingDate || new Date(today.getTime() + 2 * 86400000).toISOString().slice(0,10))
+    : (ld.rappel || new Date(today.getTime() + 1 * 86400000).toISOString().slice(0,10));
+  document.getElementById('stage-date').value = defaultDate;
+  document.getElementById('stage-time').value = ld.meetingTime || '14:00';
+  document.getElementById('stage-time-wrap').style.display = kind === 'meeting' ? 'block' : 'none';
+  document.getElementById('stage-notes').value = ld.note || '';
+  document.getElementById('pmodal-stage').classList.add('open');
+}
+document.querySelectorAll('#stage-shortcuts .date-shortcut').forEach(b => {
+  b.addEventListener('click', () => {
+    const days = parseInt(b.getAttribute('data-d')) || 0;
+    const dt = new Date();
+    dt.setDate(dt.getDate() + days);
+    document.getElementById('stage-date').value = dt.toISOString().slice(0,10);
+  });
+});
+document.getElementById('stage-confirm').addEventListener('click', () => {
+  if (_pStageTarget == null || !_pStageCb) return;
+  const date = document.getElementById('stage-date').value;
+  const time = document.getElementById('stage-time').value;
+  const notes = document.getElementById('stage-notes').value.trim();
+  if (!date) { pipelineToast('Choisis une date', 'error'); return; }
+  _pStageCb({ date, time, notes });
+  closePModal('stage');
+});
+
+// ===== Close modal helper =====
+function closePModal(name) {
+  const el = document.getElementById('pmodal-' + name);
+  if (el) el.classList.remove('open');
+  if (name === 'objection') { _pObjTarget = null; _pObjValue = ''; }
+  if (name === 'deal') { _pDealTarget = null; }
+  if (name === 'stage') { _pStageTarget = null; _pStageCb = null; }
+}
+// Escape closes all pipeline modals
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') ['objection','deal','stage'].forEach(closePModal);
+});
+
+// Initial tab counts on load
+setTimeout(() => { try { updatePipelineTabCounts(); } catch(e) {} }, 0);
+
+function switchView() {
+  document.getElementById('view-list').style.display = currentView === 'list' ? 'grid' : 'none';
+  document.getElementById('view-pipeline').style.display = currentView === 'pipeline' ? 'grid' : 'none';
+  document.getElementById('view-calendar').style.display = currentView === 'calendar' ? 'flex' : 'none';
+  document.getElementById('view-analytics').style.display = currentView === 'analytics' ? 'block' : 'none';
+  renderCurrent();
+}
+
+// Search input
+document.getElementById('search-input').addEventListener('input', (e) => {
+  filters.search = e.target.value.trim();
+  renderCurrent();
+});
+
+// ESC to close modal
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeModal();
+    closeDetailModal();
+  }
+});
+
+// Expose closeModal for inline onclick
+window.closeModal = closeModal;
+
+// INIT
+renderCurrent();
+</script>
+</body>
+</html>

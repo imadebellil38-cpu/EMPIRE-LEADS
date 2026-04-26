@@ -127,7 +127,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
   </div>
 </div>
 <script>
-var TOKEN = localStorage.getItem('token');
+var TOKEN = localStorage.getItem('ph_token') || localStorage.getItem('token') || sessionStorage.getItem('token') || '';
 if (!TOKEN) window.location.href = '/login';
 var AUTH = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN };
 function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }

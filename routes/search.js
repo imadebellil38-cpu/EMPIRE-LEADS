@@ -9,7 +9,7 @@ const { getCacheKey, getCachedResults, setCachedResults } = require('../services
 
 const router = Router();
 
-const VALID_SEARCH_MODES = ['site', 'social', 'both', 'owners', 'fewreviews', 'new', 'instagram'];
+const VALID_SEARCH_MODES = ['site', 'social', 'both', 'owners', 'fewreviews', 'new', 'instagram', 'all'];
 
 // Anthropic API key for owner name extraction (owners mode)
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
@@ -105,16 +105,52 @@ const CITIES = {
     {name:'Delémont',lat:47.3653,lng:7.3469},{name:'Martigny',lat:46.1029,lng:7.0714},
   ],
   be: [
-    {name:'Bruxelles',lat:50.8503,lng:4.3517},{name:'Anvers',lat:51.2194,lng:4.4025},
-    {name:'Gand',lat:51.0543,lng:3.7174},{name:'Charleroi',lat:50.4108,lng:4.4446},
-    {name:'Liège',lat:50.6326,lng:5.5797},{name:'Bruges',lat:51.2093,lng:3.2247},
-    {name:'Namur',lat:50.4674,lng:4.8720},{name:'Louvain',lat:50.8798,lng:4.7005},
-    {name:'Mons',lat:50.4542,lng:3.9563},{name:'Malines',lat:51.0259,lng:4.4776},
-    {name:'Aalst',lat:50.9376,lng:4.0376},{name:'Courtrai',lat:50.8279,lng:3.2649},
-    {name:'Hasselt',lat:50.9307,lng:5.3375},{name:'Ostende',lat:51.2304,lng:2.9152},
-    {name:'Saint-Nicolas',lat:51.1564,lng:4.1429},{name:'Tournai',lat:50.6060,lng:3.3880},
-    {name:'Genk',lat:50.9653,lng:5.5014},{name:'Seraing',lat:50.5836,lng:5.5006},
-    {name:'La Louvière',lat:50.4791,lng:4.1859},{name:'Verviers',lat:50.5895,lng:5.8636},
+    // Bruxelles — 19 communes
+    {name:'Bruxelles',lat:50.8503,lng:4.3517},{name:'Ixelles',lat:50.8278,lng:4.3753},
+    {name:'Uccle',lat:50.8000,lng:4.3333},{name:'Schaerbeek',lat:50.8667,lng:4.3833},
+    {name:'Etterbeek',lat:50.8372,lng:4.3886},{name:'Saint-Gilles',lat:50.8278,lng:4.3461},
+    {name:'Anderlecht',lat:50.8333,lng:4.3000},{name:'Woluwe-Saint-Lambert',lat:50.8417,lng:4.4333},
+    {name:'Woluwe-Saint-Pierre',lat:50.8333,lng:4.4333},{name:'Forest',lat:50.8103,lng:4.3242},
+    {name:'Molenbeek-Saint-Jean',lat:50.8561,lng:4.3283},{name:'Jette',lat:50.8789,lng:4.3244},
+    {name:'Auderghem',lat:50.8150,lng:4.4317},{name:'Watermael-Boitsfort',lat:50.7983,lng:4.4083},
+    {name:'Evere',lat:50.8667,lng:4.4000},{name:'Berchem-Sainte-Agathe',lat:50.8667,lng:4.2917},
+    {name:'Ganshoren',lat:50.8750,lng:4.3083},{name:'Koekelberg',lat:50.8633,lng:4.3317},
+    // Hainaut
+    {name:'Charleroi',lat:50.4108,lng:4.4446},{name:'Mons',lat:50.4542,lng:3.9563},
+    {name:'Tournai',lat:50.6060,lng:3.3880},{name:'La Louvière',lat:50.4791,lng:4.1859},
+    {name:'Mouscron',lat:50.7436,lng:3.2064},{name:'Soignies',lat:50.5792,lng:4.0722},
+    {name:'Binche',lat:50.4117,lng:4.1656},{name:'Braine-le-Comte',lat:50.6108,lng:4.1375},
+    {name:'Enghien',lat:50.6917,lng:4.0333},{name:'Ath',lat:50.6294,lng:3.7786},
+    {name:'Lessines',lat:50.7117,lng:3.8375},{name:'Comines-Warneton',lat:50.7614,lng:2.9958},
+    {name:'Manage',lat:50.5028,lng:4.2339},{name:'Châtelet',lat:50.4000,lng:4.5167},
+    {name:'Fleurus',lat:50.4833,lng:4.5500},{name:'Fontaine-l\'Évêque',lat:50.4000,lng:4.3333},
+    {name:'Courcelles',lat:50.4597,lng:4.3769},{name:'Thuin',lat:50.3389,lng:4.2853},
+    // Liège
+    {name:'Liège',lat:50.6326,lng:5.5797},{name:'Seraing',lat:50.5836,lng:5.5006},
+    {name:'Verviers',lat:50.5895,lng:5.8636},{name:'Herstal',lat:50.6667,lng:5.6333},
+    {name:'Ans',lat:50.6667,lng:5.5167},{name:'Saint-Nicolas',lat:50.6333,lng:5.5333},
+    {name:'Grâce-Hollogne',lat:50.6333,lng:5.5000},{name:'Waremme',lat:50.6958,lng:5.2556},
+    {name:'Huy',lat:50.5186,lng:5.2375},{name:'Visé',lat:50.7344,lng:5.6942},
+    {name:'Eupen',lat:50.6286,lng:6.0356},{name:'Malmedy',lat:50.4264,lng:6.0267},
+    {name:'Spa',lat:50.4833,lng:5.8667},{name:'Stavelot',lat:50.3953,lng:5.9308},
+    // Namur
+    {name:'Namur',lat:50.4674,lng:4.8720},{name:'Sambreville',lat:50.4353,lng:4.6167},
+    {name:'Gembloux',lat:50.5608,lng:4.6978},{name:'Andenne',lat:50.4886,lng:5.0972},
+    {name:'Ciney',lat:50.2942,lng:5.0983},{name:'Dinant',lat:50.2611,lng:4.9122},
+    {name:'Couvin',lat:50.0536,lng:4.4931},{name:'Philippeville',lat:50.1953,lng:4.5439},
+    {name:'Rochefort',lat:50.1594,lng:5.2219},{name:'Fosses-la-Ville',lat:50.3917,lng:4.6917},
+    // Brabant wallon
+    {name:'Wavre',lat:50.7167,lng:4.6000},{name:'Nivelles',lat:50.5986,lng:4.3278},
+    {name:'Ottignies-Louvain-la-Neuve',lat:50.6667,lng:4.5667},{name:'Braine-l\'Alleud',lat:50.6833,lng:4.3667},
+    {name:'Tubize',lat:50.6908,lng:4.2014},{name:'Waterloo',lat:50.7147,lng:4.3997},
+    {name:'Rixensart',lat:50.7167,lng:4.5333},{name:'Jodoigne',lat:50.7233,lng:4.8700},
+    {name:'Perwez',lat:50.6333,lng:4.8167},{name:'Court-Saint-Étienne',lat:50.6333,lng:4.5667},
+    // Luxembourg belge
+    {name:'Arlon',lat:49.6833,lng:5.8167},{name:'Marche-en-Famenne',lat:50.2264,lng:5.3444},
+    {name:'Bastogne',lat:50.0000,lng:5.7167},{name:'Virton',lat:49.5667,lng:5.5333},
+    {name:'Neufchâteau',lat:49.8406,lng:5.4344},{name:'Libramont',lat:49.9206,lng:5.3783},
+    {name:'Bouillon',lat:49.7933,lng:5.0672},{name:'Durbuy',lat:50.3528,lng:5.4569},
+    {name:'Hotton',lat:50.2667,lng:5.4500},{name:'Saint-Hubert',lat:50.0264,lng:5.3750},
   ],
 };
 
@@ -183,7 +219,12 @@ router.post('/', async (req, res) => {
   if (!isAdmin && user.credits <= 0) return res.status(403).json({ error: 'Plus de crédits. Passez au plan supérieur.', upgrade: true });
 
   // ── Extract & validate inputs ──
-  const { niche, country, smartKeywords, numProspects, geoMode, geoLat, geoLng, geoRadius, searchMode: rawMode } = req.body;
+  const { niche, country, smartKeywords, numProspects, searchMode: rawMode } = req.body;
+  // Frontend sends country='around_me' + lat/lng/radius ; normalize to geoMode/geoLat/geoLng/geoRadius
+  const geoMode = req.body.geoMode || country === 'around_me';
+  const geoLat = req.body.geoLat || req.body.lat;
+  const geoLng = req.body.geoLng || req.body.lng;
+  const geoRadius = req.body.geoRadius || req.body.radius;
 
   // Search mode: 'site' (no website), 'social' (no socials), 'both' (neither), 'owners' (find owner names)
   const searchMode = VALID_SEARCH_MODES.includes(rawMode) ? rawMode : 'site';
@@ -243,11 +284,25 @@ router.post('/', async (req, res) => {
   const keywords = validKeywords.map(k => norm(k));
 
   const seenPhones = new Set();
+  const seenNames = new Set(); // normalized name+city to catch duplicates without phone match
   const prospects = [];
 
   // Get existing phones for this user to avoid duplicates
-  const existingPhones = await db.all('SELECT phone FROM prospects WHERE user_id = ?', [userId]);
-  existingPhones.forEach(p => seenPhones.add(p.phone));
+  const existingProspects = await db.all('SELECT phone, name, address FROM prospects WHERE user_id = ?', [userId]);
+  existingProspects.forEach(p => {
+    if (p.phone) seenPhones.add(p.phone);
+    // Also add existing names to dedup set
+    const nk = norm(p.name || '').replace(/[^a-z0-9]/g, '');
+    const ak = norm(p.address || '').replace(/[^a-z0-9]/g, '').slice(0, 40);
+    if (nk.length > 3) seenNames.add(nk + '|' + ak);
+  });
+
+  // Also exclude previously deleted prospects so they don't reappear
+  const deletedProspects = await db.all('SELECT phone, name_key, addr_key FROM deleted_prospects WHERE user_id = ?', [userId]);
+  deletedProspects.forEach(d => {
+    if (d.phone) seenPhones.add(d.phone);
+    if (d.name_key && d.name_key.length > 3) seenNames.add(d.name_key + '|' + (d.addr_key || ''));
+  });
 
   // Collect target: owners mode over-fetches ×3 since we'll filter by found names
   const collectMax = searchMode === 'owners' ? Math.min(maxProspects * 3, 200) : maxProspects;
@@ -260,7 +315,22 @@ router.post('/', async (req, res) => {
       const name = place.displayName?.text || '';
       const phone = place.nationalPhoneNumber || place.internationalPhoneNumber || null;
       const websiteUrl = place.websiteUri || '';
-      if (!phone || seenPhones.has(phone)) continue;
+      const address = place.formattedAddress || '';
+
+      // Deduplicate by phone
+      if (phone && seenPhones.has(phone)) continue;
+
+      // Deduplicate by normalized name (catches same business across city searches)
+      const nameKey = norm(name).replace(/[^a-z0-9]/g, '');
+      const addrKey = norm(address).replace(/[^a-z0-9]/g, '').slice(0, 40);
+      const dedupKey = nameKey + '|' + addrKey;
+      if (seenNames.has(dedupKey)) continue;
+      if (nameKey.length > 3) seenNames.add(dedupKey);
+
+      // Also deduplicate by name alone if very similar (same biz, different branch listing)
+      if (seenNames.has(nameKey) && !phone) continue;
+
+      if (!phone) continue;
 
       // Mode 'site' or 'both': filter OUT businesses WITH a website
       if ((searchMode === 'site' || searchMode === 'both') && websiteUrl) continue;
@@ -282,7 +352,7 @@ router.post('/', async (req, res) => {
       prospects.push({
         name: validator.escape(name).substring(0, 200),
         phone: phone.substring(0, 30),
-        address: (place.formattedAddress || '').substring(0, 300),
+        address: address.substring(0, 300),
         rating: place.rating ?? null,
         reviews: place.userRatingCount ?? 0,
         city: cityName,
@@ -524,20 +594,14 @@ Réponds UNIQUEMENT en JSON, un tableau avec le numéro et le nom trouvé (vide 
       }
     }
 
-    // ── Charge credits ──
-    // Admin: never charged. Regular users: only pay for prospects actually found.
-    // owners mode: only charge if names found; site/social = ×1, both = ×2
-    const creditsToCharge = isAdmin ? 0 : prospects.length * creditMultiplier;
+    // ── Charge credits (atomic, race-condition safe) ──
+    // Admin: never charged. Never charge more than what user actually has.
+    const creditsToCharge = isAdmin ? 0 : Math.min(prospects.length * creditMultiplier, user.credits);
     if (creditsToCharge > 0) {
-      // Atomic deduction with guard: never go below 0
-      const deductResult = await db.run(
-        'UPDATE users SET credits = GREATEST(credits - ?, 0) WHERE id = ? AND credits >= ?',
-        [creditsToCharge, userId, creditsToCharge]
+      await db.run(
+        'UPDATE users SET credits = GREATEST(credits - ?, 0) WHERE id = ?',
+        [creditsToCharge, userId]
       );
-      // If no row matched (concurrent requests drained credits), charge what's left
-      if (deductResult.rowCount === 0) {
-        await db.run('UPDATE users SET credits = 0 WHERE id = ? AND credits > 0', [userId]);
-      }
     }
 
     // ── Save prospects to DB (loop) ──

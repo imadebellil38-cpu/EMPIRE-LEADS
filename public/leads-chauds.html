@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leads Chauds — Projets en cours</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#0a0a14;--card:#111120;--border:#1a1a2e;--green:#00d084;--orange:#F77737;--red:#E1306C;--text:#e8e8f0;--muted:#8888aa;--accent:#00d084}
+    body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+    .header{background:linear-gradient(135deg,#0d0d1a,#111128);border-bottom:1px solid var(--border);padding:28px 32px;text-align:center}
+    .header h1{font-size:28px;font-weight:800;margin-bottom:6px}
+    .header h1 span{background:linear-gradient(135deg,var(--green),#00b070);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .header p{color:var(--muted);font-size:14px}
+    .controls{max-width:900px;margin:24px auto;padding:0 20px;display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+    .controls input,.controls select{background:var(--card);border:1px solid var(--border);color:var(--text);padding:10px 14px;border-radius:8px;font-size:13px;outline:none}
+    .controls input:focus,.controls select:focus{border-color:var(--green)}
+    .controls input{flex:1;min-width:200px}
+    .controls select{min-width:120px}
+    .controls button{background:linear-gradient(135deg,var(--green),#00b070);border:none;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer}
+    .controls button:hover{opacity:.9}
+    .controls button:disabled{opacity:.5;cursor:wait}
+    .stats{max-width:900px;margin:0 auto 16px;padding:0 20px;display:flex;gap:16px;flex-wrap:wrap}
+    .stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 18px;flex:1;min-width:120px;text-align:center}
+    .stat .num{font-size:24px;font-weight:800;color:var(--green)}
+    .stat .label{font-size:11px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
+    .list{max-width:900px;margin:0 auto;padding:0 20px 40px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:12px;transition:border-color .2s}
+    .card:hover{border-color:var(--green)}
+    .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
+    .card-title{font-size:15px;font-weight:700;color:#fff;line-height:1.4}
+    .card-title a{color:#fff;text-decoration:none}
+    .card-title a:hover{color:var(--green)}
+    .badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;white-space:nowrap}
+    .badge-budget{background:rgba(0,208,132,.12);color:var(--green);border:1px solid rgba(0,208,132,.25)}
+    .badge-hot{background:rgba(225,48,108,.12);color:var(--red);border:1px solid rgba(225,48,108,.25)}
+    .badge-time{background:rgba(136,136,170,.1);color:var(--muted);border:1px solid rgba(136,136,170,.2)}
+    .badge-cat{background:rgba(247,119,55,.1);color:var(--orange);border:1px solid rgba(247,119,55,.2)}
+    .card-desc{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:10px}
+    .card-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .card-actions a,.card-actions button{padding:7px 14px;border-radius:7px;font-size:12px;font-weight:700;text-decoration:none;cursor:pointer;border:none}
+    .btn-primary{background:linear-gradient(135deg,var(--green),#00b070);color:#fff}
+    .btn-secondary{background:transparent;border:1px solid var(--border)!important;color:var(--muted)}
+    .btn-secondary:hover{border-color:var(--green)!important;color:var(--green)}
+    .loading{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px}
+    .loading .spinner{display:inline-block;width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .empty{text-align:center;padding:60px 20px;color:var(--muted)}
+    .filters-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+    .filter-chip{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .2s}
+    .filter-chip:hover,.filter-chip.active{background:rgba(0,208,132,.12);border-color:var(--green);color:var(--green)}
+    .back-link{display:inline-block;margin:20px 0 0 20px;color:var(--muted);text-decoration:none;font-size:13px}
+    .back-link:hover{color:var(--green)}
+  </style>
+</head>
+<body>
+  <a href="/app" class="back-link">&larr; Retour au CRM</a>
+
+  <div class="header">
+    <h1>&#x1F525; Leads <span>Chauds</span></h1>
+    <p>Projets actifs sur Codeur.com — des gens qui CHERCHENT un prestataire en ce moment</p>
+  </div>
+
+  <div class="controls">
+    <input type="text" id="keyword" placeholder="Filtrer par mot-cle (site, e-commerce, wordpress, app...)" value="">
+    <select id="pages">
+      <option value="3">3 pages (~50 projets)</option>
+      <option value="5">5 pages (~80 projets)</option>
+      <option value="8" selected>8 pages (~130 projets)</option>
+      <option value="16">16 pages (tout)</option>
+    </select>
+    <button id="btn-fetch" onclick="fetchProjects()">&#x1F50D; Chercher les projets</button>
+  </div>
+
+  <div class="filters-row" style="max-width:900px;margin:0 auto 16px;padding:0 20px;display:none" id="filters">
+    <button class="filter-chip active" data-filter="all">Tous</button>
+    <button class="filter-chip" data-filter="site">Site web</button>
+    <button class="filter-chip" data-filter="ecommerce">E-commerce</button>
+    <button class="filter-chip" data-filter="wordpress">WordPress</button>
+    <button class="filter-chip" data-filter="app">App mobile</button>
+    <button class="filter-chip" data-filter="design">Design</button>
+    <button class="filter-chip" data-filter="refonte">Refonte</button>
+  </div>
+
+  <div class="stats" id="stats" style="display:none">
+    <div class="stat"><div class="num" id="stat-total">0</div><div class="label">Projets</div></div>
+    <div class="stat"><div class="num" id="stat-site">0</div><div class="label">Sites web</div></div>
+    <div class="stat"><div class="num" id="stat-ecom">0</div><div class="label">E-commerce</div></div>
+    <div class="stat"><div class="num" id="stat-app">0</div><div class="label">Apps</div></div>
+  </div>
+
+  <div class="list" id="list">
+    <div class="empty">
+      <p style="font-size:40px;margin-bottom:12px">&#x1F50D;</p>
+      <p>Clique sur <strong>"Chercher les projets"</strong> pour scanner les annonces actives</p>
+      <p style="margin-top:8px;font-size:12px;color:var(--muted)">Les projets sont recuperes en temps reel depuis Codeur.com</p>
+    </div>
+  </div>
+
+<script>
+var TOKEN = localStorage.getItem('ph_token') || sessionStorage.getItem('ph_token') || '';
+var allProjects = [];
+var currentFilter = 'all';
+
+function categorize(p) {
+  var t = ((p.title || '') + ' ' + (p.slug || '') + ' ' + (p.description || '')).toLowerCase();
+  var cats = [];
+  if (t.match(/site|vitrine|landing|page web|web site|site internet/)) cats.push('site');
+  if (t.match(/ecommerce|e-commerce|shopify|prestashop|woocommerce|boutique|magasin/)) cats.push('ecommerce');
+  if (t.match(/wordpress|elementor|wp|theme wordpress/)) cats.push('wordpress');
+  if (t.match(/app|mobile|ios|android|react native|flutter/)) cats.push('app');
+  if (t.match(/design|graphi|logo|ui|ux|maquette|figma|webdesign/)) cats.push('design');
+  if (t.match(/refonte|redesign|migration|mise a jour|amelior/)) cats.push('refonte');
+  if (!cats.length) cats.push('autre');
+  return cats;
+}
+
+function matchesFilter(p) {
+  if (currentFilter === 'all') return true;
+  return (p._cats || []).indexOf(currentFilter) !== -1;
+}
+
+function escHtml(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderList(projects) {
+  var list = document.getElementById('list');
+  var filtered = projects.filter(matchesFilter);
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty"><p>Aucun projet trouve pour ce filtre</p></div>';
+    return;
+  }
+
+  var html = '';
+  filtered.forEach(function(p, i) {
+    var cats = p._cats || [];
+    var catBadges = cats.map(function(c) {
+      var labels = {site:'Site web',ecommerce:'E-commerce',wordpress:'WordPress',app:'App mobile',design:'Design',refonte:'Refonte',autre:'Autre'};
+      return '<span class="badge badge-cat">' + (labels[c]||c) + '</span>';
+    }).join(' ');
+
+    var budgetBadge = p.budget ? '<span class="badge badge-budget">' + escHtml(p.budget) + '</span>' : '';
+    var timeBadge = p.timeAgo ? '<span class="badge badge-time">' + escHtml(p.timeAgo) + '</span>' : '';
+
+    html += '<div class="card">' +
+      '<div class="card-top">' +
+        '<div class="card-title"><a href="' + escHtml(p.url) + '" target="_blank">' + escHtml(p.title) + '</a></div>' +
+        '<div style="display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0">' + budgetBadge + timeBadge + '</div>' +
+      '</div>' +
+      (p.description ? '<div class="card-desc">' + escHtml(p.description) + '</div>' : '') +
+      '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">' +
+        '<div>' + catBadges + '</div>' +
+        '<div class="card-actions">' +
+          '<a href="' + escHtml(p.url) + '" target="_blank" class="btn-primary">Voir le projet &rarr;</a>' +
+          '<button class="btn-secondary" onclick="copyLink(\'' + escHtml(p.url) + '\',this)">Copier le lien</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  });
+
+  list.innerHTML = html;
+}
+
+function updateStats() {
+  var total = allProjects.length;
+  var site = allProjects.filter(function(p){return p._cats.indexOf('site')!==-1||p._cats.indexOf('wordpress')!==-1;}).length;
+  var ecom = allProjects.filter(function(p){return p._cats.indexOf('ecommerce')!==-1;}).length;
+  var app = allProjects.filter(function(p){return p._cats.indexOf('app')!==-1;}).length;
+
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-site').textContent = site;
+  document.getElementById('stat-ecom').textContent = ecom;
+  document.getElementById('stat-app').textContent = app;
+  document.getElementById('stats').style.display = 'flex';
+  document.getElementById('filters').style.display = 'flex';
+}
+
+async function fetchProjects() {
+  var btn = document.getElementById('btn-fetch');
+  var list = document.getElementById('list');
+  var keyword = document.getElementById('keyword').value.trim();
+  var pages = document.getElementById('pages').value;
+
+  btn.disabled = true;
+  btn.textContent = 'Scan en cours...';
+  list.innerHTML = '<div class="loading"><div class="spinner"></div><p>Scan de Codeur.com en cours (' + pages + ' pages)...</p><p style="font-size:12px;color:var(--muted);margin-top:6px">Cela peut prendre 10-30 secondes</p></div>';
+
+  try {
+    var url = '/api/scrape/codeur?pages=' + pages;
+    if (keyword) url += '&keyword=' + encodeURIComponent(keyword);
+
+    var r = await fetch(url, {
+      headers: { 'Authorization': 'Bearer ' + TOKEN }
+    });
+    var d = await r.json();
+
+    if (d.error) throw new Error(d.error);
+
+    allProjects = (d.projects || []).map(function(p) {
+      p._cats = categorize(p);
+      return p;
+    });
+
+    updateStats();
+    renderList(allProjects);
+
+    btn.textContent = (d.cached ? '(cache) ' : '') + d.count + ' projets trouves — Relancer';
+  } catch(e) {
+    list.innerHTML = '<div class="empty"><p style="color:var(--red)">Erreur : ' + escHtml(e.message) + '</p><p style="margin-top:8px;font-size:12px">Verifie que tu es connecte (token JWT valide)</p></div>';
+    btn.textContent = 'Reessayer';
+  }
+  btn.disabled = false;
+}
+
+function copyLink(url, btn) {
+  try {
+    navigator.clipboard.writeText(url);
+    var orig = btn.textContent;
+    btn.textContent = 'Copie !';
+    setTimeout(function() { btn.textContent = orig; }, 1500);
+  } catch(e) {}
+}
+
+// Filter chips
+document.getElementById('filters').addEventListener('click', function(e) {
+  var chip = e.target.closest('.filter-chip');
+  if (!chip) return;
+  document.querySelectorAll('.filter-chip').forEach(function(c) { c.classList.remove('active'); });
+  chip.classList.add('active');
+  currentFilter = chip.getAttribute('data-filter');
+  renderList(allProjects);
+});
+
+// Auto-fetch on load
+if (TOKEN) {
+  fetchProjects();
+}
+</script>
+</body>
+</html>

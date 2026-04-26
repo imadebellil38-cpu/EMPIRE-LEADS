@@ -186,11 +186,8 @@
     }
     /* Satoshi body + Clash Display pour les gros titres (look Atrakt) */
     body{font-family:'Satoshi','Inter',system-ui,-apple-system,sans-serif}
-    h3,h4,.ft-feat h4,.offer-h4,.steps-h,.ft-text h3{font-family:'Satoshi','Inter',system-ui,sans-serif;letter-spacing:-.015em;font-weight:700}
-    /* Switzer pour les gros titres : bold, rond, pro */
+    h3,h4,.ft-feat h4,.offer-h4,.steps-h,.ft-text h3{font-family:'Satoshi','Inter',system-ui,sans-serif;letter-spacing:-.015em}
     h1,h2,.hero h1,.sec-title,.steps-title,.offer-h,.cta h2,.cta-big-h,.roi-title,.cta-giant-logo{font-family:'Switzer','Satoshi','Inter',system-ui,sans-serif;letter-spacing:-.028em;font-weight:800}
-    /* Italique pour les mots accentués */
-    .hero h1 em,.cta-big-h em,.steps-title em,.sec-title em{font-style:italic;font-weight:500;font-variation-settings:'SOFT' 50,'WONK' 1}
     /* Scribble underline sur un mot — effet dessin manuel */
     .scribble{position:relative;display:inline-block;white-space:nowrap}
     .scribble::after{content:"";position:absolute;left:-6%;right:-6%;bottom:-.08em;height:.42em;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 40' preserveAspectRatio='none'><path d='M5 25 Q 75 5 150 18 T 295 22' stroke='%2316a34a' stroke-width='10' fill='none' stroke-linecap='round' opacity='0.55'/><path d='M10 30 Q 80 10 155 23 T 290 27' stroke='%2316a34a' stroke-width='6' fill='none' stroke-linecap='round' opacity='0.4'/></svg>");background-repeat:no-repeat;background-size:100% 100%;z-index:-1;pointer-events:none}
@@ -472,7 +469,7 @@
 <section class="hero" id="hero-section">
   <!-- VIDEO BACKGROUND SLOT — depose ton MP4 dans /public/video/hero.mp4 pour l'activer -->
   <div class="hero-video-wrap" aria-hidden="true">
-    <video class="hero-video" id="hero-video" autoplay muted loop playsinline preload="auto" disablepictureinpicture disableremoteplayback>
+    <video class="hero-video" id="hero-video" autoplay muted loop playsinline preload="metadata" poster="/video/hero-poster.jpg">
       <source src="/video/hero.mp4" type="video/mp4">
       <source src="/video/hero.webm" type="video/webm">
     </video>
@@ -489,244 +486,6 @@
   </div>
 </section>
 
-<!-- ─── APP SHOWCASE — carrousel visuel de l'application ─── -->
-<section class="show-section">
-  <div class="centered" style="margin-bottom:3rem">
-    <span class="sec-label">L'application</span>
-    <h2 class="sec-title">Une app simple, pensée<br>pour closer.</h2>
-    <p class="sec-desc">Découvrez Empire Leads en action. Chaque écran est pensé pour vous faire gagner du temps et signer plus vite.</p>
-  </div>
-
-  <div class="show-tabs" role="tablist">
-    <button class="show-tab active" data-stab="0">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-      Recherche
-    </button>
-    <button class="show-tab" data-stab="1">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Pipeline CRM
-    </button>
-    <button class="show-tab" data-stab="2">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/></svg>
-      Pitch IA
-    </button>
-    <button class="show-tab" data-stab="3">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-      Analyse
-    </button>
-  </div>
-
-  <div class="show-wrap">
-    <div class="show-frame">
-      <div class="show-chrome">
-        <span class="sc-dot"></span><span class="sc-dot"></span><span class="sc-dot"></span>
-        <div class="sc-url" id="showUrl">empire-leads.fr/app</div>
-      </div>
-      <div class="show-body">
-
-        <!-- Screen 0 - Recherche -->
-        <div class="show-screen active" data-sscreen="0">
-          <div class="sc-head">
-            <div class="sc-title">Trouver des prospects</div>
-            <div class="sc-pill">200 résultats trouvés</div>
-          </div>
-          <div class="sc-search-bar">
-            <input type="text" value="restaurants sans site Lyon" disabled>
-            <button>Lancer le scan</button>
-          </div>
-          <div class="sc-rows">
-            <div class="sc-row"><div class="sc-av" style="background:linear-gradient(135deg,#dc2626,#f97316)">LZ</div><div class="sc-inf"><div class="sc-n">Le Petit Zinc</div><div class="sc-m">01 42 56 78 90 · Lyon 2e · 4.6/5</div></div><span class="sc-tag sc-tag-red">Sans site</span></div>
-            <div class="sc-row"><div class="sc-av" style="background:linear-gradient(135deg,#7c3aed,#6366f1)">DR</div><div class="sc-inf"><div class="sc-n">Pizzeria Da Roberto</div><div class="sc-m">04 91 55 23 67 · Lyon 7e · 4.9/5</div></div><span class="sc-tag sc-tag-red">Sans site</span></div>
-            <div class="sc-row"><div class="sc-av" style="background:linear-gradient(135deg,#059669,#10b981)">BM</div><div class="sc-inf"><div class="sc-n">Brasserie du Marché</div><div class="sc-m">04 78 92 11 44 · Lyon 3e · 4.7/5</div></div><span class="sc-tag sc-tag-red">Sans site</span></div>
-            <div class="sc-row"><div class="sc-av" style="background:linear-gradient(135deg,#d97706,#f59e0b)">CA</div><div class="sc-inf"><div class="sc-n">Café des Amis</div><div class="sc-m">04 72 41 23 90 · Lyon 1er · 4.3/5</div></div><span class="sc-tag sc-tag-blue">Site obsolète</span></div>
-            <div class="sc-row"><div class="sc-av" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">MA</div><div class="sc-inf"><div class="sc-n">Maison Arnoux</div><div class="sc-m">04 78 30 22 15 · Lyon 6e · 4.8/5</div></div><span class="sc-tag sc-tag-red">Sans site</span></div>
-          </div>
-        </div>
-
-        <!-- Screen 1 - Pipeline CRM -->
-        <div class="show-screen" data-sscreen="1">
-          <div class="sc-head">
-            <div class="sc-title">Pipeline CRM</div>
-            <div class="sc-pill">47 prospects actifs</div>
-          </div>
-          <div class="sc-pipeline">
-            <div class="sc-col">
-              <div class="sc-col-h">À contacter <span>12</span></div>
-              <div class="sc-card"><div class="sc-cn">Café des Amis</div><div class="sc-cm">Cold call</div></div>
-              <div class="sc-card"><div class="sc-cn">Snack Le Palais</div><div class="sc-cm">Cold call</div></div>
-              <div class="sc-card"><div class="sc-cn">Boulangerie V.</div><div class="sc-cm">Cold call</div></div>
-            </div>
-            <div class="sc-col">
-              <div class="sc-col-h">À rappeler <span>8</span></div>
-              <div class="sc-card"><div class="sc-cn">Le Petit Zinc</div><div class="sc-cm">Intéressé · demain 14h</div></div>
-              <div class="sc-card"><div class="sc-cn">Pizzeria Da R.</div><div class="sc-cm">Relance vendredi</div></div>
-            </div>
-            <div class="sc-col">
-              <div class="sc-col-h">RDV <span>3</span></div>
-              <div class="sc-card"><div class="sc-cn">Brasserie Marché</div><div class="sc-cm">Jeudi 10h</div></div>
-            </div>
-            <div class="sc-col">
-              <div class="sc-col-h won">Signé <span>2</span></div>
-              <div class="sc-card sc-win"><div class="sc-cn">Maison Arnoux</div><div class="sc-cm">1 450 €</div></div>
-              <div class="sc-card sc-win"><div class="sc-cn">Le Bouchon</div><div class="sc-cm">890 €</div></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Screen 2 - Pitch IA -->
-        <div class="show-screen" data-sscreen="2">
-          <div class="sc-head">
-            <div class="sc-title">Pitch IA généré</div>
-            <div class="sc-pill sc-pill-green">Généré en 2 sec</div>
-          </div>
-          <div class="sc-pitch-head">
-            <div class="sc-av" style="background:linear-gradient(135deg,#dc2626,#f97316)">LZ</div>
-            <div><div class="sc-n">Le Petit Zinc · Restaurant Lyon</div><div class="sc-m">Email : contact@lepetitzinc.fr · Tél : 01 42 56 78 90</div></div>
-          </div>
-          <div class="sc-pitch">
-            <p><strong>Objet :</strong> Votre restaurant Le Petit Zinc perd ~40 clients/mois sans site</p>
-            <p style="margin-top:10px">Bonjour,</p>
-            <p style="margin-top:6px">J'ai remarqué que <strong>Le Petit Zinc</strong> a une excellente réputation sur Google (4.6 étoiles, 89 avis). Mais vous n'apparaissez pas dans les recherches "restaurant Lyon 2e" parce que vous n'avez pas de site.</p>
-            <p style="margin-top:6px">Cela vous fait perdre environ <strong>30 à 50 réservations par mois</strong> (clients qui réservent chez un concurrent qui a un site).</p>
-            <p style="margin-top:6px">Je crée des sites simples pour restaurants, livrés en 5 jours, à partir de 990 €.</p>
-            <p style="margin-top:6px">15 minutes au téléphone cette semaine ?</p>
-          </div>
-          <div class="sc-actions">
-            <button class="sc-btn-ghost">Régénérer</button>
-            <button class="sc-btn-primary">Envoyer par email</button>
-          </div>
-        </div>
-
-        <!-- Screen 3 - Analyse -->
-        <div class="show-screen" data-sscreen="3">
-          <div class="sc-head">
-            <div class="sc-title">Analyse & KPIs</div>
-            <div class="sc-pill">Avril 2026</div>
-          </div>
-          <div class="sc-kpis">
-            <div class="sc-kpi"><div class="sc-kpi-v">247</div><div class="sc-kpi-l">Prospects contactés</div></div>
-            <div class="sc-kpi"><div class="sc-kpi-v">38</div><div class="sc-kpi-l">Rendez-vous pris</div></div>
-            <div class="sc-kpi"><div class="sc-kpi-v">9</div><div class="sc-kpi-l">Clients signés</div></div>
-            <div class="sc-kpi sc-kpi-green"><div class="sc-kpi-v">13 840 €</div><div class="sc-kpi-l">CA du mois</div></div>
-          </div>
-          <div class="sc-chart">
-            <div class="sc-chart-title">Évolution du CA mensuel</div>
-            <svg viewBox="0 0 320 120" preserveAspectRatio="none" style="width:100%;height:120px">
-              <defs><linearGradient id="gradChart" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="#16a34a" stop-opacity=".3"/><stop offset="100%" stop-color="#16a34a" stop-opacity="0"/></linearGradient></defs>
-              <path d="M0,90 L45,82 L90,75 L135,62 L180,50 L225,38 L270,22 L320,10 L320,120 L0,120 Z" fill="url(#gradChart)"/>
-              <path d="M0,90 L45,82 L90,75 L135,62 L180,50 L225,38 L270,22 L320,10" stroke="#16a34a" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-              <circle cx="320" cy="10" r="4" fill="#16a34a"/>
-            </svg>
-          </div>
-        </div>
-
-      </div>
-    </div>
-    <div class="show-dots">
-      <span class="show-dot active" data-sgo="0"></span>
-      <span class="show-dot" data-sgo="1"></span>
-      <span class="show-dot" data-sgo="2"></span>
-      <span class="show-dot" data-sgo="3"></span>
-    </div>
-  </div>
-</section>
-
-<style>
-  .show-section{padding:100px 6%;background:linear-gradient(180deg,#ffffff 0%,#f7fcf8 100%);overflow:hidden}
-  .show-tabs{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;max-width:640px;margin:0 auto 2.5rem;padding:.5rem;background:var(--bg);border:1px solid var(--border);border-radius:16px}
-  .show-tab{display:inline-flex;align-items:center;gap:.5rem;background:transparent;border:none;color:var(--text2);padding:.7rem 1.1rem;border-radius:11px;font-size:.84rem;font-weight:600;cursor:pointer;transition:all .25s;font-family:'Inter',sans-serif}
-  .show-tab svg{width:15px;height:15px;flex-shrink:0}
-  .show-tab:hover{color:var(--text);background:rgba(22,163,74,.06)}
-  .show-tab.active{background:var(--white);color:var(--green);box-shadow:0 4px 12px rgba(22,163,74,.1),0 0 0 1px rgba(22,163,74,.15)}
-  .show-wrap{max-width:1100px;margin:0 auto}
-  .show-frame{background:#fff;border-radius:18px;box-shadow:0 30px 80px rgba(22,163,74,.15),0 0 0 1px rgba(22,163,74,.08);border:1px solid var(--border);overflow:hidden}
-  .show-chrome{display:flex;align-items:center;gap:7px;padding:14px 18px;background:var(--bg);border-bottom:1px solid var(--border)}
-  .sc-dot{width:10px;height:10px;border-radius:50%}
-  .sc-dot:nth-child(1){background:#ff5f57}.sc-dot:nth-child(2){background:#ffbd2e}.sc-dot:nth-child(3){background:#28ca41}
-  .sc-url{margin-left:12px;background:#fff;border:1px solid var(--border);border-radius:6px;padding:5px 14px;font-size:.72rem;color:var(--text3);font-weight:500}
-  .show-body{position:relative;min-height:460px;padding:26px 30px;background:#fff}
-  .show-screen{position:absolute;inset:26px 30px;opacity:0;transition:opacity .5s ease;pointer-events:none;display:flex;flex-direction:column;gap:16px}
-  .show-screen.active{opacity:1;pointer-events:auto}
-  .sc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-  .sc-title{font-size:1.05rem;font-weight:800;color:var(--dark);font-family:'Switzer','Satoshi','Inter',sans-serif}
-  .sc-pill{font-size:.7rem;font-weight:700;color:var(--text3);background:var(--bg);border:1px solid var(--border);padding:.35rem .7rem;border-radius:999px}
-  .sc-pill-green{color:var(--green);background:var(--green-bg);border-color:var(--green-border)}
-  .sc-search-bar{display:flex;gap:10px}
-  .sc-search-bar input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:11px 16px;font-size:.88rem;font-weight:600;color:var(--green);font-family:inherit}
-  .sc-search-bar button{background:var(--green);color:#fff;border:none;border-radius:10px;padding:11px 22px;font-weight:700;font-size:.82rem;cursor:pointer;font-family:inherit}
-  .sc-rows{display:flex;flex-direction:column;gap:8px}
-  .sc-row{display:flex;align-items:center;gap:12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:11px 14px;animation:sr-in .5s ease both}
-  .sc-row:nth-child(2){animation-delay:.05s}.sc-row:nth-child(3){animation-delay:.1s}.sc-row:nth-child(4){animation-delay:.15s}.sc-row:nth-child(5){animation-delay:.2s}
-  @keyframes sr-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-  .sc-av{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.7rem;font-weight:800;flex-shrink:0}
-  .sc-inf{flex:1;min-width:0}
-  .sc-n{font-size:.85rem;font-weight:700;color:var(--text)}
-  .sc-m{font-size:.7rem;color:var(--text3);margin-top:2px}
-  .sc-tag{font-size:.6rem;font-weight:800;padding:3px 8px;border-radius:5px;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0;border:1px solid}
-  .sc-tag-red{background:#fef2f2;color:#dc2626;border-color:#fecaca}
-  .sc-tag-blue{background:#eff6ff;color:#2563eb;border-color:#bfdbfe}
-  .sc-pipeline{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;flex:1}
-  .sc-col{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:6px}
-  .sc-col-h{display:flex;justify-content:space-between;align-items:center;font-size:.62rem;font-weight:800;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;padding-bottom:7px;border-bottom:1px solid var(--border);margin-bottom:4px}
-  .sc-col-h span{background:var(--white);color:var(--text2);padding:1px 6px;border-radius:5px;font-size:.7rem}
-  .sc-col-h.won{color:var(--green)}
-  .sc-col-h.won span{color:var(--green);background:var(--green-bg)}
-  .sc-card{background:var(--white);border:1px solid var(--border);border-radius:7px;padding:8px 10px}
-  .sc-card.sc-win{border-color:var(--green-border);background:var(--green-bg)}
-  .sc-cn{font-size:.72rem;font-weight:700;color:var(--text);margin-bottom:2px}
-  .sc-cm{font-size:.62rem;color:var(--text3)}
-  .sc-card.sc-win .sc-cm{color:var(--green);font-weight:600}
-  .sc-pitch-head{display:flex;gap:12px;align-items:center;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px}
-  .sc-pitch{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:16px 18px;font-size:.82rem;line-height:1.65;color:var(--text);max-height:260px;overflow-y:auto}
-  .sc-pitch p{margin:0}
-  .sc-pitch strong{color:var(--dark);font-weight:700}
-  .sc-actions{display:flex;gap:10px;justify-content:flex-end}
-  .sc-btn-ghost{background:var(--white);border:1px solid var(--border);color:var(--text);padding:9px 16px;border-radius:8px;font-weight:700;font-size:.78rem;cursor:pointer;font-family:inherit}
-  .sc-btn-primary{background:var(--green);border:none;color:#fff;padding:9px 18px;border-radius:8px;font-weight:700;font-size:.78rem;cursor:pointer;font-family:inherit}
-  .sc-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-  .sc-kpi{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px 12px;text-align:center}
-  .sc-kpi-green{background:var(--green-bg);border-color:var(--green-border)}
-  .sc-kpi-v{font-family:'Switzer','Satoshi','Inter',sans-serif;font-size:1.45rem;font-weight:900;color:var(--dark);letter-spacing:-.5px;line-height:1;margin-bottom:5px}
-  .sc-kpi-green .sc-kpi-v{color:var(--green)}
-  .sc-kpi-l{font-size:.65rem;color:var(--text3);font-weight:600}
-  .sc-chart{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px 18px;flex:1}
-  .sc-chart-title{font-size:.74rem;font-weight:700;color:var(--text2);margin-bottom:10px}
-  .show-dots{display:flex;gap:8px;margin-top:1.5rem;justify-content:center}
-  .show-dot{width:8px;height:8px;border-radius:50%;background:rgba(22,163,74,.25);cursor:pointer;transition:all .3s}
-  .show-dot.active{background:var(--green);width:24px;border-radius:4px}
-  @media(max-width:768px){
-    .show-tabs{padding:.35rem}
-    .show-tab{padding:.55rem .8rem;font-size:.72rem}
-    .show-tab svg{width:12px;height:12px}
-    .show-body{padding:18px 16px;min-height:520px}
-    .show-screen{inset:18px 16px}
-    .sc-pipeline{grid-template-columns:repeat(2,1fr)}
-    .sc-kpis{grid-template-columns:repeat(2,1fr)}
-  }
-</style>
-<script>
-(function(){
-  var tabs=document.querySelectorAll('.show-tab');
-  var dots=document.querySelectorAll('.show-dot');
-  var screens=document.querySelectorAll('.show-screen');
-  var urls=['empire-leads.fr/app — recherche','empire-leads.fr/app — pipeline','empire-leads.fr/app — pitch','empire-leads.fr/app — analyse'];
-  var urlEl=document.getElementById('showUrl');
-  var i=0,auto;
-  function go(n){
-    tabs.forEach(function(t,k){t.classList.toggle('active',k===n)});
-    dots.forEach(function(d,k){d.classList.toggle('active',k===n)});
-    screens.forEach(function(s,k){s.classList.toggle('active',k===n)});
-    if(urlEl)urlEl.textContent=urls[n]||urls[0];
-    i=n;
-  }
-  function loop(){auto=setInterval(function(){go((i+1)%screens.length)},4500)}
-  tabs.forEach(function(t){t.addEventListener('click',function(){clearInterval(auto);go(parseInt(t.dataset.stab));loop()})});
-  dots.forEach(function(d){d.addEventListener('click',function(){clearInterval(auto);go(parseInt(d.dataset.sgo));loop()})});
-  loop();
-})();
-</script>
-
-<div class="sep"></div>
 <div class="sep"></div>
 
 <!-- ─── COMMENT CA MARCHE ─── -->
@@ -817,7 +576,7 @@
   .logos-marquee{overflow:hidden;mask-image:linear-gradient(90deg,transparent 0%,#000 8%,#000 92%,transparent 100%);-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 8%,#000 92%,transparent 100%)}
   .logos-track{display:flex;gap:3rem;width:max-content;animation:logosScroll 40s linear infinite;align-items:center}
   @keyframes logosScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-  .logo-item{flex-shrink:0;font-family:'Switzer','Satoshi','Inter',sans-serif;font-size:1.35rem;font-weight:800;color:var(--text3);letter-spacing:-.5px;opacity:.55;transition:opacity .3s,color .3s}
+  .logo-item{flex-shrink:0;font-family:'Switzer','Satoshi',sans-serif;font-size:1.35rem;font-weight:800;color:var(--text3);letter-spacing:-.5px;opacity:.55;transition:opacity .3s,color .3s}
   .logo-item:hover{opacity:1;color:var(--green)}
 </style>
 
@@ -875,7 +634,7 @@
   .vs-tag{display:inline-block;font-size:.62rem;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;padding:.35rem .85rem;border-radius:999px;margin-bottom:.9rem}
   .vs-tag-bad{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
   .vs-tag-good{background:rgba(22,163,74,.12);color:#047857;border:1px solid rgba(22,163,74,.25)}
-  .vs-head h3{font-family:'Switzer','Satoshi','Inter',sans-serif;font-size:1.8rem;font-weight:800;letter-spacing:-1px;color:#052e16}
+  .vs-head h3{font-family:'Switzer','Satoshi',sans-serif;font-size:1.8rem;font-weight:800;letter-spacing:-1px;color:#052e16}
   .vs-bad h3{color:#52525b}
   .vs-list{list-style:none;display:flex;flex-direction:column;gap:.85rem;margin-bottom:1.8rem;flex:1}
   .vs-list li{display:flex;gap:.75rem;align-items:flex-start;font-size:.92rem;line-height:1.55}
@@ -1228,8 +987,8 @@
 <section id="roi" class="roi-section">
   <div class="centered" style="margin-bottom:3rem">
     <span class="sec-label">Calculateur</span>
-    <h2 class="sec-title">Calcule ce qu'Empire te rapporte.</h2>
-    <p class="sec-desc">Entre tes chiffres actuels et le nombre de clients en plus que tu veux signer. Le ROI se calcule en temps réel.</p>
+    <h2 class="sec-title">Combien Empire Leads va te rapporter ?</h2>
+    <p class="sec-desc">Ajuste les curseurs avec tes chiffres réels. Le ROI est calculé en temps réel.</p>
   </div>
   <div class="roi-card">
     <div class="roi-title">Calcule ton ROI</div>
@@ -1250,12 +1009,12 @@
 
     <div class="roi-slider-block">
       <div class="roi-slider-head">
-        <label>Nouveaux clients par mois signés grâce à Empire Leads</label>
-        <span class="roi-slider-val" id="roiBoostVal">+3 clients / mois</span>
+        <label>Boost de prospection estimé avec Empire Leads</label>
+        <span class="roi-slider-val" id="roiBoostVal">+100 %</span>
       </div>
-      <input type="range" id="roiBoost" min="0" max="15" value="3" class="roi-slider">
+      <input type="range" id="roiBoost" min="0" max="300" value="100" class="roi-slider">
       <div class="roi-slider-axis">
-        <span>0</span><span>Moyenne Empire</span><span>+15 clients</span>
+        <span>0 %</span><span>Moyenne Empire</span><span>300 %</span>
       </div>
     </div>
 
@@ -1269,11 +1028,11 @@
       <div class="roi-arrow">→</div>
       <div class="roi-box roi-after">
         <div class="roi-badge">Empire Leads</div>
-        <div class="roi-box-title">Avec Empire (+<span id="roiPctLabel">3</span> clients)</div>
-        <div class="roi-line"><span>Clients / mois</span><strong id="roiNewClients">5</strong></div>
-        <div class="roi-line"><span>CA mensuel</span><strong id="roiNewMois">15 000 €</strong></div>
-        <div class="roi-line highlight"><span>CA supplémentaire / mois</span><strong id="roiSuppMois">+9 000 €</strong></div>
-        <div class="roi-line highlight"><span>CA supplémentaire / an</span><strong id="roiSuppAn">+108 000 €</strong></div>
+        <div class="roi-box-title">Avec Empire (+<span id="roiPctLabel">100</span> %)</div>
+        <div class="roi-line"><span>Clients / mois</span><strong id="roiNewClients">4</strong></div>
+        <div class="roi-line"><span>CA mensuel</span><strong id="roiNewMois">12 000 €</strong></div>
+        <div class="roi-line highlight"><span>CA supplémentaire / mois</span><strong id="roiSuppMois">+6 000 €</strong></div>
+        <div class="roi-line highlight"><span>CA supplémentaire / an</span><strong id="roiSuppAn">+72 000 €</strong></div>
       </div>
     </div>
 
@@ -1347,21 +1106,22 @@
   function recalc(){
     var clients=parseFloat(document.getElementById('roiClients').value)||0;
     var panier=parseFloat(document.getElementById('roiPanier').value)||0;
-    var extra=parseFloat(document.getElementById('roiBoost').value)||0;
+    var boost=parseFloat(document.getElementById('roiBoost').value)||0;
+    var pct=boost/100;
     var curMois=clients*panier;
     var curAn=curMois*12;
-    var newClients=clients+extra;
+    var newClients=clients*(1+pct);
     var newMois=newClients*panier;
     var suppMois=newMois-curMois;
     var suppAn=suppMois*12;
     var multiple=suppAn/(price*12);
     var breakeven=suppMois>0?(price/suppMois)*30:999;
-    document.getElementById('roiBoostVal').textContent='+'+extra+' client'+(extra>1?'s':'')+' / mois';
-    document.getElementById('roiPctLabel').textContent=extra;
+    document.getElementById('roiBoostVal').textContent='+'+boost+' %';
+    document.getElementById('roiPctLabel').textContent=boost;
     document.getElementById('roiCurClients').textContent=Math.round(clients);
     document.getElementById('roiCurMois').textContent=fmt(curMois);
     document.getElementById('roiCurAn').textContent=fmt(curAn);
-    document.getElementById('roiNewClients').textContent=Math.round(newClients);
+    document.getElementById('roiNewClients').textContent=newClients.toFixed(1).replace('.0','');
     document.getElementById('roiNewMois').textContent=fmt(newMois);
     document.getElementById('roiSuppMois').textContent='+'+fmt(suppMois);
     document.getElementById('roiSuppAn').textContent='+'+fmt(suppAn);
@@ -1379,6 +1139,189 @@
 })();
 </script>
 
+<!-- ─── OFFRE DECOUVERTE INTERACTIVE ─── -->
+<section class="offer-section">
+  <div class="centered" style="margin-bottom:3rem">
+    <span class="sec-label">Offre de lancement</span>
+    <h2 class="sec-title">Commence avec un pack découverte</h2>
+  </div>
+  <div class="offer-wrap">
+    <div class="offer-mockup">
+      <div class="offer-browser">
+        <div class="offer-browser-chrome">
+          <span class="ob-dot"></span><span class="ob-dot"></span><span class="ob-dot"></span>
+          <div class="ob-url" id="obUrl">empire-leads.fr/app</div>
+        </div>
+        <div class="offer-browser-body">
+          <div class="offer-slide active" data-slide="0">
+            <div class="os-search">
+              <div class="os-input">restaurants Lyon sans site</div>
+              <div class="os-btn">Scan</div>
+            </div>
+            <div class="os-row"><div class="os-ic" style="background:linear-gradient(135deg,#dc2626,#f97316)">LP</div><div class="os-info"><div class="os-name">Le Petit Zinc</div><div class="os-meta">01 42 56 78 90 — Paris 15e — 4.6/5</div></div><span class="os-tag">Sans site</span></div>
+            <div class="os-row"><div class="os-ic" style="background:linear-gradient(135deg,#7c3aed,#6366f1)">DR</div><div class="os-info"><div class="os-name">Pizzeria Da Roberto</div><div class="os-meta">04 91 55 23 67 — Lyon 7e — 4.9/5</div></div><span class="os-tag">Sans réseaux</span></div>
+            <div class="os-row"><div class="os-ic" style="background:linear-gradient(135deg,#059669,#10b981)">BM</div><div class="os-info"><div class="os-name">Brasserie du Marche</div><div class="os-meta">04 78 92 11 44 — Lyon 2e — 4.7/5</div></div><span class="os-tag">Sans site</span></div>
+            <div class="os-row"><div class="os-ic" style="background:linear-gradient(135deg,#d97706,#f59e0b)">CA</div><div class="os-info"><div class="os-name">Cafe des Amis</div><div class="os-meta">04 72 41 23 90 — Lyon 1er — 4.3/5</div></div><span class="os-tag">Obsolete</span></div>
+            <div class="os-foot">47 prospects trouvés en 12 sec</div>
+          </div>
+          <div class="offer-slide" data-slide="1">
+            <div class="os-search"><div class="os-input">garages automobiles Marseille</div><div class="os-btn">Scan</div></div>
+            <div class="os-row"><div class="os-ic" style="background:linear-gradient(135deg,#1e293b,#475569)">AM</div><div class="os-info"><div class="os-name">Auto Mediterranee</div><div class="os-meta">04 91 22 43 56 — Marseille 13e — 4.4/5</div></div><span class="os-tag">Sans site</span></div>
+            <div class="os-row"><div class="os-ic" style="background:linear-gradient(135deg,#991b1b,#dc2626)">GP</div><div class="os-info"><div class="os-name">Garage Pradel</div><div class="os-meta">04 91 77 81 22 — Marseille 8e — 4.8/5</div></div><span class="os-tag">Sans réseaux</span></div>
+            <div class="os-row"><div class="os-ic" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">MC</div><div class="os-info"><div class="os-name">Mecanique du Cours</div><div class="os-meta">04 91 65 33 98 — Marseille 1er — 4.5/5</div></div><span class="os-tag">Sans site</span></div>
+            <div class="os-row"><div class="os-ic" style="background:linear-gradient(135deg,#525252,#737373)">CA</div><div class="os-info"><div class="os-name">Carrosserie Allard</div><div class="os-meta">04 91 49 12 30 — Marseille 9e — 4.6/5</div></div><span class="os-tag">Obsolete</span></div>
+            <div class="os-foot">62 prospects trouvés en 8 sec</div>
+          </div>
+          <div class="offer-slide" data-slide="2">
+            <div class="os-search"><div class="os-input">coachs sportifs Bordeaux</div><div class="os-btn">Scan</div></div>
+            <div class="os-row"><div class="os-ic" style="background:linear-gradient(135deg,#be185d,#ec4899)">PC</div><div class="os-info"><div class="os-name">Paul Coaching Prive</div><div class="os-meta">06 12 34 56 78 — Bordeaux — 5.0/5</div></div><span class="os-tag">Sans site</span></div>
+            <div class="os-row"><div class="os-ic" style="background:linear-gradient(135deg,#7c2d12,#ea580c)">SF</div><div class="os-info"><div class="os-name">Sophie Fit</div><div class="os-meta">06 87 65 43 21 — Bordeaux — 4.9/5</div></div><span class="os-tag">Sans réseaux</span></div>
+            <div class="os-row"><div class="os-ic" style="background:linear-gradient(135deg,#065f46,#10b981)">MR</div><div class="os-info"><div class="os-name">Max Running Club</div><div class="os-meta">06 54 32 10 98 — Bordeaux — 4.7/5</div></div><span class="os-tag">Sans site</span></div>
+            <div class="os-row"><div class="os-ic" style="background:linear-gradient(135deg,#4c1d95,#8b5cf6)">JB</div><div class="os-info"><div class="os-name">Julie Boxing Studio</div><div class="os-meta">06 23 45 67 89 — Bordeaux — 4.8/5</div></div><span class="os-tag">Obsolete</span></div>
+            <div class="os-foot">31 prospects trouvés en 6 sec</div>
+          </div>
+          <div class="offer-slide" data-slide="3">
+            <div class="os-search"><div class="os-input">artisans Nice</div><div class="os-btn">Scan</div></div>
+            <div class="os-row"><div class="os-ic" style="background:linear-gradient(135deg,#78350f,#d97706)">MB</div><div class="os-info"><div class="os-name">Menuiserie Borelli</div><div class="os-meta">04 93 44 22 11 — Nice — 4.7/5</div></div><span class="os-tag">Sans site</span></div>
+            <div class="os-row"><div class="os-ic" style="background:linear-gradient(135deg,#1e40af,#3b82f6)">PA</div><div class="os-info"><div class="os-name">Plomberie Antoine</div><div class="os-meta">04 93 88 55 33 — Nice — 4.9/5</div></div><span class="os-tag">Sans réseaux</span></div>
+            <div class="os-row"><div class="os-ic" style="background:linear-gradient(135deg,#6b21a8,#a855f7)">ER</div><div class="os-info"><div class="os-name">Elec Riviera</div><div class="os-meta">04 93 67 21 44 — Nice — 4.6/5</div></div><span class="os-tag">Sans site</span></div>
+            <div class="os-row"><div class="os-ic" style="background:linear-gradient(135deg,#047857,#10b981)">CM</div><div class="os-info"><div class="os-name">Carrelage du Midi</div><div class="os-meta">04 93 12 78 90 — Nice — 4.5/5</div></div><span class="os-tag">Obsolete</span></div>
+            <div class="os-foot">54 prospects trouvés en 11 sec</div>
+          </div>
+        </div>
+      </div>
+      <div class="offer-dots">
+        <span class="offer-dot active" data-go="0"></span>
+        <span class="offer-dot" data-go="1"></span>
+        <span class="offer-dot" data-go="2"></span>
+        <span class="offer-dot" data-go="3"></span>
+      </div>
+    </div>
+
+    <div class="offer-card">
+      <div class="offer-glow"></div>
+      <div class="offer-head">
+        <div>
+          <h3 class="offer-h">Un pack<br>rentabilisé en<br>quelques jours</h3>
+        </div>
+        <div class="offer-prices">
+          <span class="offer-price-old">589 €</span>
+          <span class="offer-price-new">289<em>€</em></span>
+        </div>
+      </div>
+      <p class="offer-desc">1 000 prospects qualifiés livrés en 24h. Tu payes une fois, tu les exploites pendant 6 mois.</p>
+      <div class="offer-stock"><span class="offer-stock-dot"></span>2 places restantes aujourd'hui</div>
+      <a href="/login" class="offer-btn">
+        <span class="offer-btn-text">Commander</span>
+        <span class="offer-btn-circle"><span class="offer-btn-arrow">→</span></span>
+      </a>
+      <div class="offer-secure">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+        Paiement sécurisé par <strong>stripe</strong>
+      </div>
+      <div class="offer-sep"></div>
+      <h4 class="offer-h4">Dans cette offre</h4>
+      <ul class="offer-list">
+        <li><span class="offer-ck">✓</span>1 000 prospects qualifiés</li>
+        <li><span class="offer-ck">✓</span>Téléphone, email, décideur</li>
+        <li><span class="offer-ck">✓</span>Filtre "sans site" / "sans réseaux"</li>
+        <li><span class="offer-ck">✓</span>Accès complet au CRM</li>
+        <li><span class="offer-ck">✓</span>Pitchs IA personnalisés illimités</li>
+        <li><span class="offer-ck">✓</span>Livraison en 24h chrono</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<style>
+  .offer-section{padding:60px 6% 100px;background:var(--bg)}
+  .offer-wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1.15fr 1fr;gap:3rem;align-items:stretch}
+  /* ── Mockup gauche ── */
+  .offer-mockup{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .offer-browser{width:100%;background:#fff;border-radius:16px;box-shadow:0 25px 60px rgba(22,163,74,.12),0 10px 30px rgba(0,0,0,.08);border:1px solid var(--border);overflow:hidden;transform:perspective(1400px) rotateY(-6deg) rotateX(3deg);transition:transform .6s ease}
+  .offer-browser:hover{transform:perspective(1400px) rotateY(-3deg) rotateX(1deg)}
+  .offer-browser-chrome{display:flex;align-items:center;gap:7px;padding:14px 18px;background:var(--bg);border-bottom:1px solid var(--border)}
+  .ob-dot{width:10px;height:10px;border-radius:50%}
+  .ob-dot:nth-child(1){background:#ff5f57}.ob-dot:nth-child(2){background:#ffbd2e}.ob-dot:nth-child(3){background:#28ca41}
+  .ob-url{margin-left:12px;background:#fff;border:1px solid var(--border);border-radius:6px;padding:5px 14px;font-size:.72rem;color:var(--text3);font-weight:500;min-width:200px}
+  .offer-browser-body{position:relative;min-height:360px;padding:20px}
+  .offer-slide{position:absolute;inset:20px;opacity:0;transition:opacity .5s ease;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+  .offer-slide.active{opacity:1;pointer-events:auto}
+  .os-search{display:flex;gap:10px;margin-bottom:4px}
+  .os-input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--green);font-size:.82rem;font-weight:600}
+  .os-btn{background:var(--green);color:#fff;border-radius:8px;padding:10px 18px;font-weight:700;font-size:.78rem}
+  .os-row{display:flex;align-items:center;gap:12px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:11px 13px;animation:osSlide .5s ease both}
+  .os-row:nth-child(2){animation-delay:.05s}.os-row:nth-child(3){animation-delay:.1s}.os-row:nth-child(4){animation-delay:.15s}.os-row:nth-child(5){animation-delay:.2s}
+  @keyframes osSlide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+  .os-ic{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.66rem;font-weight:800;flex-shrink:0}
+  .os-info{flex:1;min-width:0}
+  .os-name{font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:2px}
+  .os-meta{font-size:.66rem;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .os-tag{font-size:.58rem;font-weight:800;color:#dc2626;background:#fef2f2;border:1px solid #fecaca;padding:3px 8px;border-radius:5px;letter-spacing:.3px;text-transform:uppercase;flex-shrink:0}
+  .os-foot{margin-top:auto;padding-top:8px;font-size:.68rem;color:var(--green);font-weight:700;text-align:center}
+  .offer-dots{display:flex;gap:8px;margin-top:1.3rem;justify-content:center}
+  .offer-dot{width:8px;height:8px;border-radius:50%;background:rgba(22,163,74,.25);cursor:pointer;transition:all .3s}
+  .offer-dot.active{background:var(--green);width:24px;border-radius:4px}
+
+  /* ── Offre droite ── */
+  .offer-card{position:relative;background:linear-gradient(145deg,#0b4d2c 0%,#16a34a 60%,#22c55e 100%);border-radius:22px;padding:2.5rem 2.3rem;color:#fff;overflow:hidden;box-shadow:0 25px 60px rgba(22,163,74,.25)}
+  .offer-glow{position:absolute;inset:0;background:radial-gradient(circle at 80% 0%,rgba(255,255,255,.25) 0%,transparent 45%);pointer-events:none}
+  .offer-card > *{position:relative}
+  .offer-head{display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;margin-bottom:1.2rem}
+  .offer-h{font-size:1.5rem;font-weight:800;line-height:1.1;letter-spacing:-.8px}
+  .offer-prices{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+  .offer-price-old{font-size:.95rem;color:rgba(255,255,255,.55);text-decoration:line-through;font-weight:600}
+  .offer-price-new{font-size:2.4rem;font-weight:900;letter-spacing:-1.5px;line-height:1}
+  .offer-price-new em{font-style:normal;font-size:.9rem;font-weight:600;margin-left:4px;opacity:.85}
+  .offer-desc{font-size:.88rem;line-height:1.6;color:rgba(255,255,255,.85);margin-bottom:1.4rem}
+  .offer-stock{display:inline-flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);padding:.45rem .9rem;border-radius:999px;font-size:.78rem;font-weight:600;margin-bottom:1.4rem;backdrop-filter:blur(8px)}
+  .offer-stock-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 4px rgba(74,222,128,.3);animation:pulseDot 2s infinite}
+  @keyframes pulseDot{0%,100%{box-shadow:0 0 0 4px rgba(74,222,128,.3)}50%{box-shadow:0 0 0 8px rgba(74,222,128,.05)}}
+  .offer-btn{display:flex;align-items:center;justify-content:space-between;gap:1rem;width:100%;background:rgba(255,255,255,.95);color:#0b4d2c;padding:.5rem .5rem .5rem 1.6rem;border-radius:999px;font-weight:800;font-size:1rem;letter-spacing:-.2px;transition:all .3s cubic-bezier(.34,1.56,.64,1);margin-bottom:1rem;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+  .offer-btn:hover{background:#fff;transform:translateY(-2px);box-shadow:0 15px 40px rgba(0,0,0,.3)}
+  .offer-btn-circle{display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#0b4d2c);color:#fff;transition:transform .6s cubic-bezier(.34,1.56,.64,1);position:relative}
+  .offer-btn:hover .offer-btn-circle{transform:rotate(360deg) scale(1.1)}
+  .offer-btn-circle::before{content:"";position:absolute;inset:-4px;border-radius:50%;border:1px dashed rgba(255,255,255,.4);animation:spinDash 8s linear infinite}
+  @keyframes spinDash{to{transform:rotate(360deg)}}
+  .offer-btn-arrow{font-size:1.1rem;font-weight:700}
+  .offer-secure{display:flex;align-items:center;justify-content:center;gap:.4rem;font-size:.75rem;color:rgba(255,255,255,.8);font-weight:500}
+  .offer-secure strong{font-weight:800;text-transform:lowercase;letter-spacing:-.3px}
+  .offer-sep{height:1px;background:rgba(255,255,255,.18);margin:1.8rem 0 1.4rem}
+  .offer-h4{font-size:.95rem;font-weight:800;margin-bottom:1rem;letter-spacing:-.2px}
+  .offer-list{list-style:none;display:flex;flex-direction:column;gap:.7rem}
+  .offer-list li{display:flex;align-items:center;gap:.75rem;font-size:.86rem;color:rgba(255,255,255,.92)}
+  .offer-ck{display:flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.15);color:#fff;font-weight:900;font-size:.72rem;flex-shrink:0}
+
+  @media(max-width:900px){
+    .offer-wrap{grid-template-columns:1fr;gap:2rem}
+    .offer-browser{transform:none}
+    .offer-browser:hover{transform:none}
+    .offer-card{padding:2rem 1.5rem}
+    .offer-head{flex-direction:column;align-items:stretch}
+    .offer-prices{flex-direction:row;align-items:baseline;gap:.8rem}
+  }
+</style>
+
+<script>
+(function(){
+  var slides=document.querySelectorAll('.offer-slide');
+  var dots=document.querySelectorAll('.offer-dot');
+  var urls=['empire-leads.fr/app — Lyon','empire-leads.fr/app — Marseille','empire-leads.fr/app — Bordeaux','empire-leads.fr/app — Nice'];
+  var urlEl=document.getElementById('obUrl');
+  var i=0,timer;
+  function go(n){
+    slides.forEach(function(s,k){s.classList.toggle('active',k===n)});
+    dots.forEach(function(d,k){d.classList.toggle('active',k===n)});
+    if(urlEl)urlEl.textContent=urls[n]||urls[0];
+    i=n;
+  }
+  function loop(){timer=setInterval(function(){go((i+1)%slides.length)},3500)}
+  dots.forEach(function(d){d.addEventListener('click',function(){clearInterval(timer);go(parseInt(d.dataset.go));loop()})});
+  loop();
+})();
+</script>
+
+<div class="sep"></div>
 
 <!-- ─── PRICING (tableau comparatif style Smartlead) ─── -->
 <section id="tarifs" class="pricing-section">
@@ -1410,127 +1353,139 @@
               <a href="/login" class="pc-plan-btn pc-plan-btn-green">Choisir Pro</a>
             </div>
           </th>
+          <th class="pc-plan-col">
+            <div class="pc-plan">
+              <div class="pc-plan-name">Sur mesure</div>
+              <div class="pc-plan-price"><strong>Sur devis</strong></div>
+              <a href="mailto:contact@empire-leads.fr" class="pc-plan-btn pc-plan-btn-outline">Nous contacter</a>
+            </div>
+          </th>
         </tr>
       </thead>
       <tbody>
-        <tr class="pc-section-row"><td colspan="3">Prospection</td></tr>
+        <tr class="pc-section-row"><td colspan="4">Prospection</td></tr>
         <tr>
           <td><div class="pc-feat"><span class="pc-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></span>Recherches mensuelles</div></td>
           <td><strong>200</strong></td>
           <td class="pc-cell-hl"><strong>Illimité</strong></td>
+          <td><strong>Illimité</strong></td>
         </tr>
         <tr>
           <td><div class="pc-feat"><span class="pc-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>Export CSV illimité</div></td>
           <td><span class="pc-ck">✓</span></td>
           <td class="pc-cell-hl"><span class="pc-ck">✓</span></td>
+          <td><span class="pc-ck">✓</span></td>
         </tr>
         <tr>
           <td><div class="pc-feat"><span class="pc-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></span>Filtres avancés (sans site, sans réseaux)</div></td>
           <td><span class="pc-ck">✓</span></td>
           <td class="pc-cell-hl"><span class="pc-ck">✓</span></td>
+          <td><span class="pc-ck">✓</span></td>
         </tr>
         <tr>
           <td><div class="pc-feat"><span class="pc-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></span>Recherche multi-sources (Google Maps, annuaires)</div></td>
           <td><span class="pc-ck">✓</span></td>
           <td class="pc-cell-hl"><span class="pc-ck">✓</span></td>
+          <td><span class="pc-ck">✓</span></td>
         </tr>
         <tr>
           <td><div class="pc-feat"><span class="pc-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3h18l-2 13H5L3 3z"/><circle cx="9" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/></svg></span>Données enrichies (téléphone, email, décideur)</div></td>
           <td><span class="pc-ck">✓</span></td>
           <td class="pc-cell-hl"><span class="pc-ck">✓</span></td>
+          <td><span class="pc-ck">✓</span></td>
         </tr>
 
-        <tr class="pc-section-row"><td colspan="3">CRM & Closing</td></tr>
+        <tr class="pc-section-row"><td colspan="4">CRM & Closing</td></tr>
         <tr>
           <td><div class="pc-feat"><span class="pc-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>Pipeline CRM 6 étapes</div></td>
           <td><span class="pc-ck">✓</span></td>
           <td class="pc-cell-hl"><span class="pc-ck">✓</span></td>
+          <td><span class="pc-ck">✓</span></td>
         </tr>
         <tr>
           <td><div class="pc-feat"><span class="pc-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/></svg></span>Pitch IA personnalisé (illimité)</div></td>
           <td><span class="pc-ck">✓</span></td>
           <td class="pc-cell-hl"><span class="pc-ck">✓</span></td>
+          <td><span class="pc-ck">✓</span></td>
         </tr>
         <tr>
           <td><div class="pc-feat"><span class="pc-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2a3 3 0 013 3v6a3 3 0 01-6 0V5a3 3 0 013-3z"/><path d="M19 10v1a7 7 0 01-14 0v-1"/><line x1="12" y1="18" x2="12" y2="22"/></svg></span>Notes vocales & rappels automatiques</div></td>
           <td><span class="pc-ck">✓</span></td>
           <td class="pc-cell-hl"><span class="pc-ck">✓</span></td>
+          <td><span class="pc-ck">✓</span></td>
         </tr>
         <tr>
           <td><div class="pc-feat"><span class="pc-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Historique d'activité & relances</div></td>
           <td><span class="pc-ck">✓</span></td>
           <td class="pc-cell-hl"><span class="pc-ck">✓</span></td>
+          <td><span class="pc-ck">✓</span></td>
         </tr>
         <tr>
           <td><div class="pc-feat"><span class="pc-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>Dashboard stats & analytics</div></td>
           <td><span class="pc-ck">✓</span></td>
           <td class="pc-cell-hl"><span class="pc-ck">✓</span></td>
+          <td><span class="pc-ck">✓</span></td>
         </tr>
 
-        <tr class="pc-section-row"><td colspan="3">Extensions Premium</td></tr>
+        <tr class="pc-section-row"><td colspan="4">Extensions Premium</td></tr>
         <tr>
           <td><div class="pc-feat"><span class="pc-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="18" cy="6" r="1.5" fill="currentColor"/></svg></span>Instagram Finder (commentateurs, followers)</div></td>
           <td><span class="pc-x">—</span></td>
           <td class="pc-cell-hl"><span class="pc-ck">✓</span></td>
+          <td><span class="pc-ck">✓</span></td>
         </tr>
         <tr>
           <td><div class="pc-feat"><span class="pc-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>Leads Chauds temps réel</div></td>
           <td><span class="pc-x">—</span></td>
           <td class="pc-cell-hl"><span class="pc-ck">✓</span></td>
+          <td><span class="pc-ck">✓</span></td>
         </tr>
         <tr>
           <td><div class="pc-feat"><span class="pc-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>Email Finder & vérification SMTP</div></td>
           <td><span class="pc-x">—</span></td>
           <td class="pc-cell-hl"><span class="pc-ck">✓</span></td>
+          <td><span class="pc-ck">✓</span></td>
         </tr>
         <tr>
           <td><div class="pc-feat"><span class="pc-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Génération de devis & signature</div></td>
           <td><span class="pc-x">—</span></td>
           <td class="pc-cell-hl"><span class="pc-ck">✓</span></td>
+          <td><span class="pc-ck">✓</span></td>
         </tr>
 
+        <tr class="pc-section-row"><td colspan="4">Sur mesure</td></tr>
+        <tr>
+          <td><div class="pc-feat"><span class="pc-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4.5L6 21l1.5-7.5L2 9h7z"/></svg></span>App à votre marque (white-label)</div></td>
+          <td><span class="pc-x">—</span></td>
+          <td class="pc-cell-hl"><span class="pc-x">—</span></td>
+          <td><span class="pc-ck">✓</span></td>
+        </tr>
+        <tr>
+          <td><div class="pc-feat"><span class="pc-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></span>Domaine personnalisé</div></td>
+          <td><span class="pc-x">—</span></td>
+          <td class="pc-cell-hl"><span class="pc-x">—</span></td>
+          <td><span class="pc-ck">✓</span></td>
+        </tr>
+        <tr>
+          <td><div class="pc-feat"><span class="pc-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></span>Accompagnement dédié (coach Empire)</div></td>
+          <td><span class="pc-x">—</span></td>
+          <td class="pc-cell-hl"><span class="pc-x">—</span></td>
+          <td><span class="pc-ck">✓</span></td>
+        </tr>
+        <tr>
+          <td><div class="pc-feat"><span class="pc-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>Support prioritaire 24/7</div></td>
+          <td><span class="pc-x">—</span></td>
+          <td class="pc-cell-hl"><span class="pc-x">—</span></td>
+          <td><span class="pc-ck">✓</span></td>
+        </tr>
+        <tr>
+          <td><div class="pc-feat"><span class="pc-feat-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>Niches personnalisées pour votre marché</div></td>
+          <td><span class="pc-x">—</span></td>
+          <td class="pc-cell-hl"><span class="pc-x">—</span></td>
+          <td><span class="pc-ck">✓</span></td>
+        </tr>
       </tbody>
     </table>
-  </div>
-
-  <!-- ── Mobile pricing cards (displayed < 760px) ── -->
-  <div class="pc-mobile">
-    <div class="pc-mobile-card">
-      <div class="pc-mobile-name">Essentiel</div>
-      <div class="pc-mobile-price"><strong>99</strong><span>€ / mois</span></div>
-      <p class="pc-mobile-desc">Parfait pour démarrer votre prospection et signer vos premiers clients.</p>
-      <ul class="pc-mobile-list">
-        <li><span class="ck">✓</span>200 recherches / mois</li>
-        <li><span class="ck">✓</span>Filtres sans site / sans réseaux</li>
-        <li><span class="ck">✓</span>Export CSV illimité</li>
-        <li><span class="ck">✓</span>Pipeline CRM 6 étapes</li>
-        <li><span class="ck">✓</span>Pitch IA personnalisé</li>
-        <li><span class="ck">✓</span>Notes vocales &amp; rappels</li>
-        <li class="off"><span class="xx">—</span>Instagram Finder</li>
-        <li class="off"><span class="xx">—</span>Leads Chauds temps réel</li>
-        <li class="off"><span class="xx">—</span>Email Finder</li>
-      </ul>
-      <a href="/login" class="pc-mobile-btn pc-mobile-btn-outline">Choisir Essentiel</a>
-    </div>
-    <div class="pc-mobile-card featured">
-      <span class="pc-mobile-badge">Populaire</span>
-      <div class="pc-mobile-name">Pro</div>
-      <div class="pc-mobile-price"><strong>349</strong><span>€ / mois</span></div>
-      <p class="pc-mobile-desc">Tout ce qu'il faut pour maximiser votre volume de signatures.</p>
-      <ul class="pc-mobile-list">
-        <li><span class="ck">✓</span>Recherches illimitées</li>
-        <li><span class="ck">✓</span>Filtres sans site / sans réseaux</li>
-        <li><span class="ck">✓</span>Export CSV illimité</li>
-        <li><span class="ck">✓</span>Pipeline CRM 6 étapes</li>
-        <li><span class="ck">✓</span>Pitch IA personnalisé</li>
-        <li><span class="ck">✓</span>Notes vocales &amp; rappels</li>
-        <li><span class="ck">✓</span>Instagram Finder</li>
-        <li><span class="ck">✓</span>Leads Chauds temps réel</li>
-        <li><span class="ck">✓</span>Email Finder &amp; vérification SMTP</li>
-        <li><span class="ck">✓</span>Génération devis &amp; signature</li>
-      </ul>
-      <a href="/login" class="pc-mobile-btn pc-mobile-btn-green">Choisir Pro</a>
-    </div>
   </div>
 </section>
 
@@ -1564,34 +1519,90 @@
   .pc-x{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:#fef2f2;color:#dc2626;font-weight:800;font-size:.8rem;border:1px solid #fecaca;opacity:.7}
   .pc-cell-hl{background:rgba(22,163,74,.04)}
   .pc-table tbody tr:last-child td{border-bottom:none}
-  @media(max-width:760px){
-    /* Mobile : on cache le tableau complexe, on affiche 2 cards */
-    .pc-wrap{border:none;box-shadow:none;border-radius:0;overflow:visible;background:transparent}
-    .pc-table{display:none}
-    .pc-mobile{display:grid;grid-template-columns:1fr;gap:1rem;max-width:420px;margin:0 auto}
-    .pc-mobile-card{background:var(--white);border:1px solid var(--border);border-radius:18px;padding:1.8rem 1.6rem;position:relative;transition:all .3s;display:flex;flex-direction:column}
-    .pc-mobile-card.featured{border-color:var(--green);box-shadow:0 20px 50px -15px rgba(22,163,74,.35),0 0 0 1px var(--green)}
-    .pc-mobile-badge{position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;font-size:.6rem;font-weight:800;padding:.35rem .85rem;border-radius:999px;letter-spacing:1.5px;text-transform:uppercase;white-space:nowrap;box-shadow:0 4px 14px rgba(22,163,74,.3)}
-    .pc-mobile-name{font-size:.7rem;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:var(--text3);margin-bottom:.6rem}
-    .pc-mobile-card.featured .pc-mobile-name{color:var(--green)}
-    .pc-mobile-price{display:flex;align-items:baseline;gap:.3rem;margin-bottom:1rem;font-family:'Switzer','Satoshi','Inter',sans-serif}
-    .pc-mobile-price strong{font-size:3rem;font-weight:600;color:var(--dark);line-height:1;letter-spacing:-2px}
-    .pc-mobile-price span{font-size:.8rem;color:var(--text3);font-weight:500;font-family:'Inter',sans-serif}
-    .pc-mobile-desc{font-size:.88rem;color:var(--text2);line-height:1.55;margin-bottom:1.4rem}
-    .pc-mobile-list{list-style:none;margin:0 0 1.5rem;display:flex;flex-direction:column;gap:.7rem;flex:1}
-    .pc-mobile-list li{display:flex;gap:.7rem;align-items:flex-start;font-size:.88rem;color:var(--text);line-height:1.45}
-    .pc-mobile-list li.off{color:var(--text3)}
-    .pc-mobile-list .ck{color:var(--green);font-weight:800;flex-shrink:0;margin-top:1px}
-    .pc-mobile-list .xx{color:var(--text3);font-weight:800;flex-shrink:0;margin-top:1px}
-    .pc-mobile-btn{display:block;width:100%;padding:1rem;border-radius:12px;font-size:.92rem;font-weight:700;text-align:center;transition:all .25s;text-decoration:none}
-    .pc-mobile-btn-outline{background:var(--white);border:1px solid var(--border2);color:var(--text)}
-    .pc-mobile-btn-outline:hover{border-color:var(--green);color:var(--green)}
-    .pc-mobile-btn-green{background:var(--green);color:#fff;box-shadow:0 8px 22px rgba(22,163,74,.25)}
-    .pc-mobile-btn-green:active{background:#15803d}
+  @media(max-width:900px){
+    .pc-wrap{border-radius:14px;overflow-x:auto}
+    .pc-table{min-width:760px}
+    .pc-table th,.pc-table td{padding:12px 14px;font-size:.82rem}
+    .pc-plan-price strong{font-size:2rem}
   }
-  @media(min-width:761px){.pc-mobile{display:none}}
 </style>
 
+<div class="sep"></div>
+
+<!-- ─── TESTIMONIALS (carousel qui défile) ─── -->
+<section class="tm-section">
+  <div class="centered" style="margin-bottom:3rem">
+    <span class="sec-label">Témoignages</span>
+    <h2 class="sec-title">Ils signent des clients<br>grâce à Empire Leads</h2>
+    <div class="tm-rating">
+      <span class="tm-stars">★★★★★</span>
+      <span>4.9/5 · basé sur les retours clients</span>
+    </div>
+  </div>
+
+  <div class="tm-marquee" aria-hidden="false">
+    <div class="tm-track">
+      <!-- Duplicate twice for seamless loop -->
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=14" alt="" class="tm-av"><div><div class="tm-name">Thomas Robert</div><div class="tm-role">Commercial indépendant · Lyon</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"En 2 jours, j'ai identifié 15 entreprises sans site web dans ma zone. J'en ai converti 3 la première semaine. Le ROI est ridicule."</p></div>
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=47" alt="" class="tm-av"><div><div class="tm-name">Sophie Moreau</div><div class="tm-role">Directrice — Agence web · Paris</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"On cherchait un moyen d'identifier rapidement des prospects locaux. Empire nous a rempli le pipeline en une après-midi. Game changer."</p></div>
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=33" alt="" class="tm-av"><div><div class="tm-name">Antoine Legrand</div><div class="tm-role">Consultant stratégie · Bordeaux</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"L'Instagram Finder a transformé notre approche. On extrait les audiences des concurrents, on contacte avec un pitch perso. Résultats immédiats."</p></div>
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=52" alt="" class="tm-av"><div><div class="tm-name">Marine Castelli</div><div class="tm-role">Freelance webdesign · Marseille</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"J'ai signé 4 contrats en 30 jours avec les leads Empire. Au début j'y croyais pas, mais les commerces sans site c'est vraiment l'angle mort du marché."</p></div>
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=12" alt="" class="tm-av"><div><div class="tm-name">Julien Bernard</div><div class="tm-role">Dirigeant — Studio digital · Nantes</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"Les Leads Chauds c'est une mine d'or. Mes commerciaux appellent des prospects qui cherchent activement un presta. Conversion x3 vs notre ancienne base."</p></div>
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=25" alt="" class="tm-av"><div><div class="tm-name">Léa Dubois</div><div class="tm-role">Coach business · Toulouse</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"Le pitch IA m'a sauvé des heures. Je balance 40 emails perso par jour au lieu de 5. Mes clients coachs trouvent ça bluffant."</p></div>
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=68" alt="" class="tm-av"><div><div class="tm-name">Pierre Almeida</div><div class="tm-role">Fondateur — SEO agency · Lille</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"Le pack découverte à 289€ s'est rentabilisé sur le 1er contrat signé (3 800€). Franchement je comprends pas comment c'est pas plus cher."</p></div>
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=41" alt="" class="tm-av"><div><div class="tm-name">Camille Roux</div><div class="tm-role">Account manager · Nice</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"Le pipeline CRM est simple et efficace. J'ai abandonné mon HubSpot, trop complexe pour mon use case. Empire fait le taf sans friction."</p></div>
+      <!-- Loop clone -->
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=14" alt="" class="tm-av"><div><div class="tm-name">Thomas Robert</div><div class="tm-role">Commercial indépendant · Lyon</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"En 2 jours, j'ai identifié 15 entreprises sans site web dans ma zone. J'en ai converti 3 la première semaine. Le ROI est ridicule."</p></div>
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=47" alt="" class="tm-av"><div><div class="tm-name">Sophie Moreau</div><div class="tm-role">Directrice — Agence web · Paris</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"On cherchait un moyen d'identifier rapidement des prospects locaux. Empire nous a rempli le pipeline en une après-midi. Game changer."</p></div>
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=33" alt="" class="tm-av"><div><div class="tm-name">Antoine Legrand</div><div class="tm-role">Consultant stratégie · Bordeaux</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"L'Instagram Finder a transformé notre approche. On extrait les audiences des concurrents, on contacte avec un pitch perso. Résultats immédiats."</p></div>
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=52" alt="" class="tm-av"><div><div class="tm-name">Marine Castelli</div><div class="tm-role">Freelance webdesign · Marseille</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"J'ai signé 4 contrats en 30 jours avec les leads Empire. Au début j'y croyais pas, mais les commerces sans site c'est vraiment l'angle mort du marché."</p></div>
+    </div>
+  </div>
+
+  <div class="tm-marquee tm-marquee-reverse">
+    <div class="tm-track tm-track-reverse">
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=20" alt="" class="tm-av"><div><div class="tm-name">Nicolas Faure</div><div class="tm-role">Freelance dev · Rennes</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"Le filtre sans site web c'est ma nouvelle arme secrète. Les prospects n'ont quasi aucune concurrence, le closing est 10x plus simple."</p></div>
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=56" alt="" class="tm-av"><div><div class="tm-name">Élodie Martin</div><div class="tm-role">Directrice marketing · Strasbourg</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"On utilise Empire sur toute notre équipe commerciale. Chaque BDR remplit son pipeline en 15 min le matin. Productivité 2x."</p></div>
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=64" alt="" class="tm-av"><div><div class="tm-name">Hugo Perrin</div><div class="tm-role">Solopreneur · Grenoble</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"Je bossais sur LinkedIn Sales Nav pendant des heures. Empire m'a fait gagner 4h/jour avec des prospects 10x plus qualifiés."</p></div>
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=31" alt="" class="tm-av"><div><div class="tm-name">Amélie Girard</div><div class="tm-role">Cofondatrice — Agence SMA · Lyon</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"Le support est exceptionnel. J'ai eu Morales au téléphone en 20 min sur un bug, résolu dans la foulée. Rare pour un SaaS à ce prix."</p></div>
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=38" alt="" class="tm-av"><div><div class="tm-name">Raphaël Noël</div><div class="tm-role">Consultant SaaS · Paris</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"Le ROI Empire est l'un des rares outils où je peux calculer un retour direct. 289€ dépensés = 5k€+ signés. Pas de bullshit."</p></div>
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=49" alt="" class="tm-av"><div><div class="tm-name">Clara Vasseur</div><div class="tm-role">Account exec · Montpellier</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"J'étais sceptique au début (encore un outil de prospection...) mais les commerces sans site c'est littéralement un marché oublié. Dingue."</p></div>
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=59" alt="" class="tm-av"><div><div class="tm-name">Yanis Berrada</div><div class="tm-role">Fondateur — Growth studio · Lyon</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"Je recommande Empire à chaque client qui démarre sa prospection B2B locale. C'est le meilleur rapport qualité/prix du marché."</p></div>
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=22" alt="" class="tm-av"><div><div class="tm-name">Manon Leclerc</div><div class="tm-role">Business dev · Angers</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"Ce qui m'a convaincue : la simplicité. Pas besoin d'être un expert CRM. Je lance un scan, j'appelle, je note, je signe. Point barre."</p></div>
+      <!-- Loop clone -->
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=20" alt="" class="tm-av"><div><div class="tm-name">Nicolas Faure</div><div class="tm-role">Freelance dev · Rennes</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"Le filtre sans site web c'est ma nouvelle arme secrète. Les prospects n'ont quasi aucune concurrence, le closing est 10x plus simple."</p></div>
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=56" alt="" class="tm-av"><div><div class="tm-name">Élodie Martin</div><div class="tm-role">Directrice marketing · Strasbourg</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"On utilise Empire sur toute notre équipe commerciale. Chaque BDR remplit son pipeline en 15 min le matin. Productivité 2x."</p></div>
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=64" alt="" class="tm-av"><div><div class="tm-name">Hugo Perrin</div><div class="tm-role">Solopreneur · Grenoble</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"Je bossais sur LinkedIn Sales Nav pendant des heures. Empire m'a fait gagner 4h/jour avec des prospects 10x plus qualifiés."</p></div>
+      <div class="tm-card"><div class="tm-head"><img src="https://i.pravatar.cc/80?img=31" alt="" class="tm-av"><div><div class="tm-name">Amélie Girard</div><div class="tm-role">Cofondatrice — Agence SMA · Lyon</div></div><span class="tm-star">★★★★★</span></div><p class="tm-text">"Le support est exceptionnel. J'ai eu Morales au téléphone en 20 min sur un bug, résolu dans la foulée. Rare pour un SaaS à ce prix."</p></div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .tm-section{padding:100px 6%;background:var(--bg);overflow:hidden}
+  .tm-rating{display:inline-flex;align-items:center;gap:.7rem;margin-top:1.2rem;font-size:.85rem;color:var(--text2);font-weight:500}
+  .tm-stars{color:var(--green);font-size:1rem;letter-spacing:2px}
+  .tm-marquee{width:100%;overflow:hidden;mask-image:linear-gradient(90deg,transparent 0%,#000 6%,#000 94%,transparent 100%);-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 6%,#000 94%,transparent 100%);padding:1rem 0;margin-bottom:1rem}
+  .tm-track{display:flex;gap:1.2rem;width:max-content;animation:tmScroll 60s linear infinite}
+  .tm-track-reverse{animation:tmScrollReverse 70s linear infinite}
+  .tm-marquee:hover .tm-track{animation-play-state:paused}
+  @keyframes tmScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+  @keyframes tmScrollReverse{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+  .tm-card{flex-shrink:0;width:380px;background:var(--white);border:1px solid var(--border);border-radius:16px;padding:1.4rem 1.5rem;box-shadow:0 4px 14px rgba(0,0,0,.04);transition:all .3s}
+  .tm-card:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(22,163,74,.1);border-color:var(--green-border)}
+  .tm-head{display:flex;align-items:center;gap:.8rem;margin-bottom:.9rem}
+  .tm-av{width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;background:var(--bg)}
+  .tm-name{font-size:.88rem;font-weight:700;color:var(--dark);letter-spacing:-.2px}
+  .tm-role{font-size:.72rem;color:var(--text3);margin-top:1px}
+  .tm-head > div:nth-child(2){flex:1;min-width:0}
+  .tm-star{color:var(--green);font-size:.72rem;letter-spacing:1px;flex-shrink:0}
+  .tm-text{font-size:.88rem;color:var(--text2);line-height:1.6}
+  @media(max-width:768px){
+    .tm-card{width:300px;padding:1.2rem}
+  }
+</style>
+
+<div class="sep"></div>
 
 <!-- ─── FAQ (redesign avec visuel gauche) ─── -->
 <section id="faq" class="faq-section">
@@ -1599,10 +1610,17 @@
     <div class="faq-left">
       <span class="sec-label">FAQ</span>
       <h2 class="sec-title">Une question ?<br>On a la réponse.</h2>
-      <p class="sec-desc">Tout ce que tu veux savoir avant de te lancer. Si tu veux creuser, écris-nous — réponse en moins de 2 heures.</p>
+      <p class="sec-desc">Tout ce que tu veux savoir avant de te lancer. Si tu veux creuser, écris-nous.</p>
+      <div class="faq-contact">
+        <div class="faq-avatar"><span>M</span></div>
+        <div>
+          <div class="faq-contact-name">Morales · Support Empire</div>
+          <div class="faq-contact-sub">Réponse en &lt; 2h, 7j/7</div>
+        </div>
+      </div>
       <a href="mailto:contact@empire-leads.fr" class="faq-cta">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-        Nous contacter
+          Poser une question
       </a>
     </div>
     <div class="faq-right">
@@ -1635,7 +1653,7 @@
   .faq-item{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:all .25s}
   .faq-item:hover{border-color:var(--green-border);box-shadow:0 6px 20px rgba(22,163,74,.05)}
   .faq-item.open{border-color:var(--green-border);box-shadow:0 8px 24px rgba(22,163,74,.08)}
-  .faq-q{width:100%;padding:1.3rem 1.5rem;background:none;border:none;display:flex;justify-content:space-between;align-items:center;gap:1rem;font-size:.95rem;font-weight:700;color:var(--dark);cursor:pointer;text-align:left;font-family:'Inter',sans-serif}
+  .faq-q{width:100%;padding:1.3rem 1.5rem;background:none;border:none;display:flex;justify-content:space-between;align-items:center;gap:1rem;font-size:.95rem;font-weight:700;color:var(--dark);cursor:pointer;text-align:left;font-family:'Satoshi','Inter',sans-serif}
   .faq-arrow{flex-shrink:0;font-size:1.5rem;color:var(--green);font-weight:300;transition:transform .3s}
   .faq-item.open .faq-arrow{transform:rotate(45deg)}
   .faq-a{padding:0 1.5rem 1.4rem;color:var(--text2);font-size:.9rem;line-height:1.7;display:none}
@@ -1651,9 +1669,21 @@
 <section class="cta-dark">
   <div class="cta-dark-bg"></div>
   <div class="cta-dark-inner">
+    <div class="cta-avatars">
+      <div class="cta-av" style="background:linear-gradient(135deg,#7c3aed,#c084fc)">TM</div>
+      <div class="cta-av" style="background:linear-gradient(135deg,#dc2626,#f97316)">JD</div>
+      <div class="cta-av" style="background:linear-gradient(135deg,#059669,#10b981)">SL</div>
+      <div class="cta-av" style="background:linear-gradient(135deg,#2563eb,#60a5fa)">AK</div>
+      <div class="cta-av" style="background:linear-gradient(135deg,#be185d,#ec4899)">MC</div>
+    </div>
+    <div class="cta-stars">
+      ★★★★★
+      <span class="cta-rating">4.9/5 par 200+ clients</span>
+    </div>
     <h2 class="cta-big-h">
-      Prêt à signer<br>
-      vos prochains <em>clients B2B</em> ?
+      Rejoins les <em class="scribble">200+ pros</em><br>
+      qui signent leurs clients<br>
+      avec Empire Leads.
     </h2>
     <a href="/login" class="offer-btn cta-big-btn">
       <span class="offer-btn-text">Demarrer gratuitement</span>
@@ -1684,7 +1714,7 @@
   .cta-big-btn{max-width:340px;margin:0 auto 1rem;color:#08110c!important}
   .cta-big-btn .offer-btn-circle{background:linear-gradient(135deg,#16a34a,#065f46)}
   .cta-secure{display:inline-flex;align-items:center;gap:.5rem;font-size:.78rem;color:rgba(255,255,255,.55);font-weight:500;margin-top:.5rem}
-  .cta-giant-logo{margin:5rem auto 0;display:flex;justify-content:center;align-items:center;gap:.3rem;font-family:'Inter',sans-serif;font-weight:900;font-size:clamp(4rem,16vw,13rem);letter-spacing:-8px;line-height:.9;position:relative;z-index:1;padding-bottom:.1em;user-select:none}
+  .cta-giant-logo{margin:5rem auto 0;display:flex;justify-content:center;align-items:center;gap:.3rem;font-family:'Satoshi','Inter',sans-serif;font-weight:900;font-size:clamp(4rem,16vw,13rem);letter-spacing:-8px;line-height:.9;position:relative;z-index:1;padding-bottom:.1em;user-select:none}
   .cta-giant-logo .cgl-dark{background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,.02) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;color:transparent;text-shadow:none}
   .cta-giant-logo .cgl-green{background:linear-gradient(180deg,rgba(22,163,74,.35) 0%,rgba(22,163,74,.05) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;color:transparent;margin-left:.2em}
   @media(max-width:768px){
@@ -1738,7 +1768,7 @@
       <p>&copy; 2026 Empire Leads. Tous droits réservés. Conçu à Grenoble avec 🇫🇷.</p>
       <div class="footer-payment">
         <span>Paiement sécurisé</span>
-        <svg width="30" height="18" viewBox="0 0 60 25" fill="none"><rect width="60" height="25" rx="4" fill="#635BFF"/><text x="50%" y="60%" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" font-weight="700" fill="#fff">stripe</text></svg>
+        <svg width="30" height="18" viewBox="0 0 60 25" fill="none"><rect width="60" height="25" rx="4" fill="#635BFF"/><text x="50%" y="60%" text-anchor="middle" font-family="Satoshi,Inter,sans-serif" font-size="10" font-weight="700" fill="#fff">stripe</text></svg>
       </div>
     </div>
   </div>

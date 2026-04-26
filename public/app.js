@@ -26,6 +26,7 @@ let saveTimer      = null;
 let scanCountry = 'fr';
 let scanMode    = 'site';
 let userCredits = 0;
+let userPlan = 'free'; // 'free' | 'pro' | 'admin'
 let calendarWeek  = getWeekStart(new Date()); // Monday of current week
 let scanLat     = null;
 let scanLng     = null;
@@ -133,6 +134,12 @@ async function apiDelete(url) {
   if (r.status === 401) { logout(); return null; }
   return r.json();
 }
+async function apiPatch(url, body) {
+  const r = await fetch(url, { method: 'PATCH', headers: AUTH, body: JSON.stringify(body) });
+  if (r.status === 401) { logout(); return null; }
+  const data = await r.json();
+  return r.ok ? data : { ...data, ok: false };
+}
 
 /* ─────────────────────────────────────────
    LOGOUT
@@ -155,12 +162,21 @@ async function init() {
       const emailEl = document.getElementById('user-email-display');
       if (emailEl) emailEl.textContent = u.display_name || u.email;
       userCredits = u.credits || 0;
+      userPlan = u.plan || 'free';
+      if (u.is_admin) userPlan = 'pro'; // admins always have PRO
       updateProspectsSlider();
       // Update plan badge
       const planLabel = document.getElementById('plan-badge-label');
       const planCredits = document.getElementById('plan-badge-credits');
       if (planLabel) planLabel.textContent = u.plan || 'free';
       if (planCredits) planCredits.textContent = (u.credits || 0) + ' cr';
+      // Bouton admin — visible uniquement pour les admins
+      if (u.is_admin) {
+        const btnAdmin = document.getElementById('btn-admin');
+        const btnAdminM = document.getElementById('btn-admin-mobile');
+        if (btnAdmin) btnAdmin.style.display = 'inline-flex';
+        if (btnAdminM) btnAdminM.style.display = 'block';
+      }
       // Bouton thème personnalisé — toggle CSS theme
       if (u.theme_url) {
         window._userTheme = u.theme_url;
@@ -194,6 +210,158 @@ async function loadProspects() {
   rebuildNicheFilter();
   updateBadges();
   renderList();
+  updateOnboardingBanner();
+
+  // Auto-enrich all non-enriched prospects in background (PRO only)
+  startBackgroundEnrichment();
+}
+
+/* ─────────────────────────────────────────
+   ONBOARDING BANNER
+───────────────────────────────────────── */
+function updateOnboardingBanner() {
+  const banner = document.getElementById('onboarding-banner');
+  if (!banner) return;
+  const dismissed = localStorage.getItem('ph_onboarding_dismissed') === '1';
+  // Show if : no prospects AND not dismissed
+  const shouldShow = allProspects.length === 0 && !dismissed;
+  banner.style.display = shouldShow ? 'block' : 'none';
+}
+
+function dismissOnboarding() {
+  try { localStorage.setItem('ph_onboarding_dismissed', '1'); } catch (_) {}
+  const banner = document.getElementById('onboarding-banner');
+  if (banner) banner.style.display = 'none';
+}
+
+/* ─────────────────────────────────────────
+   QUICK START TEMPLATES (scan panel)
+   1-click popular combos to fill niche + country + mode + count
+───────────────────────────────────────── */
+const SCAN_TEMPLATES = {
+  'resto-paris':          { niche: 'restaurant Paris',      country: 'fr', mode: 'site',   count: 30 },
+  'plombier-lyon':        { niche: 'plombier Lyon',         country: 'fr', mode: 'social', count: 30 },
+  'coiffeur-marseille':   { niche: 'coiffeur Marseille',    country: 'fr', mode: 'both',   count: 30 },
+  'estheticienne-bordeaux': { niche: 'esthéticienne Bordeaux', country: 'fr', mode: 'both', count: 30 },
+  'salle-sport-fr':       { niche: 'salle de sport France', country: 'fr', mode: 'site',   count: 50 },
+  'dentiste-paris':       { niche: 'dentiste Paris',        country: 'fr', mode: 'site',   count: 30 },
+  'garage-nice':          { niche: 'garage automobile Nice', country: 'fr', mode: 'both',  count: 30 },
+  'kine-toulouse':        { niche: 'kinésithérapeute Toulouse', country: 'fr', mode: 'site', count: 30 },
+};
+
+function applyScanTemplate(key) {
+  const tpl = SCAN_TEMPLATES[key];
+  if (!tpl) return;
+  // 1) niche
+  const nicheInput = document.getElementById('scan-niche');
+  if (nicheInput) nicheInput.value = tpl.niche;
+  // 2) country (click the flag-btn for this country)
+  try {
+    const flagBtn = document.querySelector('.flag-btn[data-country="' + tpl.country + '"]');
+    if (flagBtn && typeof selectCountry === 'function') selectCountry(flagBtn);
+  } catch (_) {}
+  // 3) mode
+  try {
+    const modeBtn = document.querySelector('.mode-btn[data-mode="' + tpl.mode + '"]');
+    if (modeBtn && typeof selectMode === 'function') selectMode(modeBtn);
+  } catch (_) {}
+  // 4) prospects count
+  const slider = document.getElementById('prospects-slider');
+  if (slider) {
+    slider.value = String(tpl.count);
+    if (typeof updateProspectsSlider === 'function') updateProspectsSlider();
+  }
+  // 5) scroll to launch button + highlight
+  const launchBtn = document.getElementById('btn-scan');
+  if (launchBtn) {
+    launchBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Pulse effect
+    launchBtn.style.transition = 'box-shadow 0.3s';
+    const originalShadow = launchBtn.style.boxShadow;
+    launchBtn.style.boxShadow = '0 0 0 4px rgba(0,208,132,.4), 0 6px 20px rgba(0,208,132,.35)';
+    setTimeout(() => { launchBtn.style.boxShadow = originalShadow; }, 1800);
+  }
+  showToast('Template "' + tpl.niche + '" chargé · clique sur "Lancer la recherche" ↓', 'success', 3000);
+}
+
+function startFirstScan() {
+  // Ouvre le scan panel s'il est replié, focus sur le premier champ, scroll en haut
+  try {
+    const panel = document.getElementById('scan-panel');
+    const body = document.getElementById('scan-body');
+    if (panel && body && body.style.display === 'none') {
+      // Dérouler le panel si c'est replié
+      if (typeof toggleScanPanel === 'function') toggleScanPanel();
+    }
+    const nicheInput = document.getElementById('scan-niche');
+    if (nicheInput) {
+      nicheInput.focus();
+      nicheInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else if (panel) {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    showToast('Choisis une niche (ex: "plombier", "coiffeur") puis clique sur Lancer ↓', 'info', 5000);
+  } catch (e) {}
+}
+
+/* ─────────────────────────────────────────
+   BACKGROUND AUTO-ENRICHMENT
+   Processes all non-enriched prospects 1 by 1 every 2.5s.
+   Shows a subtle progress indicator. PRO users only.
+───────────────────────────────────────── */
+let _bgEnrichRunning = false;
+async function startBackgroundEnrichment() {
+  if (_bgEnrichRunning) return;
+  const isPro = userPlan === 'pro' || userPlan === 'admin';
+  if (!isPro) return;
+  _bgEnrichRunning = true;
+  try {
+    while (true) {
+      const todo = allProspects.filter(p => !p.enriched_at && !p._bgEnrichFailed);
+      if (!todo.length) break;
+      showBgEnrichIndicator(allProspects.length - todo.length, allProspects.length);
+      const next = todo[0];
+      try {
+        const res = await apiPost('/api/prospects/' + next.id + '/enrich');
+        if (res && res.error) {
+          // If PRO check fails or other error, stop the loop
+          if (res.upgrade) { break; }
+          next._bgEnrichFailed = true;
+        } else if (res && res.found === false) {
+          // Mark as attempted so we don't retry infinitely; set enriched_at locally so filter/UI skip it
+          next._bgEnrichFailed = true;
+          next.enriched_at = new Date().toISOString();
+        } else if (res && res.data) {
+          // Merge returned data locally
+          Object.assign(next, res.data);
+          next.enriched_at = new Date().toISOString();
+          // If this prospect's fiche is currently open, refresh the detail view
+          if (currentProspect && currentProspect.id === next.id) {
+            currentProspect = next;
+            buildDetailInfo(next);
+          }
+          // Refresh the card list to reflect the new dirigeant badge / filter eligibility
+          renderList();
+        }
+      } catch (e) {
+        next._bgEnrichFailed = true;
+      }
+      // Pace: 2.5s between calls to avoid Pappers rate-limit
+      await new Promise(r => setTimeout(r, 2500));
+    }
+    hideBgEnrichIndicator();
+  } catch (_) { hideBgEnrichIndicator(); }
+  finally { _bgEnrichRunning = false; }
+}
+
+function showBgEnrichIndicator(done, total) {
+  // Indicator disabled — removed per user request
+  return;
+}
+
+function hideBgEnrichIndicator() {
+  const el = document.getElementById('bg-enrich-indicator');
+  if (el) el.remove();
 }
 
 /* ─────────────────────────────────────────
@@ -359,10 +527,31 @@ function renderList() {
 
   let prospects = getFilteredProspects();
 
-  // Signal filter
-  if (signalFilter === 'nosite')    prospects = prospects.filter(p => p.has_website === 0 || p.has_website === false);
-  if (signalFilter === 'nosocial')  prospects = prospects.filter(p => (p.has_facebook === 0 || p.has_facebook === false) && (p.has_instagram === 0 || p.has_instagram === false));
-  if (signalFilter === 'both')      prospects = prospects.filter(p => (p.has_website === 0 || p.has_website === false) && (p.has_facebook === 0 || p.has_facebook === false) && (p.has_instagram === 0 || p.has_instagram === false));
+  // Signal filter — robust checks (catches null, undefined, '', 0, false)
+  // hasSite: priority to website_url field (truth from Google Maps). has_website flag is fallback.
+  const hasSite = (p) => {
+    if (p.website_url && String(p.website_url).trim().length > 3) return true;
+    if (p.has_website === 1 || p.has_website === true) return true;
+    return false;
+  };
+  // hasSocial: any Facebook OR Instagram OR TikTok presence
+  const hasSocial = (p) => {
+    if (p.has_facebook === 1 || p.has_facebook === true) return true;
+    if (p.has_instagram === 1 || p.has_instagram === true) return true;
+    if (p.has_tiktok === 1 || p.has_tiktok === true) return true;
+    if (p.instagram_handle && String(p.instagram_handle).trim()) return true;
+    return false;
+  };
+  if (signalFilter === 'nosite')    prospects = prospects.filter(p => !hasSite(p));
+  if (signalFilter === 'nosocial')  prospects = prospects.filter(p => !hasSocial(p));
+  if (signalFilter === 'both')      prospects = prospects.filter(p => !hasSite(p) && !hasSocial(p));
+  if (signalFilter === 'mobile')    prospects = prospects.filter(p => {
+    if (!p.phone) return false;
+    // Strip everything except digits, then check FR mobile patterns: 06xx, 07xx, +336xx, +337xx, 0033 6xx, 0033 7xx
+    const digits = String(p.phone).replace(/\D/g, '');
+    // Match: starts with 06/07 (10-digit national) OR 336/337 (international FR mobile)
+    return /^0[67]\d{8}$/.test(digits) || /^33[67]\d{8}$/.test(digits) || /^00337\d{8}$/.test(digits) || /^00336\d{8}$/.test(digits);
+  });
 
   // Sort
   prospects = prospects.sort((a, b) => {
@@ -376,6 +565,9 @@ function renderList() {
   const empty     = document.getElementById('empty-state');
   const tblWrap   = document.getElementById('tbl-wrap');
   const cardsWrap = document.getElementById('cards-wrap');
+
+  // Refresh onboarding banner visibility on each render
+  if (typeof updateOnboardingBanner === 'function') updateOnboardingBanner();
 
   if (prospects.length === 0) {
     if (empty) {
@@ -399,8 +591,65 @@ function renderList() {
   if (tblWrap)   tblWrap.style.display   = 'block';
   if (cardsWrap) cardsWrap.style.display = 'flex';
 
+  // Always split "À rappeler" into 2 groups: Intéressés (RDV à poser) vs Pas le temps (à rappeler)
+  if (currentTab === 'to_recall') {
+    const interested = prospects.filter(p => (p.recall_type || 'interested') === 'interested');
+    const noTime     = prospects.filter(p => p.recall_type === 'no_time');
+    const groups = [];
+    if (interested.length) groups.push({ title: 'Intéressés — RDV à poser', subtype: 'interested', count: interested.length, items: interested });
+    if (noTime.length)     groups.push({ title: 'Pas le temps — à rappeler plus tard', subtype: 'no_time', count: noTime.length, items: noTime });
+    if (groups.length >= 1) {
+      renderTableGrouped(groups);
+      renderCardsGrouped(groups);
+      return;
+    }
+  }
+
   renderTable(prospects);
   renderCards(prospects);
+}
+
+function renderCardsGrouped(groups) {
+  const wrap = document.getElementById('cards-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  groups.forEach(g => {
+    const header = document.createElement('div');
+    header.className = 'cards-section-header';
+    if (g.subtype) header.dataset.subtype = g.subtype;
+    header.innerHTML = `<span class="cards-section-title">${g.title}</span><span class="cards-section-count">${g.count}</span>`;
+    wrap.appendChild(header);
+    g.items.forEach(p => {
+      _renderSingleCard(p, wrap);
+      // Tag card with subtype for CSS coloring
+      if (g.subtype) {
+        const card = document.getElementById('pcard-' + p.id);
+        if (card) card.dataset.recallType = g.subtype;
+      }
+    });
+  });
+}
+
+function renderTableGrouped(groups) {
+  const tbody = document.getElementById('prospects-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  groups.forEach(g => {
+    const headerRow = document.createElement('tr');
+    headerRow.className = 'tbl-section-header';
+    if (g.subtype) headerRow.dataset.subtype = g.subtype;
+    headerRow.innerHTML = `<td colspan="99"><div class="tbl-section-inner"><span class="tbl-section-title">${g.title}</span><span class="tbl-section-count">${g.count}</span></div></td>`;
+    tbody.appendChild(headerRow);
+    renderTableRows(g.items, tbody);
+    // Tag the newly-added rows with subtype
+    if (g.subtype) {
+      const rows = tbody.querySelectorAll('tr:not(.tbl-section-header)');
+      const startIdx = rows.length - g.items.length;
+      for (let i = startIdx; i < rows.length; i++) {
+        if (rows[i]) rows[i].dataset.recallType = g.subtype;
+      }
+    }
+  });
 }
 
 /* ─────────────────────────────────────────
@@ -480,7 +729,8 @@ function buildMainAction(p) {
 
   if (stage === 'cold_call') {
     return `
-      <button class="act-btn act-btn-interested act-btn-primary" onclick="moveStage(${id},'to_recall')">✅ Intéressé</button>
+      <button class="act-btn act-btn-interested act-btn-primary" onclick="moveStage(${id},'to_recall','interested')">✅ Intéressé</button>
+      <button class="act-btn act-btn-recall" onclick="moveStage(${id},'to_recall','no_time')">⏰ À rappeler</button>
       <button class="act-btn act-btn-no-answer" onclick="moveStage(${id},'no_answer')">📵 Pas répondu</button>
       <button class="act-btn act-btn-refuse" onclick="moveStage(${id},'refused')">❌ Refus</button>
     `;
@@ -526,14 +776,11 @@ function buildMainAction(p) {
 /* ─────────────────────────────────────────
    RENDER TABLE (desktop)
 ───────────────────────────────────────── */
-function renderTable(prospects) {
-  const tbody = document.getElementById('prospects-tbody');
-  if (!tbody) return;
-  tbody.innerHTML = '';
-
+function renderTableRows(prospects, tbody) {
   prospects.forEach(p => {
     const tr = document.createElement('tr');
     tr.dataset.stage = p.pipeline_stage;
+    if (bulkSelectMode && selectedIds.has(p.id)) tr.classList.add('prospect-card-selected');
 
     const signals = buildSignals(p);
     const actions = buildMainAction(p);
@@ -560,7 +807,12 @@ function renderTable(prospects) {
 
     const nicheBadge = p.niche ? `<span class="niche-tag" onclick="filterByNiche('${escAttr(p.niche)}')" title="Filtrer par ${esc(p.niche)}">${esc(p.niche)}</span>` : '';
 
+    const bulkCheckboxTd = bulkSelectMode
+      ? `<td class="td-bulk" style="width:40px;padding:0 4px 0 12px;vertical-align:middle;text-align:center"><input type="checkbox" class="bulk-cb" id="bulk-cb-${p.id}" ${selectedIds.has(p.id) ? 'checked' : ''} onchange="toggleProspectSelection(${p.id}, this.checked)" style="width:20px;height:20px;accent-color:#E1306C;cursor:pointer"></td>`
+      : '';
+
     tr.innerHTML = `
+      ${bulkCheckboxTd}
       <td class="td-main">
         <div class="prospect-name" onclick="openDetail(${p.id})">${esc(p.name || '—')}</div>
         ${p.address ? `<div class="prospect-addr">${esc(p.address)}</div>` : ''}
@@ -581,12 +833,19 @@ function renderTable(prospects) {
           }
           ${phoneCopy}
         </div>
-        <button class="btn-fiche" onclick="openDetail(${p.id})" title="Voir la fiche complète">📋 Fiche</button>
-        ${p.pipeline_stage === 'cold_call' ? `<button class="btn-delete-row" onclick="deleteProspect(${p.id})" title="Supprimer">🗑️</button>` : ''}
+        <a class="btn-fiche btn-fiche-google" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent((p.name || '') + ' ' + (p.address || ''))}" target="_blank" rel="noopener" title="Voir sur Google Maps">📋 Fiche Google</a>
+        ${bulkSelectMode ? '' : `<button class="prospect-menu-btn" onclick="openProspectMenu(event, ${p.id})" title="Actions">⋮</button>`}
       </td>
     `;
     tbody.appendChild(tr);
   });
+}
+
+function renderTable(prospects) {
+  const tbody = document.getElementById('prospects-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  renderTableRows(prospects, tbody);
 }
 
 /* ─────────────────────────────────────────
@@ -682,115 +941,90 @@ function pickCoachPhrase(stage) {
 }
 
 function buildSwipeActions(p) {
-  const phrase = pickCoachPhrase(p.pipeline_stage).replace(/\n/g, '<br>');
-  return `<div class="csw-phrase">${phrase}</div>`;
+  return '';
 }
 
 function addSwipeHandler(card) {
+  // Swipe disabled — cards stay fixed in place
+  return;
+}
+
+function _renderSingleCard(p, wrap) {
+  const card = document.createElement('div');
+  card.className = 'prospect-card';
+  card.id = 'pcard-' + p.id;
+  card.dataset.stage = p.pipeline_stage;
+
+  const actions  = buildMainAction(p);
+  const address  = p.address || p.city || '';
+
+  const metaParts = [];
+  if (p.niche)    metaParts.push(`<span class="cm-tag" onclick="filterByNiche('${escAttr(nicheKey(p.niche))}')">${esc(p.niche)}</span>`);
+  if (p.rating)   metaParts.push(`★ ${p.rating}${p.reviews ? ` (${p.reviews})` : ''}`);
+  const heatScore = calcHeat(p);
+  if (heatScore >= 6) metaParts.push('🔥🔥 Brûlant');
+  else if (heatScore >= 3) metaParts.push('🔥 Chaud');
+  if (!p.website_url) metaParts.push('🌐 Sans site');
+  if (p.has_facebook === 0 && p.has_instagram === 0) metaParts.push('📵 Sans réseaux');
+  if (p.instagram_handle) metaParts.push(`📸 @${esc(p.instagram_handle)}`);
+  if (p.pipeline_stage === 'refused' && p.objection) metaParts.push(`❌ ${esc(p.objection)}`);
+  const metaLine = metaParts.join(' · ');
+
+  const mapsQuery = encodeURIComponent((p.name || '') + ' ' + address);
+  const mapsUrl   = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
+
+  const callBtnMobile = p.phone
+    ? `<button class="card-call-btn-mobile" onclick="callProspect(${p.id})">📞 Appeler</button>`
+    : '';
+
+  const swipeActions = buildSwipeActions(p);
+  const stageBadge   = buildStageBadge(p.pipeline_stage);
+  const dateChip     = buildDateChip(p);
+
+  const bulkCheckbox = bulkSelectMode
+    ? `<div class="bulk-cb-wrap" style="position:absolute;top:12px;right:12px;z-index:10"><input type="checkbox" class="bulk-cb" id="bulk-cb-${p.id}" ${selectedIds.has(p.id) ? 'checked' : ''} onchange="toggleProspectSelection(${p.id}, this.checked)" style="width:22px;height:22px;accent-color:#E1306C;cursor:pointer"></div>`
+    : '';
+  const menuBtn = bulkSelectMode ? '' : `<button class="prospect-menu-btn" onclick="openProspectMenu(event, ${p.id})" title="Actions">⋮</button>`;
+  if (selectedIds.has(p.id)) card.classList.add('prospect-card-selected');
+
+  card.innerHTML = `
+    <div class="card-swipe-actions">${swipeActions}</div>
+    ${bulkCheckbox}
+    ${menuBtn}
+    <div class="card-inner" style="cursor:pointer">
+      ${stageBadge}
+      <div class="stage-journey" id="journey-${p.id}"></div>
+      <div class="card-name" style="text-decoration:underline;text-decoration-color:rgba(225,48,108,.4);text-underline-offset:3px">${esc(p.name || '—')}</div>
+      ${address ? `<div class="card-address">${esc(address)}</div>` : ''}
+      <div class="card-meta-line">${metaLine}${dateChip}</div>
+      <div class="card-links-row">
+        <button class="card-link-btn card-fiche-btn" onclick="event.stopPropagation();openDetail(${p.id})" style="background:linear-gradient(135deg,#E1306C,#F77737);color:#fff;border:none;font-weight:800">👁️ Ouvrir fiche</button>
+        <a class="card-link-btn" href="${escAttr(mapsUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">📍 Google Maps</a>
+        <button class="card-link-btn" onclick="event.stopPropagation();openDetail(${p.id});setTimeout(()=>switchModalTab('crm'),50)">📞 Historique</button>
+      </div>
+      <div class="card-actions">${actions}</div>
+      ${callBtnMobile}
+      ${p.notes ? `<div class="card-notes-row"><button class="notes-peek-btn" onclick="event.stopPropagation();toggleNotesPreview('c${p.id}', this)">📝 Notes</button><div class="notes-preview" id="notes-preview-c${p.id}" style="display:none">${esc(p.notes)}</div></div>` : ''}
+    </div>
+  `;
+  // Make the whole card-inner clickable — opens the fiche. Inner buttons/links with event.stopPropagation() override.
   const inner = card.querySelector('.card-inner');
-  if (!inner) return;
-  let startX = 0, startY = 0, dragging = false, opened = false;
-  const W = 150;
-
-  card.addEventListener('touchstart', e => {
-    startX = e.touches[0].clientX;
-    startY = e.touches[0].clientY;
-    dragging = true;
-  }, { passive: true });
-
-  card.addEventListener('touchmove', e => {
-    if (!dragging) return;
-    const dx = e.touches[0].clientX - startX;
-    const dy = e.touches[0].clientY - startY;
-    if (Math.abs(dy) > Math.abs(dx) + 5) { dragging = false; return; }
-    e.preventDefault();
-    const base = opened ? -W : 0;
-    const tx = Math.max(Math.min(base + dx, 0), -W);
-    inner.style.transition = 'none';
-    inner.style.transform = `translateX(${tx}px)`;
-  }, { passive: false });
-
-  card.addEventListener('touchend', e => {
-    if (!dragging) return;
-    dragging = false;
-    const dx = e.changedTouches[0].clientX - startX;
-    const base = opened ? -W : 0;
-    const final = base + dx;
-    inner.style.transition = 'transform .25s cubic-bezier(.25,.1,.25,1)';
-    if (final < -W / 2) { inner.style.transform = `translateX(-${W}px)`; opened = true; }
-    else { inner.style.transform = 'translateX(0)'; opened = false; }
-  });
-
-  document.addEventListener('touchstart', e => {
-    if (opened && !card.contains(e.target)) {
-      inner.style.transition = 'transform .25s';
-      inner.style.transform = 'translateX(0)';
-      opened = false;
-    }
-  }, { passive: true });
+  if (inner) {
+    inner.addEventListener('click', (e) => {
+      if (e.target.closest('button, a, input, .bulk-cb-wrap, .prospect-menu-btn')) return;
+      openDetail(p.id);
+    });
+  }
+  _loadStageJourney(p.id);
+  wrap.appendChild(card);
+  addSwipeHandler(card);
 }
 
 function renderCards(prospects) {
   const wrap = document.getElementById('cards-wrap');
   if (!wrap) return;
   wrap.innerHTML = '';
-
-  prospects.forEach(p => {
-    const card = document.createElement('div');
-    card.className = 'prospect-card';
-    card.id = 'pcard-' + p.id;
-    card.dataset.stage = p.pipeline_stage;
-
-    const actions  = buildMainAction(p);
-    const address  = p.address || p.city || '';
-
-    // Ligne méta compacte : secteur · note · chaleur · signaux — tout en gris neutre
-    const metaParts = [];
-    if (p.niche)    metaParts.push(`<span class="cm-tag" onclick="filterByNiche('${escAttr(nicheKey(p.niche))}')">${esc(p.niche)}</span>`);
-    if (p.rating)   metaParts.push(`★ ${p.rating}${p.reviews ? ` (${p.reviews})` : ''}`);
-    const heatScore = calcHeat(p);
-    if (heatScore >= 6) metaParts.push('🔥🔥 Brûlant');
-    else if (heatScore >= 3) metaParts.push('🔥 Chaud');
-    if (!p.website_url) metaParts.push('🌐 Sans site');
-    if (p.has_facebook === 0 && p.has_instagram === 0) metaParts.push('📵 Sans réseaux');
-    if (p.instagram_handle) metaParts.push(`📸 @${esc(p.instagram_handle)}`);
-    if (p.pipeline_stage === 'refused' && p.objection) metaParts.push(`❌ ${esc(p.objection)}`);
-    const metaLine = metaParts.join(' · ');
-
-    const mapsQuery = encodeURIComponent((p.name || '') + ' ' + address);
-    const mapsUrl   = `https://www.google.com/maps/search/?api=1&query=${mapsQuery}`;
-
-    const callBtnMobile = p.phone
-      ? `<button class="card-call-btn-mobile" onclick="callProspect(${p.id})">📞 Appeler</button>`
-      : '';
-
-    const swipeActions = buildSwipeActions(p);
-    const stageBadge   = buildStageBadge(p.pipeline_stage);
-    const dateChip     = buildDateChip(p);
-
-    card.innerHTML = `
-      <div class="card-swipe-actions">${swipeActions}</div>
-      <div class="card-inner">
-        ${stageBadge}
-        <div class="stage-journey" id="journey-${p.id}"></div>
-        <div class="card-name">${esc(p.name || '—')}</div>
-        ${address ? `<div class="card-address">${esc(address)}</div>` : ''}
-        <div class="card-meta-line">${metaLine}${dateChip}</div>
-        <div class="card-links-row">
-          <button class="card-link-btn" onclick="openDetail(${p.id})">📋 Fiche</button>
-          <a class="card-link-btn" href="${escAttr(mapsUrl)}" target="_blank" rel="noopener">📍 Maps</a>
-          <button class="card-link-btn" onclick="openDetail(${p.id});document.querySelector('[data-tab=contact]')?.click()">📞 Historique</button>
-        </div>
-        <div class="card-actions">${actions}</div>
-        ${callBtnMobile}
-        ${p.notes ? `<div class="card-notes-row"><button class="notes-peek-btn" onclick="toggleNotesPreview('c${p.id}', this)">📝 Notes</button><div class="notes-preview" id="notes-preview-c${p.id}" style="display:none">${esc(p.notes)}</div></div>` : ''}
-      </div>
-    `;
-    // Load stage journey
-    _loadStageJourney(p.id);
-    wrap.appendChild(card);
-    addSwipeHandler(card);
-  });
+  prospects.forEach(p => _renderSingleCard(p, wrap));
 }
 
 /* ─────────────────────────────────────────
@@ -817,7 +1051,9 @@ function _restoreCard(id) {
   }
 }
 
-function moveStage(id, stage) {
+let _stageTargetRecallType = null;
+
+function moveStage(id, stage, recallType) {
   // Fade-out immédiat de la carte pour éviter l'effet "bouton collé" iOS
   const cardEl = document.getElementById('pcard-' + id);
   if (cardEl) {
@@ -845,8 +1081,10 @@ function moveStage(id, stage) {
   if (stage === 'to_recall' || stage === 'meeting_to_set' || stage === 'meeting_confirmed') {
     _stageTargetId    = id;
     _stageTargetStage = stage;
+    _stageTargetRecallType = recallType || null;
     const isRecall = stage === 'to_recall';
-    document.getElementById('stage-modal-title').textContent       = isRecall ? '🔄 À Rappeler — date & heure' : '📅 Rendez-vous — date & heure';
+    const isNoTime = isRecall && recallType === 'no_time';
+    document.getElementById('stage-modal-title').textContent       = isNoTime ? '⏰ À Rappeler (pas le temps) — date & heure' : (isRecall ? '🔥 Intéressé — RDV à poser' : '📅 Rendez-vous — date & heure');
     document.getElementById('stage-modal-confirm-btn').textContent = isRecall ? 'Enregistrer le rappel' : 'Confirmer le RDV';
     document.getElementById('stage-time-optional').style.display   = isRecall ? '' : 'none';
     document.getElementById('stage-date-input').value  = '';
@@ -873,22 +1111,36 @@ function setDateShortcut(daysFromNow) {
 function closeStageModal() {
   document.getElementById('stage-modal-overlay').style.display = 'none';
   if (_stageTargetId) _restoreCard(_stageTargetId);
-  _stageTargetId = null; _stageTargetStage = null;
+  _stageTargetId = null; _stageTargetStage = null; _stageTargetRecallType = null;
 }
 
 function confirmStageModal() {
   if (!_stageTargetId) return;
   // Capture before closeStageModal() nulls them
-  const id       = _stageTargetId;
-  const stage    = _stageTargetStage;
-  const date     = document.getElementById('stage-date-input').value;
-  const time     = document.getElementById('stage-time-input').value;
-  const notes    = document.getElementById('stage-notes-input').value.trim();
-  const isRecall = stage === 'to_recall';
-  const datetime = date ? (time ? `${date} ${time}` : date) : null;
+  const id         = _stageTargetId;
+  const stage      = _stageTargetStage;
+  const recallType = _stageTargetRecallType;
+  const date       = document.getElementById('stage-date-input').value;
+  const time       = document.getElementById('stage-time-input').value;
+  const notes      = document.getElementById('stage-notes-input').value.trim();
+  const isRecall   = stage === 'to_recall';
+  const datetime   = date ? (time ? `${date} ${time}` : date) : null;
+
+  // Obliger une date pour les rappels et RDV
+  if (!datetime) {
+    const msg = isRecall ? 'Choisis une date pour le rappel !' : 'Choisis une date pour le RDV !';
+    showToast(msg, 'warning');
+    // Reopen modal
+    _stageTargetId = id;
+    _stageTargetStage = stage;
+    _stageTargetRecallType = recallType;
+    document.getElementById('stage-modal-overlay').style.display = 'flex';
+    return;
+  }
+
   closeStageModal();
   if (isRecall) {
-    _doMoveStage(id, 'to_recall', null, datetime, null, notes || null);
+    _doMoveStage(id, 'to_recall', null, datetime, null, notes || null, null, null, null, null, recallType);
   } else {
     _doMoveStage(id, stage, null, null, datetime, notes || null);
   }
@@ -932,7 +1184,7 @@ function confirmObjection() {
   _doMoveStage(id, 'refused', obj, null, null, null);
 }
 
-async function _doMoveStage(id, stage, objection, rappel, meeting_date, notes, deal_type, deal_date, deal_recurrence, deal_value) {
+async function _doMoveStage(id, stage, objection, rappel, meeting_date, notes, deal_type, deal_date, deal_recurrence, deal_value, recall_type) {
   const prospect = allProspects.find(p => p.id === id);
   if (!prospect) return;
 
@@ -946,6 +1198,8 @@ async function _doMoveStage(id, stage, objection, rappel, meeting_date, notes, d
   if (deal_date)       prospect.deal_date       = deal_date;
   if (deal_recurrence) prospect.deal_recurrence = deal_recurrence;
   if (deal_value)      prospect.deal_value      = deal_value;
+  if (stage === 'to_recall') prospect.recall_type = recall_type || 'interested';
+  else prospect.recall_type = null;
   updateBadges();
   // Délai iOS : évite que le touch state colle sur la prochaine carte (400ms = iOS safe)
   setTimeout(() => renderList(), 400);
@@ -959,6 +1213,7 @@ async function _doMoveStage(id, stage, objection, rappel, meeting_date, notes, d
   if (deal_date)       body.deal_date       = deal_date;
   if (deal_recurrence) body.deal_recurrence = deal_recurrence;
   if (deal_value)      body.deal_value      = deal_value;
+  if (recall_type)     body.recall_type     = recall_type;
   const res = await apiPut(`/api/prospects/${id}/stage`, body);
   if (!res || !res.ok) {
     prospect.pipeline_stage = oldStage;
@@ -1110,25 +1365,12 @@ async function callProspect(id) {
   const p = allProspects.find(x => x.id === id);
   if (!p || !p.phone) return;
 
-  // Store which prospect we're calling so we can open their CRM after
+  // Store which prospect we're calling (kept for downstream use)
   _callRec.prospectId = id;
 
   // Dial synchronously (works on iOS)
   _dialSync(p.phone);
-
-  // Listen for when user returns from the phone app
-  _callRec._returnHandler = function() {
-    if (document.visibilityState === 'visible') {
-      document.removeEventListener('visibilitychange', _callRec._returnHandler);
-      // Auto-open this prospect's CRM tab with voice recorder ready
-      setTimeout(() => {
-        openDetail(id);
-        switchModalTab('crm');
-        showToast('📞 Appel terminé — enregistre une note vocale', 'info');
-      }, 300);
-    }
-  };
-  document.addEventListener('visibilitychange', _callRec._returnHandler);
+  // No auto-open of the prospect modal anymore — user opens it manually if needed.
 }
 
 // Synchronous tel: navigation via hidden anchor (preserves iOS user gesture context)
@@ -1165,7 +1407,7 @@ function stopCallRecEarly() {
 }
 
 function _onCallRecordStop() {
-  const { chunks, startTime, prospectId } = _callRec;
+  const { chunks, startTime } = _callRec;
   _callRec.active = false;
 
   if (!chunks.length) return;
@@ -1175,24 +1417,13 @@ function _onCallRecordStop() {
 
   const reader = new FileReader();
   reader.onloadend = () => {
-    // Pre-load into voice recorder state so logAttempt() picks it up
+    // Save into voice recorder state so logAttempt() picks it up if user opens the prospect
     _voiceBase64 = reader.result;
     _voiceDuration = duration;
     _voiceBlob = blob;
-
-    // Open the prospect's CRM tab with audio pre-loaded
-    openDetail(prospectId);
-    setTimeout(() => {
-      switchModalTab('crm');
-      const audioEl = document.getElementById('voice-rec-audio');
-      if (audioEl) {
-        audioEl.src = URL.createObjectURL(blob);
-        const preview = document.getElementById('voice-rec-preview');
-        if (preview) preview.style.display = 'flex';
-      }
-      const m = Math.floor(duration / 60), s = duration % 60;
-      showToast(`📞 Appel enregistré (${m}:${String(s).padStart(2, '0')}) — loggue le contact`, 'success');
-    }, 150);
+    // No auto-open of the prospect modal anymore — just a discrete toast.
+    const m = Math.floor(duration / 60), s = duration % 60;
+    showToast(`📞 Appel terminé (${m}:${String(s).padStart(2, '0')})`, 'success');
   };
   reader.readAsDataURL(blob);
 }
@@ -1269,12 +1500,40 @@ async function loadAttempts(prospectId) {
     const when = d.toLocaleDateString('fr-FR', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
     const durLabel = a.audio_duration ? ` · ${Math.floor(a.audio_duration/60)}:${String(a.audio_duration%60).padStart(2,'0')}` : '';
     const audioHtml = a.audio_data ? `<div class="attempt-audio"><audio src="${a.audio_data}" controls preload="none" style="width:100%;height:32px"></audio><span class="attempt-audio-dur">${a.audio_duration}s</span></div>` : '';
+    const noteHtml = a.note
+      ? `<div class="attempt-note-line"><em>${esc(a.note)}</em></div>`
+      : `<div class="attempt-note-line attempt-note-empty"><em>Aucune note</em></div>`;
     return `<div class="attempt-row">
       <span class="attempt-icon">${TYPE_ICON[a.attempt_type] || '📞'}</span>
-      <span class="attempt-info"><strong>${RESULT_LABEL[a.result] || a.result}</strong>${durLabel}${a.note ? ` — <em>${esc(a.note)}</em>` : ''}${audioHtml}</span>
-      <span class="attempt-date">${when}</span>
+      <span class="attempt-info">
+        <div class="attempt-info-top"><strong>${RESULT_LABEL[a.result] || a.result}</strong>${durLabel}</div>
+        ${noteHtml}
+        ${audioHtml}
+      </span>
+      <span class="attempt-actions">
+        <button class="attempt-edit-btn" onclick="editAttemptNote(${a.id}, ${currentProspect ? currentProspect.id : 'null'})" title="Modifier la note">✏️</button>
+        <span class="attempt-date">${when}</span>
+      </span>
     </div>`;
   }).join('');
+}
+
+// Edit a note on an existing attempt
+async function editAttemptNote(attemptId, prospectId) {
+  if (!attemptId || !prospectId) return;
+  // Fetch existing note
+  const all = await apiGet(`/api/prospects/${prospectId}/attempts`);
+  const cur = all && all.find(x => x.id === attemptId);
+  const existingNote = (cur && cur.note) || '';
+  const newNote = window.prompt('📝 Modifier la note de ce contact :', existingNote);
+  if (newNote === null) return; // cancelled
+  const res = await apiPatch(`/api/prospects/${prospectId}/attempts/${attemptId}`, { note: newNote });
+  if (!res || res.error) {
+    showToast(res?.error || 'Erreur lors de la sauvegarde', 'error');
+    return;
+  }
+  showToast('✅ Note mise à jour', 'success');
+  loadAttempts(prospectId);
 }
 
 async function _loadStageJourney(prospectId) {
@@ -1364,6 +1623,14 @@ function openDetail(id) {
 
   buildDetailInfo(p);
 
+  // Auto-enrich in background if not already enriched (PRO only, to avoid wasting credits on free users who can't see data anyway)
+  const isProUser = userPlan === 'pro' || userPlan === 'admin';
+  if (isProUser && !p.enriched_at && !p._autoEnrichAttempted) {
+    p._autoEnrichAttempted = true; // prevent re-triggering on the same session
+    // fire-and-forget — enrichProspect updates the UI itself when done
+    setTimeout(() => { if (currentProspect && currentProspect.id === id) enrichProspect(id); }, 100);
+  }
+
   const notesEl  = document.getElementById('m-notes');
   const rappelEl = document.getElementById('m-rappel');
   const ownerEl  = document.getElementById('m-owner');
@@ -1393,85 +1660,285 @@ function buildDetailInfo(p) {
   const c = document.getElementById('detail-info-content');
   if (!c) return;
 
-  const signals    = buildSignals(p);
+  const isPro = userPlan === 'pro' || userPlan === 'admin';
+  const signals = buildSignals(p);
   const stageBadge = `<span class="stage-badge ${STAGE_CLASS[p.pipeline_stage]}">${STAGE_LABEL[p.pipeline_stage] || p.pipeline_stage}</span>`;
 
-  let html = `
+  // Helper: blur phone for free users
+  function blurPhone(ph) {
+    if (!ph) return '—';
+    if (isPro) return esc(ph);
+    // Show first 4 chars, blur rest
+    const clean = ph.replace(/\s/g, '');
+    return esc(clean.substring(0, 4)) + '<span style="filter:blur(4px);user-select:none;color:var(--muted)"> ' + clean.substring(4).replace(/./g, '█') + '</span>';
+  }
+
+  // Helper: lock badge for PRO features
+  function lockBadge(label) {
+    if (isPro) return '';
+    return `<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(249,115,22,.1);color:#f97316;font-size:.7rem;font-weight:800;padding:2px 8px;border-radius:6px;margin-left:6px;cursor:pointer" onclick="showUpgradeModal()">🔒 PRO</span>`;
+  }
+
+  // Score badge
+  let scoreBadge = '';
+  if (p.enriched_at && p.score != null) {
+    const sc = p.score || 0;
+    const scColor = sc >= 70 ? '#22c55e' : sc >= 40 ? '#f97316' : '#6b7280';
+    scoreBadge = `<div style="position:absolute;top:12px;right:12px;background:${scColor}20;color:${scColor};font-size:1.1rem;font-weight:900;padding:6px 12px;border-radius:10px;border:1.5px solid ${scColor}40">${sc}<span style="font-size:.7rem;opacity:.7">/100</span></div>`;
+  }
+
+  let html = `<div style="position:relative">${scoreBadge}`;
+
+  // === BASIC INFO (visible to all) ===
+  html += `
     <div class="detail-grid" style="margin-bottom:1rem;">
       <div class="detail-item">
-        <div class="detail-label">Téléphone</div>
-        <div class="detail-value">
-          ${p.phone
-            ? `<div class="phone-cell"><span>${esc(p.phone)}</span><button class="btn-copy-phone" onclick="copyPhone('${escAttr(p.phone)}', event)">📋</button></div>`
-            : '—'}
-        </div>
+        <div class="detail-label">Entreprise</div>
+        <div class="detail-value" style="font-weight:700;font-size:1rem">${esc(p.name || '—')}</div>
       </div>
       <div class="detail-item">
-        <div class="detail-label">Adresse</div>
-        <div class="detail-value">${esc(p.address || '—')}</div>
+        <div class="detail-label">Niche / Secteur</div>
+        <div class="detail-value">${esc(p.secteur_naf || p.niche || '—')}</div>
       </div>
       <div class="detail-item">
-        <div class="detail-label">Note Google</div>
-        <div class="detail-value">${p.rating ? `⭐ ${p.rating} (${p.reviews || 0} avis)` : '—'}</div>
-      </div>
-      <div class="detail-item">
-        <div class="detail-label">Niche</div>
-        <div class="detail-value">${esc(p.niche || '—')}</div>
+        <div class="detail-label">Ville</div>
+        <div class="detail-value">${esc(p.city || p.address || '—')}</div>
       </div>
       <div class="detail-item">
         <div class="detail-label">Étape pipeline</div>
         <div class="detail-value">${stageBadge}</div>
       </div>
-      <div class="detail-item">
-        <div class="detail-label">Ajouté le</div>
-        <div class="detail-value">${p.created_at ? new Date(p.created_at).toLocaleDateString('fr-FR') : '—'}</div>
-      </div>
     </div>
   `;
 
+  // === PRO SECTION: Dirigeant ===
+  html += `<div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:1rem">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+      <span style="font-size:.85rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--text2)">👤 Dirigeant</span>
+      ${lockBadge('dirigeant')}
+    </div>`;
+
+  if (p.enriched_at) {
+    const hasDirigeant = !!(p.dirigeant_prenom || p.dirigeant_nom);
+    const dirigeantDisplay = hasDirigeant
+      ? esc(((p.dirigeant_prenom || '') + ' ' + (p.dirigeant_nom || '')).trim())
+      : '<span style="color:var(--muted);font-style:italic">Non publié sur Pappers</span>';
+    html += `<div class="detail-grid">
+      <div class="detail-item"><div class="detail-label">Nom</div><div class="detail-value" style="font-weight:700">${isPro ? dirigeantDisplay : '<span style="filter:blur(5px);user-select:none">Prénom Nom</span>'}</div></div>
+      <div class="detail-item"><div class="detail-label">Rôle</div><div class="detail-value">${isPro ? esc(p.dirigeant_role || '—') : '<span style="filter:blur(5px);user-select:none">Président</span>'}</div></div>
+      <div class="detail-item"><div class="detail-label">Effectif</div><div class="detail-value">${isPro ? esc(p.effectif || '—') : '<span style="filter:blur(5px);user-select:none">10-19</span>'}</div></div>
+      <div class="detail-item"><div class="detail-label">SIREN</div><div class="detail-value">${isPro ? esc(p.siren || '—') : '<span style="filter:blur(5px);user-select:none">123456789</span>'}</div></div>
+    </div>
+    <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn-action-sm" onclick="enrichProspect(${p.id})" id="btn-enrich-${p.id}" style="background:rgba(249,115,22,.15);color:#f97316;border:1px solid rgba(249,115,22,.3);font-size:.75rem">🔄 Re-enrichir</button>
+    </div>`;
+  } else if (isPro) {
+    // PRO user, not yet enriched → auto-enrich kicks in on openDetail, show loading state
+    html += `<div style="text-align:center;padding:12px;color:var(--text2);font-size:.85rem">
+      <button class="btn-action-sm" id="btn-enrich-${p.id}" disabled style="padding:10px 20px;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:.9rem;cursor:pointer;opacity:.85">
+        ⏳ Enrichissement auto...
+      </button>
+      <div style="margin-top:6px;font-size:.75rem;color:var(--muted)">Recherche du dirigeant, SIREN, effectif, CA, téléphone Pappers</div>
+    </div>`;
+  } else {
+    html += `<div style="text-align:center;padding:12px;color:var(--text2);font-size:.85rem">
+      <button class="btn-action-sm" onclick="showUpgradeModal()" id="btn-enrich-${p.id}" style="padding:10px 20px;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:.9rem;cursor:pointer">
+        🔒 Enrichir (PRO)
+      </button>
+      <div style="margin-top:6px;font-size:.75rem;color:var(--muted)">Trouve dirigeant, SIREN, effectif, CA, téléphone Pappers</div>
+    </div>`;
+  }
+  html += `</div>`;
+
+  // === PRO SECTION: Contact ===
+  html += `<div style="background:var(--surface);border:1px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:1rem">
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">
+      <span style="font-size:.85rem;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--text2)">📞 Contact</span>
+      ${lockBadge('contact')}
+    </div>
+    <div class="detail-grid">
+      <div class="detail-item">
+        <div class="detail-label">Tél. Google Maps</div>
+        <div class="detail-value">${p.phone ? blurPhone(p.phone) + (isPro ? ' <span style="color:#22c55e;font-size:.7rem;font-weight:700">✓ Vérifié</span>' : '') : '—'}</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Tél. Pappers (siège)</div>
+        <div class="detail-value">${p.phone_pappers ? blurPhone(p.phone_pappers) + (isPro ? ' <span style="color:#22c55e;font-size:.7rem;font-weight:700">✓ Vérifié</span>' : '') : (p.enriched_at ? '—' : '<span style="color:var(--muted);font-size:.8rem">Enrichir pour trouver</span>')}</div>
+      </div>
+    </div>`;
+
+  // CA section
+  html += `<div class="detail-grid" style="margin-top:.6rem">
+    <div class="detail-item">
+      <div class="detail-label">Chiffre d'affaires ${lockBadge('ca')}</div>
+      <div class="detail-value">${p.chiffre_affaires && isPro
+        ? '<span style="font-weight:800;color:#22c55e;font-size:1.05rem">' + esc(parseInt(p.chiffre_affaires).toLocaleString('fr-FR')) + ' €</span>'
+        : (p.chiffre_affaires ? '<span style="filter:blur(6px);user-select:none;font-weight:800">1 250 000 €</span>' : '—')}</div>
+    </div>
+    <div class="detail-item">
+      <div class="detail-label">Note Google</div>
+      <div class="detail-value">${p.rating ? `⭐ ${p.rating} (${p.reviews || 0} avis)` : '—'}</div>
+    </div>
+  </div>`;
+  html += `</div>`;
+
+  // === Signals ===
   if (signals) {
-    html += `
-      <div style="margin-bottom:1rem;">
-        <div class="detail-label" style="margin-bottom:.5rem;">Signaux</div>
-        <div style="display:flex;gap:.3rem;flex-wrap:wrap;">${signals}</div>
-      </div>
-    `;
+    html += `<div style="margin-bottom:1rem;">
+      <div class="detail-label" style="margin-bottom:.5rem;">Signaux</div>
+      <div style="display:flex;gap:.3rem;flex-wrap:wrap;">${signals}</div>
+    </div>`;
   }
 
+  // === Site web ===
   if (p.website_url) {
-    html += `
-      <div class="detail-item" style="margin-bottom:.75rem;">
-        <div class="detail-label">Site web</div>
-        <div class="detail-value">
-          <a href="${escAttr(p.website_url)}" target="_blank" rel="noopener" style="color:var(--stage-cold)">${esc(p.website_url)}</a>
-        </div>
-      </div>
-    `;
+    html += `<div class="detail-item" style="margin-bottom:.75rem;">
+      <div class="detail-label">Site web</div>
+      <div class="detail-value"><a href="${escAttr(p.website_url)}" target="_blank" rel="noopener" style="color:var(--stage-cold)">🌐 ${esc(p.website_url)}</a></div>
+    </div>`;
+  } else {
+    html += `<div class="detail-item" style="margin-bottom:.75rem;">
+      <div class="detail-label">Site web</div>
+      <div class="detail-value"><span style="color:#f97316;font-weight:700;font-size:.85rem">❌ Aucun site — opportunité refonte</span></div>
+    </div>`;
   }
+
   if (p.instagram_handle) {
-    html += `
-      <div class="detail-item" style="margin-bottom:.75rem;">
-        <div class="detail-label">Instagram</div>
-        <div class="detail-value">
-          <a href="https://www.instagram.com/${escAttr(p.instagram_handle)}/" target="_blank" rel="noopener" style="color:#E1306C;font-weight:600;">📸 @${esc(p.instagram_handle)}</a>
-        </div>
-      </div>
-    `;
+    html += `<div class="detail-item" style="margin-bottom:.75rem;">
+      <div class="detail-label">Instagram</div>
+      <div class="detail-value"><a href="https://www.instagram.com/${escAttr(p.instagram_handle)}/" target="_blank" rel="noopener" style="color:#E1306C;font-weight:600;">📸 @${esc(p.instagram_handle)}</a></div>
+    </div>`;
   }
 
-  if (p.phone) {
-    const waPhone = p.phone.replace(/\D/g, '');
+  // === ACTION BUTTONS (PRO) ===
+  html += `<div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem">`;
+
+  // LinkedIn button — direct LinkedIn (pas Google)
+  if (p.linkedin_url && isPro) {
+    html += `<a class="btn-action-sm" href="${escAttr(p.linkedin_url)}" target="_blank" rel="noopener" style="background:rgba(10,102,194,.15);color:#0a66c2;border-color:rgba(10,102,194,.3);font-weight:700">🔗 LinkedIn</a>`;
+  } else {
+    const liKeywords = escAttr((p.owner_name || p.name || '').trim());
+    const liType = p.owner_name ? 'people' : 'companies';
+    html += `<button class="btn-action-sm" ${isPro ? `onclick="window.open('https://www.linkedin.com/search/results/${liType}/?keywords='+encodeURIComponent('${liKeywords}')+'&origin=GLOBAL_SEARCH_HEADER', '_blank')"` : `onclick="showUpgradeModal()"`} style="${isPro ? 'background:rgba(10,102,194,.15);color:#0a66c2;border-color:rgba(10,102,194,.3)' : 'opacity:.6'}">🔗 LinkedIn ${isPro ? '' : '🔒'}</button>`;
+  }
+
+  // Google Maps
+  html += `<a class="btn-action-sm" href="https://www.google.com/maps/search/${encodeURIComponent(p.name + ' ' + (p.city || p.address || ''))}" target="_blank" rel="noopener" style="background:rgba(234,67,53,.1);color:#ea4335;border-color:rgba(234,67,53,.25)">📍 Google Maps</a>`;
+
+  // Phone actions (only if PRO)
+  if (p.phone && isPro) {
+    const waPhone = p.phone.replace(/\\D/g, '');
     const intlWa = waPhone.startsWith('33') ? waPhone : waPhone.startsWith('0') ? '33' + waPhone.slice(1) : waPhone;
-    html += `
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.75rem">
-        <a class="btn-action-sm btn-wa-sm" href="https://wa.me/${intlWa}" target="_blank" rel="noopener">💬 WhatsApp</a>
-        <a class="btn-action-sm btn-sms-sm" href="sms:${escAttr(p.phone)}">📱 SMS</a>
-        <button class="btn-action-sm btn-email-find" id="btn-find-email" onclick="findEmail()">🔍 Trouver email</button>
-      </div>
-    `;
+    html += `<a class="btn-action-sm btn-wa-sm" href="https://wa.me/${intlWa}" target="_blank" rel="noopener">💬 WhatsApp</a>`;
+    html += `<a class="btn-action-sm btn-sms-sm" href="sms:${escAttr(p.phone)}">📱 SMS</a>`;
+  } else if (p.phone && !isPro) {
+    html += `<button class="btn-action-sm" onclick="showUpgradeModal()" style="opacity:.6">💬 WhatsApp 🔒</button>`;
+    html += `<button class="btn-action-sm" onclick="showUpgradeModal()" style="opacity:.6">📱 SMS 🔒</button>`;
   }
 
+  html += `</div>`;
+
+  // === Ajouté le ===
+  html += `<div style="font-size:.75rem;color:var(--muted);margin-top:.5rem">Ajouté le ${p.created_at ? new Date(p.created_at).toLocaleDateString('fr-FR') : '—'}</div>`;
+
+  html += `</div>`;
   c.innerHTML = html;
+}
+
+// Enrich prospect via Pappers API
+async function enrichProspect(id) {
+  const btn = document.getElementById('btn-enrich-' + id);
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Enrichissement...'; }
+  try {
+    const res = await apiPost('/api/prospects/' + id + '/enrich');
+    if (res.error) {
+      if (res.upgrade) { showUpgradeModal(); return; }
+      showEnrichInlineError(id, res.error);
+      if (btn) { btn.disabled = false; btn.textContent = '🔍 Enrichir'; }
+      return;
+    }
+    if (res.found === false) {
+      showEnrichNotFound(id);
+      if (btn) { btn.disabled = false; btn.textContent = '🔍 Ré-essayer'; }
+      return;
+    }
+    // Reload prospect data
+    await loadProspects();
+    const updated = allProspects.find(x => x.id === id);
+    if (updated) { currentProspect = updated; buildDetailInfo(updated); }
+  } catch (e) {
+    showEnrichInlineError(id, e.message);
+    if (btn) { btn.disabled = false; btn.textContent = '🔍 Enrichir'; }
+  }
+}
+
+// Show a friendly "not found" message with fallback actions (no popup alert)
+function showEnrichNotFound(id) {
+  const btn = document.getElementById('btn-enrich-' + id);
+  if (!btn) return;
+  const container = btn.closest('div');
+  if (!container) return;
+  const name = (currentProspect && currentProspect.name) || '';
+  const city = (currentProspect && (currentProspect.city || currentProspect.address)) || '';
+  const q = encodeURIComponent((name + ' ' + city).trim());
+  container.innerHTML = `
+    <div style="text-align:left;padding:10px 12px;background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.25);border-radius:10px;font-size:.82rem;color:var(--text);line-height:1.5">
+      <div style="font-weight:800;color:#f97316;margin-bottom:4px">⚠️ Pas trouvé automatiquement</div>
+      <div style="color:var(--text2);margin-bottom:10px">C'est souvent le cas pour les micro-entrepreneurs, auto-entrepreneurs ou boîtes au nom personnel. Tu peux chercher manuellement :</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <a href="https://www.pappers.fr/recherche?q=${q}" target="_blank" rel="noopener" class="btn-action-sm" style="background:rgba(10,102,194,.15);color:#0a66c2;border-color:rgba(10,102,194,.3);text-decoration:none">🔍 Chercher sur Pappers</a>
+        <a href="https://annuaire-entreprises.data.gouv.fr/rechercher?terme=${q}" target="_blank" rel="noopener" class="btn-action-sm" style="background:rgba(34,197,94,.15);color:#22c55e;border-color:rgba(34,197,94,.3);text-decoration:none">🏛️ Annuaire gouv</a>
+        <button class="btn-action-sm" onclick="enrichProspect(${id})" style="background:rgba(249,115,22,.15);color:#f97316;border-color:rgba(249,115,22,.3)">🔄 Ré-essayer</button>
+      </div>
+    </div>`;
+}
+
+// Generic inline error display
+function showEnrichInlineError(id, msg) {
+  const btn = document.getElementById('btn-enrich-' + id);
+  if (!btn) return;
+  const container = btn.closest('div');
+  if (!container) return;
+  container.innerHTML = `
+    <div style="text-align:left;padding:10px 12px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-radius:10px;font-size:.82rem;color:#ef4444;line-height:1.5">
+      <div style="font-weight:800;margin-bottom:4px">❌ Erreur</div>
+      <div style="color:var(--text2);margin-bottom:10px">${esc(msg || 'Erreur inconnue')}</div>
+      <button class="btn-action-sm" onclick="enrichProspect(${id})" style="background:rgba(249,115,22,.15);color:#f97316;border-color:rgba(249,115,22,.3)">🔄 Ré-essayer</button>
+    </div>`;
+}
+
+// Show upgrade modal for free users
+function showUpgradeModal() {
+  const existing = document.querySelector('.upgrade-modal-overlay');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.className = 'upgrade-modal-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:1rem';
+  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+  overlay.innerHTML = `
+    <div style="background:var(--card);border:2px solid #f97316;border-radius:20px;max-width:420px;width:100%;padding:2rem;text-align:center">
+      <div style="font-size:3rem;margin-bottom:1rem">🔒</div>
+      <h2 style="font-size:1.3rem;font-weight:900;color:#fff;margin-bottom:.5rem">Fonctionnalité PRO</h2>
+      <p style="color:var(--muted);font-size:.9rem;margin-bottom:1.5rem;line-height:1.5">
+        Accédez aux <strong style="color:#f97316">numéros de téléphone</strong>, <strong style="color:#0a66c2">LinkedIn</strong>, <strong style="color:#22c55e">emails</strong>, <strong style="color:#22c55e">chiffre d'affaires</strong> et au <strong>score de prospection</strong> avec le plan PRO.
+      </p>
+      <div style="background:rgba(249,115,22,.08);border:1px solid rgba(249,115,22,.2);border-radius:12px;padding:1rem;margin-bottom:1.5rem">
+        <div style="font-size:2rem;font-weight:900;color:#f97316">349€<span style="font-size:.9rem;color:var(--muted);font-weight:600">/mois</span></div>
+        <div style="font-size:.8rem;color:var(--muted);margin-top:.3rem">Accès illimité à toutes les fonctionnalités</div>
+      </div>
+      <a href="/pricing" style="display:block;padding:14px;background:linear-gradient(135deg,#f97316,#ea580c);color:#fff;font-weight:800;font-size:1rem;border-radius:12px;text-decoration:none;margin-bottom:.75rem">Passer PRO →</a>
+      <button onclick="this.closest('.upgrade-modal-overlay').remove()" style="background:none;border:none;color:var(--muted);font-size:.85rem;cursor:pointer">Plus tard</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+// Check PRO before CSV export
+function checkProExport(e) {
+  if (userPlan === 'pro' || userPlan === 'admin') return true;
+  e.preventDefault();
+  showUpgradeModal();
+  return false;
 }
 
 /* ─────────────────────────────────────────
@@ -1515,9 +1982,12 @@ async function generatePitch() {
   if (zone) zone.innerHTML = `<div class="pitch-result" style="color:var(--muted)">Génération en cours...</div>`;
 
   try {
+    const _pitchAbort = new AbortController();
+    const _pitchTimeout = setTimeout(() => _pitchAbort.abort(), 35000);
     const res = await fetch('/api/pitch', {
       method: 'POST',
       headers: AUTH,
+      signal: _pitchAbort.signal,
       body: JSON.stringify({
         prospect: {
           name:        p.name,
@@ -1534,6 +2004,7 @@ async function generatePitch() {
         pitchType: pitchType,
       }),
     });
+    clearTimeout(_pitchTimeout);
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -1568,7 +2039,8 @@ async function generatePitch() {
       `;
     }
   } catch (e) {
-    if (zone) zone.innerHTML = `<div class="pitch-result" style="color:var(--red-tx)">Erreur réseau.</div>`;
+    const msg = e.name === 'AbortError' ? 'Timeout — la génération a pris trop de temps. Réessaie.' : 'Erreur réseau.';
+    if (zone) zone.innerHTML = `<div class="pitch-result" style="color:var(--red-tx)">${msg}</div>`;
   } finally {
     if (btn) { btn.disabled = false; btn.textContent = '✨ Générer le pitch'; }
   }
@@ -1666,11 +2138,190 @@ async function deleteProspect(id) {
   const p = allProspects.find(x => x.id === id);
   if (!p) return;
   if (!confirm(`Supprimer "${p.name}" ? Irréversible.`)) return;
-  const res = await apiFetch(`/api/prospects/${id}`, { method: 'DELETE' });
-  if (res !== null) {
-    allProspects = allProspects.filter(x => x.id !== id);
-    rebuildNicheFilter(); updateBadges(); renderList();
-    showToast('Prospect supprimé.', 'success');
+  try {
+    const res = await apiDelete(`/api/prospects/${id}`);
+    if (res && !res.error) {
+      allProspects = allProspects.filter(x => x.id !== id);
+      rebuildNicheFilter(); updateBadges(); renderList();
+      showToast('Prospect supprimé.', 'success');
+    } else {
+      showToast('Erreur lors de la suppression', 'error');
+    }
+  } catch (e) {
+    console.error('deleteProspect error', e);
+    showToast('Erreur lors de la suppression', 'error');
+  }
+}
+
+/* ─────────────────────────────────────────
+   BULK SELECTION MODE
+───────────────────────────────────────── */
+let bulkSelectMode = false;
+const selectedIds = new Set();
+
+function toggleSelectMode() {
+  bulkSelectMode = !bulkSelectMode;
+  selectedIds.clear();
+  const bar = document.getElementById('bulk-action-bar');
+  const btn = document.getElementById('btn-select-mode');
+  if (bulkSelectMode) {
+    if (bar) bar.style.display = 'flex';
+    if (btn) { btn.style.borderColor = '#E1306C'; btn.style.color = '#E1306C'; btn.textContent = '✕'; }
+  } else {
+    if (bar) bar.style.display = 'none';
+    if (btn) { btn.style.borderColor = '#2a2a38'; btn.style.color = '#6a6a80'; btn.textContent = '☑'; }
+  }
+  renderList();
+  updateBulkCount();
+}
+
+function updateBulkCount() {
+  const el = document.getElementById('bulk-count');
+  if (el) el.textContent = `${selectedIds.size} sélectionné${selectedIds.size > 1 ? 's' : ''}`;
+}
+
+function toggleProspectSelection(id, checked) {
+  if (checked) selectedIds.add(id);
+  else selectedIds.delete(id);
+  updateBulkCount();
+  // Highlight card view
+  const card = document.getElementById('pcard-' + id);
+  if (card) {
+    if (checked) card.classList.add('prospect-card-selected');
+    else card.classList.remove('prospect-card-selected');
+  }
+  // Highlight table row
+  const cb = document.getElementById('bulk-cb-' + id);
+  if (cb) {
+    const tr = cb.closest('tr');
+    if (tr) {
+      if (checked) tr.classList.add('prospect-card-selected');
+      else tr.classList.remove('prospect-card-selected');
+    }
+  }
+}
+
+function bulkSelectAllVisible() {
+  getFilteredProspects().forEach(p => {
+    selectedIds.add(p.id);
+    const cb = document.getElementById('bulk-cb-' + p.id);
+    if (cb) cb.checked = true;
+    const card = document.getElementById('pcard-' + p.id);
+    if (card) card.classList.add('prospect-card-selected');
+  });
+  updateBulkCount();
+}
+
+function bulkSelectNone() {
+  selectedIds.clear();
+  document.querySelectorAll('.bulk-cb').forEach(cb => cb.checked = false);
+  document.querySelectorAll('.prospect-card-selected').forEach(el => el.classList.remove('prospect-card-selected'));
+  updateBulkCount();
+}
+
+async function bulkDeleteSelected() {
+  if (selectedIds.size === 0) { showToast('Aucun prospect sélectionné.', 'info'); return; }
+  const n = selectedIds.size;
+  if (!confirm(`Supprimer ${n} prospect${n > 1 ? 's' : ''} ? Cette action est irréversible.`)) return;
+  let deleted = 0;
+  const ids = Array.from(selectedIds);
+  for (const id of ids) {
+    try {
+      const res = await apiDelete(`/api/prospects/${id}`);
+      if (res && !res.error) { deleted++; allProspects = allProspects.filter(x => x.id !== id); }
+    } catch (e) { console.error('Delete failed for', id, e); }
+  }
+  selectedIds.clear();
+  rebuildNicheFilter();
+  updateBadges();
+  renderList();
+  updateBulkCount();
+  showToast(`${deleted} prospect${deleted > 1 ? 's' : ''} supprimé${deleted > 1 ? 's' : ''}.`, 'success');
+}
+
+/* ─────────────────────────────────────────
+   PROSPECT CONTEXT MENU (⋮)
+───────────────────────────────────────── */
+let _openMenu = null;
+
+function closeProspectMenu() {
+  if (_openMenu) { _openMenu.remove(); _openMenu = null; }
+  document.removeEventListener('click', _handleMenuOutsideClick, true);
+}
+
+function _handleMenuOutsideClick(e) {
+  if (_openMenu && !_openMenu.contains(e.target) && !e.target.classList.contains('prospect-menu-btn')) {
+    closeProspectMenu();
+  }
+}
+
+function openProspectMenu(event, id) {
+  event.stopPropagation();
+  closeProspectMenu();
+  const p = allProspects.find(x => x.id === id);
+  if (!p) return;
+
+  const stage = p.pipeline_stage;
+  const recall = p.recall_type || 'interested';
+
+  const items = [];
+  items.push({ label: 'Fiche CRM complète', icon: '📋', action: `openDetail(${id})` });
+  if (p.phone) items.push({ label: 'Appeler', icon: '📞', action: `callProspect(${id})` });
+  items.push({ sep: true });
+  items.push({ label: 'Changer d\'état', isLabel: true });
+  if (stage !== 'cold_call')          items.push({ label: 'Cold Call', icon: '📞', action: `_menuMove(${id},'cold_call')` });
+  if (!(stage === 'to_recall' && recall === 'interested'))
+    items.push({ label: 'À rappeler — Intéressé', icon: '🔥', action: `_menuMove(${id},'to_recall','interested')`, color: '#ff8c42' });
+  if (!(stage === 'to_recall' && recall === 'no_time'))
+    items.push({ label: 'À rappeler — Pas le temps', icon: '⏰', action: `_menuMove(${id},'to_recall','no_time')`, color: '#4da6ff' });
+  if (stage !== 'no_answer')          items.push({ label: 'Pas répondu', icon: '📵', action: `_menuMove(${id},'no_answer')` });
+  if (stage !== 'meeting_to_set')     items.push({ label: 'RDV à poser', icon: '🗓️', action: `_menuMove(${id},'meeting_to_set')` });
+  if (stage !== 'meeting_confirmed')  items.push({ label: 'RDV confirmé', icon: '✅', action: `_menuMove(${id},'meeting_confirmed')` });
+  if (stage !== 'closed')             items.push({ label: 'Closé (deal)', icon: '💰', action: `_menuMove(${id},'closed')` });
+  if (stage !== 'refused')            items.push({ label: 'Refusé', icon: '❌', action: `_menuMove(${id},'refused')` });
+  items.push({ sep: true });
+  items.push({ label: 'Supprimer le prospect', icon: '🗑', action: `closeProspectMenu(); deleteProspect(${id})`, danger: true });
+
+  const menu = document.createElement('div');
+  menu.className = 'prospect-menu-popup open';
+  menu.innerHTML = items.map(it => {
+    if (it.sep) return '<div class="pm-sep"></div>';
+    if (it.isLabel) return `<div class="pm-label">${it.label}</div>`;
+    const color = it.color ? `style="color:${it.color}"` : '';
+    const danger = it.danger ? ' pm-danger' : '';
+    return `<button class="pm-item${danger}" ${color} onclick="closeProspectMenu();${it.action}">
+      <span style="font-size:15px">${it.icon || ''}</span>
+      <span>${it.label}</span>
+    </button>`;
+  }).join('');
+
+  document.body.appendChild(menu);
+  _openMenu = menu;
+
+  // Position near the button
+  const btn = event.target.closest('.prospect-menu-btn');
+  if (btn) {
+    const rect = btn.getBoundingClientRect();
+    const menuRect = menu.getBoundingClientRect();
+    let top = rect.bottom + 6;
+    let left = rect.right - menuRect.width;
+    if (left < 8) left = 8;
+    if (top + menuRect.height > window.innerHeight - 8) {
+      top = rect.top - menuRect.height - 6;
+    }
+    menu.style.top = top + 'px';
+    menu.style.left = left + 'px';
+  }
+
+  setTimeout(() => document.addEventListener('click', _handleMenuOutsideClick, true), 0);
+}
+
+function _menuMove(id, stage, recallType) {
+  // Stages that require modal input (date, objection, deal): go through moveStage()
+  if (stage === 'to_recall' || stage === 'meeting_to_set' || stage === 'meeting_confirmed' || stage === 'closed' || stage === 'refused') {
+    moveStage(id, stage, recallType);
+  } else {
+    _doMoveStage(id, stage, null, null, null, null, null, null, null, null, null);
   }
 }
 
@@ -1681,8 +2332,8 @@ async function deleteFilteredProspects() {
   if (!ok) return;
   let deleted = 0;
   for (const p of visible) {
-    const res = await apiFetch(`/api/prospects/${p.id}`, { method: 'DELETE' });
-    if (res !== null) { deleted++; allProspects = allProspects.filter(x => x.id !== p.id); }
+    const res = await apiDelete(`/api/prospects/${p.id}`);
+    if (res && !res.error) { deleted++; allProspects = allProspects.filter(x => x.id !== p.id); }
   }
   rebuildNicheFilter();
   updateBadges();
@@ -1761,9 +2412,19 @@ const NICHES = {
     { icon: '🔥', label: 'Chauffagiste' },
     { icon: '❄️', label: 'Climaticien' },
     { icon: '🏠', label: 'Toiturier' },
-    { icon: '🌿', label: 'Jardinier' },
+    { icon: '🌿', label: 'Jardinier paysagiste' },
     { icon: '🏊', label: 'Pisciniste' },
     { icon: '🪵', label: 'Carreleur' },
+    { icon: '🪚', label: 'Charpentier' },
+    { icon: '🧰', label: 'Plaquiste' },
+    { icon: '🛠️', label: 'Façadier' },
+    { icon: '🪜', label: 'Couvreur' },
+    { icon: '🧊', label: 'Vitrier' },
+    { icon: '⛏️', label: 'Terrassier' },
+    { icon: '🏗️', label: 'Entreprise générale BTP' },
+    { icon: '🌡️', label: 'Isolation thermique' },
+    { icon: '☀️', label: 'Panneaux solaires' },
+    { icon: '💧', label: 'Pompe à chaleur' },
   ],
   restaurant: [
     { icon: '🍕', label: 'Pizzeria' },
@@ -1774,18 +2435,35 @@ const NICHES = {
     { icon: '☕', label: 'Café / Bar' },
     { icon: '🛒', label: 'Épicerie' },
     { icon: '🎂', label: 'Traiteur' },
+    { icon: '🍔', label: 'Fast food / Burger' },
+    { icon: '🍣', label: 'Sushi / Japonais' },
+    { icon: '🥗', label: 'Restaurant bio / végé' },
+    { icon: '🌮', label: 'Tacos / Kebab' },
+    { icon: '🍨', label: 'Glacier' },
+    { icon: '🧀', label: 'Fromagerie' },
+    { icon: '🍷', label: 'Caviste' },
+    { icon: '🦞', label: 'Poissonnerie' },
+    { icon: '🍱', label: 'Dark kitchen' },
+    { icon: '🥐', label: 'Food truck' },
   ],
   sante: [
     { icon: '🦷', label: 'Dentiste' },
-    { icon: '🩺', label: 'Médecin' },
+    { icon: '🩺', label: 'Médecin généraliste' },
     { icon: '💊', label: 'Pharmacie' },
     { icon: '🐾', label: 'Vétérinaire' },
     { icon: '👁️', label: 'Opticien' },
     { icon: '🤸', label: 'Kiné' },
     { icon: '🧘', label: 'Ostéopathe' },
-    { icon: '💉', label: 'Infirmier' },
+    { icon: '💉', label: 'Infirmier libéral' },
     { icon: '🧠', label: 'Psychologue' },
     { icon: '🦶', label: 'Podologue' },
+    { icon: '👂', label: 'Audioprothésiste' },
+    { icon: '🤰', label: 'Sage-femme' },
+    { icon: '🥽', label: 'Orthoptiste' },
+    { icon: '🗣️', label: 'Orthophoniste' },
+    { icon: '🌿', label: 'Naturopathe' },
+    { icon: '🏥', label: 'Clinique privée' },
+    { icon: '💆', label: 'Diététicien' },
   ],
   beaute: [
     { icon: '✂️', label: 'Coiffeur' },
@@ -1795,6 +2473,12 @@ const NICHES = {
     { icon: '🖋️', label: 'Tatoueur' },
     { icon: '✨', label: 'Esthétique' },
     { icon: '💆', label: 'Spa / Massage' },
+    { icon: '👁️', label: 'Extensions de cils' },
+    { icon: '🦷', label: 'Blanchiment dentaire' },
+    { icon: '💇', label: 'Coiffeur à domicile' },
+    { icon: '🌺', label: 'Épilation laser' },
+    { icon: '🧖', label: 'Hammam' },
+    { icon: '💄', label: 'Makeup artist' },
   ],
   auto: [
     { icon: '🔩', label: 'Garage auto' },
@@ -1802,24 +2486,240 @@ const NICHES = {
     { icon: '🔍', label: 'Contrôle technique' },
     { icon: '🛞', label: 'Pneumatiques' },
     { icon: '🚐', label: 'Déménageur' },
+    { icon: '🏍️', label: 'Moto / Scooter' },
+    { icon: '🚙', label: 'Concessionnaire auto' },
+    { icon: '🚘', label: 'Lavage auto' },
+    { icon: '🔋', label: 'Batteries auto' },
+    { icon: '🔧', label: 'Mécanique rapide' },
+    { icon: '🚓', label: 'Location véhicules' },
+    { icon: '⚡', label: 'Borne recharge VE' },
   ],
   services: [
     { icon: '🧹', label: 'Nettoyage' },
     { icon: '👔', label: 'Pressing' },
-    { icon: '🏡', label: 'Agence immo' },
     { icon: '📊', label: 'Comptable' },
     { icon: '⚖️', label: 'Avocat' },
     { icon: '📸', label: 'Photographe' },
-    { icon: '🏋️', label: 'Salle de sport' },
     { icon: '🚘', label: 'Auto-école' },
     { icon: '💐', label: 'Fleuriste' },
     { icon: '📱', label: 'Agence comm.' },
+    { icon: '🗂️', label: 'Secrétariat indépendant' },
+    { icon: '🧽', label: 'Entretien espaces verts' },
+    { icon: '🛡️', label: 'Assurance' },
+    { icon: '💼', label: 'Conseil RH' },
+    { icon: '🐕', label: 'Pet-sitter / dog walker' },
+    { icon: '📦', label: 'Conciergerie' },
+    { icon: '🧺', label: 'Laverie' },
   ],
+  immo: [
+    { icon: '🏡', label: 'Agence immobilière' },
+    { icon: '🔑', label: 'Chasseur immobilier' },
+    { icon: '🏢', label: 'Administrateur biens' },
+    { icon: '📜', label: 'Notaire' },
+    { icon: '🧑‍💼', label: 'Mandataire immo' },
+    { icon: '🏗️', label: 'Promoteur' },
+    { icon: '🏘️', label: 'Syndic de copropriété' },
+    { icon: '📐', label: 'Architecte' },
+    { icon: '📏', label: 'Géomètre' },
+    { icon: '🏕️', label: 'Location saisonnière' },
+    { icon: '🔍', label: 'Diagnostiqueur immo' },
+    { icon: '🏠', label: 'Home staging' },
+  ],
+  tech: [
+    { icon: '💻', label: 'Agence web' },
+    { icon: '🖱️', label: 'Développeur freelance' },
+    { icon: '📱', label: 'App mobile' },
+    { icon: '🎨', label: 'UI/UX designer' },
+    { icon: '📊', label: 'Consultant data' },
+    { icon: '🛒', label: 'Agence e-commerce' },
+    { icon: '🔎', label: 'Agence SEO' },
+    { icon: '🤖', label: 'Agence IA / automation' },
+    { icon: '📹', label: 'Motion designer' },
+    { icon: '🎬', label: 'Monteur vidéo' },
+    { icon: '🎯', label: 'Agence pub Meta/Google' },
+    { icon: '☁️', label: 'Infogérance IT' },
+  ],
+  sport: [
+    { icon: '🏋️', label: 'Salle de sport' },
+    { icon: '🧘', label: 'Studio yoga' },
+    { icon: '🤸', label: 'Pilates' },
+    { icon: '🥊', label: 'Salle de boxe' },
+    { icon: '⚽', label: 'Club de foot' },
+    { icon: '🎾', label: 'Club de tennis' },
+    { icon: '🏊', label: 'Piscine privée' },
+    { icon: '🚴', label: 'Coach perso' },
+    { icon: '⛸️', label: 'Patinoire' },
+    { icon: '🎳', label: 'Bowling' },
+    { icon: '🎯', label: 'Escape game' },
+    { icon: '🏃', label: 'Prep physique' },
+  ],
+  mode: [
+    { icon: '👗', label: 'Boutique prêt-à-porter' },
+    { icon: '👜', label: 'Maroquinerie' },
+    { icon: '👠', label: 'Chausseur' },
+    { icon: '💎', label: 'Bijouterie' },
+    { icon: '⌚', label: 'Horlogerie' },
+    { icon: '👓', label: 'Lunetterie' },
+    { icon: '🧵', label: 'Retoucherie' },
+    { icon: '🎩', label: 'Mode sur mesure' },
+    { icon: '👕', label: 'Concept store' },
+    { icon: '♻️', label: 'Friperie' },
+    { icon: '🛍️', label: 'E-commerce mode' },
+  ],
+  event: [
+    { icon: '🎉', label: 'Wedding planner' },
+    { icon: '🎂', label: 'Traiteur événement' },
+    { icon: '🎵', label: 'DJ / animation' },
+    { icon: '📸', label: 'Photographe mariage' },
+    { icon: '🎥', label: 'Vidéaste mariage' },
+    { icon: '🎨', label: 'Décorateur événementiel' },
+    { icon: '🎭', label: 'Agence artistique' },
+    { icon: '🍾', label: 'Bar mobile' },
+    { icon: '🎪', label: 'Location chapiteau' },
+    { icon: '💐', label: 'Fleuriste événement' },
+    { icon: '🎆', label: 'Agence événementielle B2B' },
+  ],
+  formation: [
+    { icon: '📚', label: 'Organisme formation' },
+    { icon: '👨‍🏫', label: 'Prof particulier' },
+    { icon: '🌍', label: 'École de langues' },
+    { icon: '💻', label: 'Formation digitale' },
+    { icon: '🎓', label: 'École privée' },
+    { icon: '🛠️', label: 'CFA / alternance' },
+    { icon: '👶', label: 'Crèche privée' },
+    { icon: '🎨', label: 'Atelier créatif' },
+    { icon: '♟️', label: 'Cours d\'échecs / logique' },
+    { icon: '🎹', label: 'École de musique' },
+    { icon: '🏊', label: 'Moniteur sportif' },
+    { icon: '📖', label: 'Coaching scolaire' },
+  ],
+  tourisme: [
+    { icon: '🏨', label: 'Hôtel indépendant' },
+    { icon: '🏡', label: 'Chambre d\'hôtes' },
+    { icon: '⛺', label: 'Camping' },
+    { icon: '🛎️', label: 'Gîte rural' },
+    { icon: '✈️', label: 'Agence de voyage' },
+    { icon: '🗺️', label: 'Guide touristique' },
+    { icon: '🚤', label: 'Location bateau' },
+    { icon: '🚴', label: 'Location vélo' },
+    { icon: '🏔️', label: 'École de ski' },
+    { icon: '🧗', label: 'Activité outdoor' },
+  ],
+  artisanat: [
+    { icon: '🎨', label: 'Peintre d\'art' },
+    { icon: '🏺', label: 'Céramiste' },
+    { icon: '🧵', label: 'Couturière' },
+    { icon: '💍', label: 'Joaillier' },
+    { icon: '🪑', label: 'Ébéniste d\'art' },
+    { icon: '🔨', label: 'Forgeron' },
+    { icon: '🧶', label: 'Tapissier' },
+    { icon: '🎭', label: 'Créateur d\'objets' },
+    { icon: '📿', label: 'Créateur bijoux' },
+    { icon: '🪞', label: 'Encadreur' },
+    { icon: '🕯️', label: 'Bougies artisanales' },
+  ],
+  agri: [
+    { icon: '🌾', label: 'Exploitation céréalière' },
+    { icon: '🍇', label: 'Viticulteur' },
+    { icon: '🐄', label: 'Élevage bovin' },
+    { icon: '🐑', label: 'Élevage ovin' },
+    { icon: '🐓', label: 'Élevage volaille' },
+    { icon: '🌻', label: 'Maraîcher bio' },
+    { icon: '🫒', label: 'Oléiculteur' },
+    { icon: '🍎', label: 'Arboriculteur' },
+    { icon: '🌱', label: 'Pépiniériste' },
+    { icon: '🍯', label: 'Apiculteur' },
+    { icon: '🥛', label: 'Fromager producteur' },
+    { icon: '🚜', label: 'Entreprise agricole' },
+  ],
+  transport: [
+    { icon: '🚚', label: 'Transporteur routier' },
+    { icon: '📦', label: 'Messagerie / coursier' },
+    { icon: '🚐', label: 'Déménageur pro' },
+    { icon: '🚕', label: 'Taxi' },
+    { icon: '🚙', label: 'VTC' },
+    { icon: '🛵', label: 'Livraison express' },
+    { icon: '🚢', label: 'Transport maritime' },
+    { icon: '🚛', label: 'Logistique entrepôt' },
+    { icon: '⛽', label: 'Station service' },
+    { icon: '🚌', label: 'Transport voyageurs' },
+  ],
+  industrie: [
+    { icon: '🏭', label: 'Métallurgie' },
+    { icon: '⚙️', label: 'Mécanique industrielle' },
+    { icon: '🧪', label: 'Plasturgie' },
+    { icon: '📐', label: 'Bureau d\'études' },
+    { icon: '🔩', label: 'Tôlerie' },
+    { icon: '📦', label: 'Emballage industriel' },
+    { icon: '🪚', label: 'Menuiserie industrielle' },
+    { icon: '🧼', label: 'Cosmétique fabricant' },
+    { icon: '🍪', label: 'Agroalimentaire' },
+    { icon: '🖨️', label: 'Imprimerie industrielle' },
+    { icon: '♻️', label: 'Recyclage / déchets' },
+    { icon: '🔬', label: 'Biotech / Medtech' },
+  ],
+  juridique: [
+    { icon: '⚖️', label: 'Avocat d\'affaires' },
+    { icon: '📜', label: 'Notaire' },
+    { icon: '🏛️', label: 'Huissier' },
+    { icon: '📊', label: 'Expert-comptable' },
+    { icon: '🧮', label: 'Commissaire aux comptes' },
+    { icon: '💼', label: 'Conseil en gestion' },
+    { icon: '💰', label: 'Conseiller patrimoine' },
+    { icon: '🏦', label: 'Courtier crédit' },
+    { icon: '🛡️', label: 'Courtier assurance' },
+    { icon: '📈', label: 'Cabinet conseil' },
+    { icon: '🔐', label: 'Gestionnaire paie' },
+  ],
+};
+
+// Generic search term per category — used by "Tous les métiers" button
+const CAT_ALL_LABELS = {
+  batiment:   { icon: '🏗️', label: 'Tous les métiers du bâtiment',    query: 'bâtiment' },
+  restaurant: { icon: '🍽️', label: 'Tous les métiers de la resto',    query: 'restaurant' },
+  sante:      { icon: '🏥', label: 'Tous les métiers de la santé',    query: 'santé' },
+  beaute:     { icon: '💅', label: 'Tous les métiers de la beauté',   query: 'beauté' },
+  auto:       { icon: '🚗', label: 'Tous les métiers de l\'auto',     query: 'automobile' },
+  services:   { icon: '💼', label: 'Tous les services',               query: 'services aux entreprises' },
+  immo:       { icon: '🏡', label: 'Tous les métiers immo',           query: 'immobilier' },
+  tech:       { icon: '🖥️', label: 'Toutes les agences tech',         query: 'agence digitale' },
+  sport:      { icon: '🏋️', label: 'Tous les métiers sport',          query: 'salle de sport' },
+  mode:       { icon: '👗', label: 'Toutes les boutiques mode',       query: 'boutique prêt-à-porter' },
+  event:      { icon: '🎉', label: 'Tous les métiers événementiel',   query: 'événementiel' },
+  formation:  { icon: '📚', label: 'Toutes les formations',           query: 'formation professionnelle' },
+  tourisme:   { icon: '✈️', label: 'Tous les métiers tourisme',       query: 'hôtel tourisme' },
+  artisanat:  { icon: '🎨', label: 'Tous les artisans d\'art',        query: 'artisan d\'art' },
+  agri:       { icon: '🌾', label: 'Toute l\'agriculture',            query: 'exploitation agricole' },
+  transport:  { icon: '🚚', label: 'Tout le transport',               query: 'transport logistique' },
+  industrie:  { icon: '🏭', label: 'Toute l\'industrie',              query: 'industrie PME' },
+  juridique:  { icon: '⚖️', label: 'Tous les cabinets',               query: 'cabinet juridique' },
 };
 
 function renderNicheChips(cat) {
   const container = document.getElementById('niche-chips');
   container.innerHTML = '';
+
+  // ── "Tous les métiers" chip (first, highlighted) ──
+  const allMeta = CAT_ALL_LABELS[cat];
+  if (allMeta) {
+    const allBtn = document.createElement('button');
+    allBtn.className = 'niche-chip niche-chip-all';
+    allBtn.style.cssText = 'background:linear-gradient(135deg,rgba(34,197,94,.18),rgba(34,197,94,.08));border:1.5px solid #22c55e;color:#22c55e;font-weight:800';
+    allBtn.innerHTML = `<span class="niche-chip-icon">${allMeta.icon}</span><span>${allMeta.label}</span>`;
+    allBtn.onclick = () => {
+      document.getElementById('scan-niche').value = allMeta.query;
+      document.querySelectorAll('.niche-chip').forEach(b => b.classList.remove('active'));
+      allBtn.classList.add('active');
+      const disp = document.getElementById('niche-selected-display');
+      if (disp) {
+        disp.innerHTML = `✅ Sélectionné : <strong>${allMeta.icon} ${allMeta.label}</strong> — clique sur <b>⚡ Lancer</b> pour démarrer`;
+        disp.style.display = '';
+      }
+    };
+    container.appendChild(allBtn);
+  }
+
+  // ── Individual niche chips ──
   (NICHES[cat] || []).forEach(n => {
     const btn = document.createElement('button');
     btn.className = 'niche-chip';
@@ -1848,7 +2748,171 @@ function switchNicheCat(btn) {
 document.addEventListener('DOMContentLoaded', () => {
   renderNicheChips('batiment');
   initSwipeToClose();
+  initNicheAutocomplete();
 });
+
+/* ─────────────────────────────────────────
+   NICHE AUTOCOMPLETE (strict — no free text)
+───────────────────────────────────────── */
+const NICHE_CAT_LABELS = {
+  batiment: 'BTP',
+  restaurant: 'Resto',
+  sante: 'Santé',
+  beaute: 'Beauté',
+  auto: 'Auto',
+  services: 'Services',
+  immo: 'Immo',
+  commerce: 'Commerce',
+  tech: 'Tech',
+  industrie: 'Industrie',
+  juridique: 'Juridique',
+  sport: 'Sport',
+  education: 'Éducation',
+  art: 'Art',
+};
+
+function getAllNichesFlat() {
+  const out = [];
+  Object.keys(NICHES).forEach(cat => {
+    (NICHES[cat] || []).forEach(n => {
+      out.push({ icon: n.icon, label: n.label, cat });
+    });
+  });
+  return out;
+}
+
+function normalizeNicheStr(s) {
+  return (s || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, ''); // strip accents
+}
+
+function initNicheAutocomplete() {
+  const input = document.getElementById('scan-niche');
+  const box   = document.getElementById('niche-suggestions');
+  if (!input || !box) return;
+
+  const ALL = getAllNichesFlat();
+  let activeIdx = -1;
+  let currentMatches = [];
+
+  function render(matches) {
+    currentMatches = matches;
+    if (!matches.length) {
+      box.innerHTML = '<div class="niche-sugg-empty">Aucune niche disponible pour ce mot</div>';
+      box.style.display = '';
+      return;
+    }
+    box.innerHTML = matches.slice(0, 10).map((n, i) => `
+      <div class="niche-sugg-item${i === activeIdx ? ' active' : ''}" data-idx="${i}" data-label="${n.label.replace(/"/g, '&quot;')}">
+        <span class="niche-sugg-icon">${n.icon}</span>
+        <span>${n.label}</span>
+        <span class="niche-sugg-cat">${NICHE_CAT_LABELS[n.cat] || n.cat}</span>
+      </div>
+    `).join('');
+    box.style.display = '';
+    // Wire clicks
+    box.querySelectorAll('.niche-sugg-item').forEach(el => {
+      el.addEventListener('mousedown', (e) => {
+        e.preventDefault(); // prevent blur before click registers
+        const label = el.getAttribute('data-label');
+        selectNiche(label);
+      });
+    });
+  }
+
+  function filter(q) {
+    const nq = normalizeNicheStr(q);
+    if (!nq) return ALL.slice(0, 10);
+    // Priority 1: startsWith. Priority 2: includes
+    const starts = [];
+    const contains = [];
+    ALL.forEach(n => {
+      const nn = normalizeNicheStr(n.label);
+      if (nn.startsWith(nq)) starts.push(n);
+      else if (nn.includes(nq)) contains.push(n);
+    });
+    return starts.concat(contains);
+  }
+
+  function selectNiche(label) {
+    input.value = label;
+    box.style.display = 'none';
+    activeIdx = -1;
+    // Visually mark the matching chip as active (if currently rendered)
+    document.querySelectorAll('.niche-chip').forEach(b => {
+      const bl = (b.textContent || '').trim();
+      if (bl.endsWith(label)) b.classList.add('active');
+      else b.classList.remove('active');
+    });
+    const disp = document.getElementById('niche-selected-display');
+    if (disp) {
+      const found = ALL.find(n => n.label === label);
+      const icon = found ? found.icon : '✅';
+      disp.innerHTML = `✅ Sélectionné : <strong>${icon} ${label}</strong> — clique sur <b>⚡ Lancer</b> pour démarrer`;
+      disp.style.display = '';
+    }
+  }
+
+  input.addEventListener('input', () => {
+    activeIdx = -1;
+    render(filter(input.value));
+  });
+
+  input.addEventListener('focus', () => {
+    render(filter(input.value));
+  });
+
+  input.addEventListener('blur', () => {
+    // Delay so click on suggestion registers first
+    setTimeout(() => {
+      box.style.display = 'none';
+      // Strict mode: if typed value isn't a valid niche, clear it
+      const v = (input.value || '').trim();
+      if (v && !ALL.some(n => n.label.toLowerCase() === v.toLowerCase())) {
+        input.value = '';
+        const disp = document.getElementById('niche-selected-display');
+        if (disp) disp.style.display = 'none';
+      }
+    }, 180);
+  });
+
+  input.addEventListener('keydown', (e) => {
+    const visible = box.style.display !== 'none' && currentMatches.length > 0;
+    if (e.key === 'ArrowDown') {
+      if (!visible) { render(filter(input.value)); return; }
+      e.preventDefault();
+      activeIdx = Math.min(activeIdx + 1, Math.min(currentMatches.length, 10) - 1);
+      render(currentMatches);
+    } else if (e.key === 'ArrowUp') {
+      if (!visible) return;
+      e.preventDefault();
+      activeIdx = Math.max(activeIdx - 1, 0);
+      render(currentMatches);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (visible && activeIdx >= 0) {
+        selectNiche(currentMatches[activeIdx].label);
+      } else if (visible && currentMatches[0]) {
+        // Auto-pick first match if user pressed Enter without arrow-selecting
+        selectNiche(currentMatches[0].label);
+      } else if (input.value && ALL.some(n => n.label.toLowerCase() === input.value.trim().toLowerCase())) {
+        // Already a valid niche selected — launch
+        if (typeof launchScan === 'function') launchScan();
+      }
+    } else if (e.key === 'Escape') {
+      box.style.display = 'none';
+    }
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!input.contains(e.target) && !box.contains(e.target)) {
+      box.style.display = 'none';
+    }
+  });
+}
 
 /* ─────────────────────────────────────────
    SWIPE DOWN TO CLOSE — bottom sheet modals
@@ -1991,8 +3055,7 @@ function toggleScanPanel() {
 async function launchScan() {
   // Block if no credits
   if (userCredits <= 0) {
-    showToast('Plus de crédits ! Passe à un plan supérieur.', 'error');
-    window.location.href = '/pricing';
+    showToast('Plus de crédits disponibles. Contacte le support.', 'error');
     return;
   }
 
@@ -2020,10 +3083,24 @@ async function launchScan() {
     if (fillBar) fillBar.style.width = progress + '%';
   }, 400);
 
+  // Safety net : force-reset the UI after 90s no matter what
+  const safetyTimer = setTimeout(() => {
+    clearInterval(progressTimer);
+    if (btn) btn.disabled = false;
+    if (statusText) statusText.textContent = '⚠️ Timeout — réessaie';
+    setTimeout(() => {
+      if (statusWrap) statusWrap.style.display = 'none';
+      if (fillBar)    fillBar.style.width = '0%';
+    }, 2000);
+  }, 90000);
+
   try {
+    const _searchAbort = new AbortController();
+    const _searchTimeout = setTimeout(() => _searchAbort.abort(), 60000);
     const res = await fetch('/api/search', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      signal: _searchAbort.signal,
       body: JSON.stringify({
         niche,
         country: scanCountry,
@@ -2032,24 +3109,30 @@ async function launchScan() {
         ...(scanCountry === 'around_me' && scanLat ? { lat: scanLat, lng: scanLng, radius: scanRadius } : {}),
       }),
     });
-    const data = await res.json();
+    clearTimeout(_searchTimeout);
+    const data = await res.json().catch(() => ({}));
 
     clearInterval(progressTimer);
     if (fillBar) fillBar.style.width = '100%';
 
     if (!res.ok) {
+      if (statusText) statusText.textContent = '❌ ' + (data.error || ('Erreur HTTP ' + res.status));
       if (data.upgrade) {
-        showToast('Plus de crédits ! Passe à un plan supérieur.', 'error');
-        window.location.href = '/pricing';
-        return;
+        showToast('Plus de crédits disponibles. Contacte le support.', 'error');
+      } else {
+        showToast(data.error || 'Erreur lors du scan', 'error');
       }
-      showToast(data.error || 'Erreur lors du scan', 'error');
       return;
     }
 
     const count = data.count || (data.prospects && data.prospects.length) || 0;
-    if (statusText) statusText.textContent = `✅ ${count} prospects ajoutés !`;
-    showToast(`🎯 ${count} prospects ajoutés en Cold Call`, 'success', 4000);
+    if (count === 0) {
+      if (statusText) statusText.textContent = '⚠️ Aucun prospect trouvé pour cette recherche';
+      showToast('Aucun prospect trouvé — essaie un autre métier ou une autre ville', 'warn', 4500);
+    } else {
+      if (statusText) statusText.textContent = '✅ ' + count + ' prospects ajoutés !';
+      showToast('🎯 ' + count + ' prospects ajoutés en Cold Call', 'success', 4000);
+    }
 
     // Update local credit count from server response
     if (typeof data.credits === 'number') {
@@ -2059,17 +3142,24 @@ async function launchScan() {
       updateProspectsSlider();
     }
 
-    await loadProspects();
-    switchTab('cold_call');
+    if (count > 0) {
+      await loadProspects();
+      switchTab('cold_call');
+    }
 
   } catch (e) {
     clearInterval(progressTimer);
-    showToast('Erreur de connexion', 'error');
+    if (statusText) statusText.textContent = '❌ Erreur de connexion';
+    showToast('Erreur de connexion : ' + (e.message || 'inconnue'), 'error', 5000);
   } finally {
+    clearTimeout(safetyTimer);
+    // Reset button IMMEDIATELY (no 3.5s wait) so user can retry
     if (btn) btn.disabled = false;
+    // Hide the status bar + progress after a short delay to let user read the result
     setTimeout(() => {
       if (statusWrap) statusWrap.style.display = 'none';
       if (fillBar)    fillBar.style.width = '0%';
+      if (statusText) statusText.textContent = 'Scan en cours...';
     }, 3500);
   }
 }
@@ -2182,8 +3272,12 @@ document.addEventListener('keydown', e => {
 /* ─────────────────────────────────────────
    VIEW SWITCHER (Pipeline | Rappels | Analyse)
 ───────────────────────────────────────── */
+function openExtension(name) {
+  window.location.href = '/' + name;
+}
+
 function switchView(view) {
-  ['pipeline', 'rappels', 'analyse', 'calendrier'].forEach(v => {
+  ['pipeline', 'rappels', 'analyse', 'calendrier', 'extensions', 'abonnement'].forEach(v => {
     const el = document.getElementById('view-' + v);
     if (el) el.style.display = v === view ? '' : 'none';
   });
@@ -2208,9 +3302,12 @@ async function loadRappels() {
 
   // Build unified agenda items from rappels + meetings
   const items = [];
+  const noDateItems = [];
   prospects.forEach(p => {
     if (p.pipeline_stage === 'to_recall' && p.rappel) {
       items.push({ ...p, _agendaDate: p.rappel, _agendaType: 'recall' });
+    } else if (p.pipeline_stage === 'to_recall' && !p.rappel) {
+      noDateItems.push(p);
     }
     if ((p.pipeline_stage === 'meeting_to_set' || p.pipeline_stage === 'meeting_confirmed') && p.meeting_date) {
       items.push({ ...p, _agendaDate: p.meeting_date, _agendaType: 'meeting' });
@@ -2238,7 +3335,29 @@ async function loadRappels() {
   _setAgendaSection('agenda-overdue-section', overdueList.length > 0);
   _setAgendaSection('agenda-week-section',    weekList.length > 0);
   _setAgendaSection('agenda-later-section',   laterList.length > 0);
-  _setAgendaSection('rappel-empty',           items.length === 0);
+  _setAgendaSection('rappel-empty',           items.length === 0 && noDateItems.length === 0);
+
+  // Show prospects in to_recall WITHOUT a date (warning section)
+  let noDatEl = document.getElementById('agenda-nodate-section');
+  if (!noDatEl) {
+    noDatEl = document.createElement('div');
+    noDatEl.id = 'agenda-nodate-section';
+    const emptyEl = document.getElementById('rappel-empty');
+    if (emptyEl) emptyEl.parentNode.insertBefore(noDatEl, emptyEl);
+    else document.querySelector('.view-rappels')?.appendChild(noDatEl);
+  }
+  if (noDateItems.length > 0) {
+    noDatEl.style.display = agendaView === 'list' ? '' : 'none';
+    noDatEl.innerHTML = `<div class="agenda-section-title" style="color:#f59e0b">⚠️ Sans date de rappel (${noDateItems.length})</div>`
+      + noDateItems.map(p => `<div class="agenda-card" style="border-left:3px solid #f59e0b;cursor:pointer" onclick="openProspect(${p.id})">
+        <div class="agenda-card-name">${p.name || '—'}</div>
+        <div class="agenda-card-meta">${p.niche || ''} ${p.city || ''}</div>
+        <div style="font-size:.72rem;color:#f59e0b;margin-top:4px">Pas de date — clique pour ajouter un rappel</div>
+      </div>`).join('');
+  } else {
+    noDatEl.style.display = 'none';
+    noDatEl.innerHTML = '';
+  }
 
   renderCalendar();
 

@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Comprendre Empire Leads — Manuel Imade</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0a0a14;
+  --bg2: #11112a;
+  --card: #15152e;
+  --border: #22224a;
+  --text: #ecedf5;
+  --muted: #9090b0;
+  --orange: #FF6B00;
+  --orange-l: #FFA042;
+  --green: #00d084;
+  --blue: #0095f6;
+  --purple: #a855f7;
+  --pink: #ec4899;
+  --gold: #FFD700;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(at 5% 0%, rgba(255,107,0,0.08) 0px, transparent 50%),
+    radial-gradient(at 95% 100%, rgba(168,85,247,0.06) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+.wrap {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 60px 28px 100px;
+}
+
+.hero {
+  text-align: center;
+  margin-bottom: 70px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--border);
+}
+.hero .pre {
+  display: inline-block;
+  padding: 6px 14px;
+  background: rgba(255,107,0,0.12);
+  border: 1px solid rgba(255,107,0,0.35);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--orange);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 22px;
+}
+h1 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(34px, 6vw, 56px);
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 16px;
+}
+h1 .grad {
+  background: linear-gradient(135deg, var(--orange), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero .sub {
+  font-size: 16px;
+  color: var(--muted);
+  max-width: 580px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.toc {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px 28px;
+  margin-bottom: 60px;
+}
+.toc h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.toc ol {
+  list-style: none;
+  counter-reset: item;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 24px;
+}
+.toc ol li {
+  counter-increment: item;
+  font-size: 13px;
+  padding: 6px 0;
+}
+.toc ol li::before {
+  content: counter(item, decimal-leading-zero);
+  color: var(--orange);
+  font-weight: 700;
+  margin-right: 10px;
+  font-size: 11px;
+}
+.toc ol li a { color: var(--text); text-decoration: none; transition: color 0.2s; }
+.toc ol li a:hover { color: var(--orange); }
+@media (max-width: 640px) { .toc ol { grid-template-columns: 1fr; } }
+
+section.chapter {
+  margin-bottom: 80px;
+  scroll-margin-top: 30px;
+}
+.ch-num {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--orange);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(26px, 4vw, 36px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 32px 0 12px;
+  color: var(--text);
+}
+p {
+  font-size: 16px;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+p.muted { color: var(--muted); }
+strong { color: var(--orange); font-weight: 700; }
+em { color: var(--gold); font-style: normal; font-weight: 600; }
+ul { margin: 14px 0 22px 22px; }
+ul li { margin-bottom: 10px; font-size: 15px; }
+ul li::marker { color: var(--orange); }
+
+.box {
+  background: var(--card);
+  border-left: 3px solid var(--orange);
+  padding: 18px 24px;
+  border-radius: 0 12px 12px 0;
+  margin: 24px 0;
+}
+.box.green { border-left-color: var(--green); }
+.box.blue { border-left-color: var(--blue); }
+.box.purple { border-left-color: var(--purple); }
+.box.pink { border-left-color: var(--pink); }
+.box-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--orange);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 8px;
+}
+.box.green .box-title { color: var(--green); }
+.box.blue .box-title { color: var(--blue); }
+.box.purple .box-title { color: var(--purple); }
+.box.pink .box-title { color: var(--pink); }
+.box p { margin-bottom: 0; font-size: 14px; line-height: 1.65; color: var(--text); }
+.box p + p { margin-top: 10px; }
+
+.code-line {
+  background: rgba(0,0,0,0.4);
+  border: 1px solid var(--border);
+  padding: 14px 18px;
+  border-radius: 8px;
+  font-family: 'SF Mono', Consolas, monospace;
+  font-size: 12px;
+  color: var(--green);
+  margin: 16px 0;
+  overflow-x: auto;
+}
+
+.diagram {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 28px;
+  margin: 28px 0;
+  font-family: 'SF Mono', Consolas, monospace;
+  font-size: 12px;
+  color: var(--text);
+  white-space: pre;
+  overflow-x: auto;
+  line-height: 1.6;
+}
+.diagram .arrow { color: var(--orange); }
+.diagram .label { color: var(--gold); }
+
+.kw {
+  display: inline-block;
+  padding: 2px 8px;
+  background: rgba(255,107,0,0.12);
+  border: 1px solid rgba(255,107,0,0.3);
+  border-radius: 5px;
+  font-family: 'SF Mono', Consolas, monospace;
+  font-size: 12px;
+  color: var(--orange);
+  font-weight: 600;
+}
+
+footer {
+  text-align: center;
+  padding: 60px 0 0;
+  border-top: 1px solid var(--border);
+  margin-top: 60px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+footer strong { color: var(--orange); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="hero">
+  <div class="pre">📚 Manuel Imade · Empire Leads</div>
+  <h1>Comprendre <span class="grad">ton SaaS</span><br>de A à Z</h1>
+  <p class="sub">Un manuel pour savoir exactement de quoi tu parles quand un client te demande "comment t'as fait tout ça". Pas de jargon, des analogies simples, mais on couvre vraiment tout.</p>
+</div>
+
+<div class="toc">
+  <h3>Sommaire — 14 chapitres</h3>
+  <ol>
+    <li><a href="#c1">Un site web, c'est quoi en fait</a></li>
+    <li><a href="#c2">Les 3 acteurs : navigateur, serveur, base de données</a></li>
+    <li><a href="#c3">Le frontend (la vitrine)</a></li>
+    <li><a href="#c4">Le backend (le cerveau)</a></li>
+    <li><a href="#c5">La base de données (la mémoire)</a></li>
+    <li><a href="#c6">L'authentification (les comptes &amp; mots de passe)</a></li>
+    <li><a href="#c7">Les APIs (parler à d'autres services)</a></li>
+    <li><a href="#c8">Le scraping (récupérer des leads)</a></li>
+    <li><a href="#c9">L'IA (les pitchs auto)</a></li>
+    <li><a href="#c10">Le bookmarklet Instagram (le hack)</a></li>
+    <li><a href="#c11">Stripe et les paiements</a></li>
+    <li><a href="#c12">Vercel et le déploiement</a></li>
+    <li><a href="#c13">Le multi-tenant (chacun sa data)</a></li>
+    <li><a href="#c14">La carte globale</a></li>
+  </ol>
+</div>
+
+<!-- ============ CHAPITRE 1 ============ -->
+<section class="chapter" id="c1">
+  <div class="ch-num">— Chapitre 01 —</div>
+  <h2>Un site web, c'est quoi en fait</h2>
+
+  <p>Quand tu tapes <span class="kw">prospecthunter.vercel.app</span> dans Chrome et que tu appuies sur Entrée, voilà ce qui se passe en réalité :</p>
+
+  <p>Ton navigateur (Chrome, Safari, Firefox) envoie une <strong>lettre</strong> à un ordinateur quelque part dans un data-center, en disant "salut, donne-moi la page d'accueil de prospecthunter". Cet ordinateur lointain reçoit la lettre, prépare une réponse (un fichier HTML, des images, du code), et la renvoie. Ton navigateur reçoit la réponse, la lit, et l'affiche à l'écran.</p>
+
+  <div class="box">
+    <div class="box-title">🍕 L'analogie du restaurant</div>
+    <p>Imagine que tu commandes une pizza. Toi (le client) tu appelles le resto. Le resto reçoit ta commande, le cuisinier prépare la pizza dans la cuisine, le serveur te la livre. Le navigateur c'est <em>toi</em>, l'ordinateur lointain c'est le <em>resto</em>, et la pizza c'est <em>la page web</em>.</p>
+  </div>
+
+  <p>Un site web simple, c'est juste <strong>3 fichiers</strong> :</p>
+  <ul>
+    <li><span class="kw">HTML</span> — la structure (les titres, les paragraphes, les boutons). C'est le squelette.</li>
+    <li><span class="kw">CSS</span> — le style (les couleurs, les polices, les tailles). C'est les vêtements.</li>
+    <li><span class="kw">JavaScript</span> — le mouvement (les clics, les animations, la logique). C'est les muscles.</li>
+  </ul>
+
+  <p>Mais Empire Leads c'est pas un simple site, c'est une <strong>application web</strong> (une "web app" ou un "SaaS"). La différence : il y a aussi un <em>cerveau côté serveur</em> qui mémorise des trucs (qui est connecté, quels prospects appartiennent à qui, etc.), et une <em>base de données</em> qui stocke tout. C'est le sujet des chapitres suivants.</p>
+</section>
+
+<!-- ============ CHAPITRE 2 ============ -->
+<section class="chapter" id="c2">
+  <div class="ch-num">— Chapitre 02 —</div>
+  <h2>Les 3 acteurs : navigateur, serveur, base de données</h2>
+
+  <p>Toute application web repose sur <strong>3 acteurs</strong> qui se passent des messages.</p>
+
+  <div class="diagram">
+TON ORDI                       UN ORDI DANS UN DATA-CENTER
++----------+    requête →    +----------+    requête →    +----------+
+| FRONTEND |  ─────────────  | BACKEND  |  ─────────────  | DATABASE |
+| Chrome   |  ←─────────────  | Node.js  |  ←─────────────  | Postgres |
++----------+    réponse      +----------+    réponse      +----------+
+"la vitrine"                 "le cerveau"                  "la mémoire"
+  </div>
+
+  <h3>1️⃣ Le frontend — la vitrine</h3>
+  <p>C'est ce que ton utilisateur <em>voit</em>. Les boutons, les listes de prospects, les formulaires. Tout ce qui s'affiche dans Chrome ou Safari sur le téléphone. Le frontend tourne sur l'ordinateur de l'utilisateur.</p>
+
+  <h3>2️⃣ Le backend — le cerveau</h3>
+  <p>C'est le programme qui tourne sur un serveur dans un data-center. Quand l'utilisateur clique "Logger un appel", le frontend envoie un message au backend ("hé, ajoute cet appel"), et le backend traite la demande, sauvegarde dans la base, et répond "OK c'est fait".</p>
+
+  <h3>3️⃣ La database — la mémoire</h3>
+  <p>C'est l'endroit où on stocke <em>tout</em> ce qui doit être conservé : les comptes utilisateurs, les prospects, les notes, les appels, les rendez-vous. Elle vit aussi dans un data-center, séparée du backend.</p>
+
+  <div class="box green">
+    <div class="box-title">💡 Pourquoi 3 acteurs séparés ?</div>
+    <p>Parce que ça permet de <em>scaler</em> (grossir). Si t'as 10 000 utilisateurs en même temps, tu peux mettre <strong>plusieurs backends</strong> en parallèle qui partagent la même base. Et si tu changes le frontend, tu touches pas à la base. C'est l'architecture standard de tous les SaaS du monde.</p>
+  </div>
+</section>
+
+<!-- ============ CHAPITRE 3 ============ -->
+<section class="chapter" id="c3">
+  <div class="ch-num">— Chapitre 03 —</div>
+  <h2>Le frontend (la vitrine)</h2>
+
+  <p>Empire Leads, le frontend c'est essentiellement <strong>un seul gros fichier JavaScript</strong> qui s'appelle <span class="kw">app.js</span> (presque 4000 lignes), accompagné d'un <span class="kw">index.html</span> et d'un <span class="kw">style.css</span>.</p>
+
+  <p>Quand tu vas sur <span class="kw">/app</span>, ton navigateur télécharge ces 3 fichiers et les exécute localement. À partir de là, tout se passe dans <em>ton</em> navigateur : les filtres, les changements de stage, l'affichage des cartes prospects, les animations. C'est ce qu'on appelle un <strong>SPA</strong> (Single Page Application — application à une seule page) : la page ne se recharge jamais, elle se met à jour dynamiquement.</p>
+
+  <h3>Comment le frontend "parle" au backend</h3>
+  <p>Quand tu cliques sur un bouton, le JavaScript fait ce qu'on appelle un <span class="kw">fetch</span> (= aller chercher quelque chose). C'est exactement comme envoyer un SMS au backend :</p>
+  <div class="code-line">fetch('/api/prospects', { method: 'GET' })</div>
+  <p>Traduction : "Hé serveur, donne-moi la liste de mes prospects." Le serveur répond avec un fichier <span class="kw">JSON</span> (un format de données standard, lisible par les humains et les machines), et le frontend affiche les prospects à l'écran.</p>
+
+  <div class="box blue">
+    <div class="box-title">📦 C'est quoi du JSON ?</div>
+    <p>C'est juste une façon d'écrire des données, comme une recette de cuisine structurée. Exemple :</p>
+    <p><span class="kw">{ "name": "Plombier Dupont", "phone": "0612345678", "stage": "cold_call" }</span></p>
+    <p>C'est le langage universel pour échanger des données entre 2 programmes sur Internet.</p>
+  </div>
+
+  <h3>Le pattern d'Empire Leads</h3>
+  <p>Frontend en HTML/CSS/JavaScript "vanilla" (= sans framework). Pas de React, pas de Vue, pas d'Angular. Juste du JavaScript pur. C'est plus rapide à charger et plus simple à maintenir. La plupart des SaaS modernes utilisent React (avec lequel ils se compliquent souvent la vie pour rien). Empire Leads prouve qu'on peut faire un vrai SaaS sans tout ça.</p>
+</section>
+
+<!-- ============ CHAPITRE 4 ============ -->
+<section class="chapter" id="c4">
+  <div class="ch-num">— Chapitre 04 —</div>
+  <h2>Le backend (le cerveau)</h2>
+
+  <p>Le backend d'Empire Leads tourne sur <strong>Node.js</strong>. Node.js c'est un programme qui sait exécuter du JavaScript en dehors d'un navigateur — sur un serveur. C'est un peu magique : la même langue (JavaScript) peut tourner côté navigateur ET côté serveur.</p>
+
+  <p>Pour gérer les requêtes qui arrivent (les "lettres" qu'envoie le frontend), on utilise une bibliothèque qui s'appelle <strong>Express</strong>. Express c'est comme un facteur intelligent : il reçoit les lettres, les trie selon leur destination (l'URL demandée), et appelle le bon code pour répondre.</p>
+
+  <h3>Exemple concret</h3>
+  <p>Quand le frontend envoie <span class="kw">GET /api/prospects</span>, Express regarde dans son carnet d'adresses :</p>
+  <div class="code-line">app.get('/api/prospects', (req, res) => { ... })</div>
+  <p>Et exécute le code correspondant : "va chercher les prospects de cet utilisateur dans la base, et renvoie-les en JSON."</p>
+
+  <h3>Les "routes" d'Empire Leads</h3>
+  <p>Le backend est organisé en <strong>fichiers de routes</strong>, chacun gérant un domaine :</p>
+  <ul>
+    <li><span class="kw">routes/auth.js</span> — login, register, reset password</li>
+    <li><span class="kw">routes/prospects.js</span> — créer/modifier/supprimer des prospects, le pipeline</li>
+    <li><span class="kw">routes/search.js</span> — chercher de nouveaux prospects via Google Maps</li>
+    <li><span class="kw">routes/pitch.js</span> — générer des pitchs IA via Claude</li>
+    <li><span class="kw">routes/quotes.js</span> — créer et signer des devis</li>
+    <li><span class="kw">routes/stripe.js</span> — gérer les paiements</li>
+    <li><span class="kw">routes/admin.js</span> — dashboard admin (pour toi)</li>
+  </ul>
+
+  <p>Chaque route est une "porte d'entrée" sur le serveur. Le frontend tape à la porte avec une URL, et le backend exécute le code derrière la porte.</p>
+
+  <div class="box">
+    <div class="box-title">🏠 L'analogie de la maison</div>
+    <p>Le backend c'est ta maison. Les routes c'est les portes (porte cuisine, porte salon, porte garage). Le facteur (Express) reçoit les colis et sait dans quelle pièce les déposer. Chaque pièce sait quoi faire avec ce qu'elle reçoit.</p>
+  </div>
+</section>
+
+<!-- ============ CHAPITRE 5 ============ -->
+<section class="chapter" id="c5">
+  <div class="ch-num">— Chapitre 05 —</div>
+  <h2>La base de données (la mémoire)</h2>
+
+  <p>La base de données c'est l'endroit où on stocke toutes les infos qui doivent <em>survivre</em> entre les sessions. Si on stockait les prospects en mémoire dans le backend, dès qu'on redémarre le serveur tout serait perdu. La base de données, elle, garde tout sur disque, en permanence.</p>
+
+  <p>Empire Leads utilise <strong>PostgreSQL</strong> (= "Postgres"), hébergé chez <strong>Supabase</strong>. PostgreSQL c'est une base de données <em>relationnelle</em> : les données sont organisées en tables (comme un tableau Excel géant).</p>
+
+  <h3>Les tables principales d'Empire Leads</h3>
+  <ul>
+    <li><span class="kw">users</span> — un utilisateur par ligne (email, mot de passe crypté, plan, crédits, admin oui/non)</li>
+    <li><span class="kw">prospects</span> — un prospect par ligne (nom, téléphone, stage du pipeline, notes, etc.)</li>
+    <li><span class="kw">searches</span> — historique des recherches faites</li>
+    <li><span class="kw">call_attempts</span> — chaque tentative de contact loggée (appel, sms, email)</li>
+    <li><span class="kw">quotes</span> — les devis créés avec leur statut</li>
+    <li><span class="kw">activity_log</span> — journal de toutes les actions (qui a fait quoi quand)</li>
+  </ul>
+
+  <h3>Comment on parle à la base de données</h3>
+  <p>Avec un langage qui s'appelle <strong>SQL</strong> (Structured Query Language). C'est comme un anglais simplifié pour donner des ordres à la base.</p>
+  <div class="code-line">SELECT * FROM prospects WHERE user_id = 42</div>
+  <p>Traduction : "Donne-moi tous les prospects dont l'utilisateur est le numéro 42." La base répond avec une liste de lignes.</p>
+
+  <div class="box green">
+    <div class="box-title">📚 L'analogie de la bibliothèque</div>
+    <p>La base de données c'est une <em>bibliothèque géante</em>. Chaque table c'est un rayon (rayon "Utilisateurs", rayon "Prospects"). Chaque livre c'est une ligne. Le bibliothécaire (le moteur SQL) sait retrouver n'importe quel livre en quelques millisecondes, même s'il y en a 10 millions.</p>
+  </div>
+
+  <h3>Pourquoi Supabase ?</h3>
+  <p>Supabase c'est un service qui héberge ta base PostgreSQL pour toi (sans que tu aies à gérer un serveur). Tu paies un abonnement, ils s'occupent de la sauvegarde, de la sécurité, des backups. C'est plus pratique que de monter ton propre serveur PostgreSQL. Concurrent direct : Firebase de Google.</p>
+</section>
+
+<!-- ============ CHAPITRE 6 ============ -->
+<section class="chapter" id="c6">
+  <div class="ch-num">— Chapitre 06 —</div>
+  <h2>L'authentification (les comptes &amp; mots de passe)</h2>
+
+  <p>Comment Empire Leads sait qui tu es ? Et comment il empêche un utilisateur de voir les prospects d'un autre ?</p>
+
+  <h3>Étape 1 : Création de compte</h3>
+  <p>Quand un user s'inscrit, il donne un email + un mot de passe. <strong>On ne stocke JAMAIS le mot de passe en clair</strong>. À la place, on utilise une bibliothèque qui s'appelle <strong>bcrypt</strong> qui transforme "monpassword123" en quelque chose comme :</p>
+  <div class="code-line">$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy</div>
+  <p>C'est ce qu'on appelle un <em>hash</em>. La particularité : c'est <strong>impossible</strong> de retrouver le mot de passe original à partir du hash. Mais on peut vérifier qu'un mot de passe donné correspond à un hash existant. C'est ça qui rend les comptes sécurisés.</p>
+
+  <div class="box pink">
+    <div class="box-title">🔒 Pourquoi c'est crucial</div>
+    <p>Si demain un hacker pirate la base de données d'Empire Leads, il verra des hashes inutilisables. Il ne pourra pas se connecter aux comptes. C'est la <em>norme légale</em> aujourd'hui : si tu stockes des mots de passe en clair et qu'il y a un leak, tu es responsable juridiquement.</p>
+  </div>
+
+  <h3>Étape 2 : Login</h3>
+  <p>Quand l'user revient et tape son mot de passe, on prend le mot de passe entré, on le passe dans bcrypt, et on compare au hash stocké. Si ça matche, on génère un <strong>JWT</strong>.</p>
+
+  <h3>C'est quoi un JWT ?</h3>
+  <p><strong>JWT</strong> = JSON Web Token. C'est une carte d'identité numérique qu'on donne au navigateur du user après login. Cette carte contient son ID, son email, et la date d'expiration (genre 7 jours). Elle est signée cryptographiquement avec un secret que seul le serveur connaît.</p>
+  <div class="code-line">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NDIsImVtYWlsIjoidG90b0BleGFtcGxlLmNvbSJ9.signature</div>
+  <p>À chaque requête que le frontend envoie au backend, il rajoute cette carte dans le header. Le backend vérifie la signature ("ce token a bien été émis par moi, il y a moins de 7 jours") et identifie l'user.</p>
+
+  <div class="box">
+    <div class="box-title">🎫 L'analogie du bracelet de festival</div>
+    <p>Quand tu rentres dans un festival, on te met un bracelet (= JWT). À chaque scène, le videur regarde ton bracelet et sait que t'es OK pour entrer. Pas besoin de redonner ta carte d'identité à chaque fois. Le bracelet expire à la fin du festival.</p>
+  </div>
+</section>
+
+<!-- ============ CHAPITRE 7 ============ -->
+<section class="chapter" id="c7">
+  <div class="ch-num">— Chapitre 07 —</div>
+  <h2>Les APIs (parler à d'autres services)</h2>
+
+  <p><strong>API</strong> = Application Programming Interface. C'est juste un mot compliqué pour dire : <em>une porte standardisée qu'un service ouvre pour qu'un autre programme puisse lui parler</em>.</p>
+
+  <p>Empire Leads parle à plusieurs APIs externes pour faire son boulot :</p>
+  <ul>
+    <li><strong>Google Places API</strong> — pour chercher des entreprises sur Google Maps</li>
+    <li><strong>Google Custom Search Engine</strong> — pour vérifier si une entreprise a un compte Instagram ou Facebook</li>
+    <li><strong>Pappers API</strong> — pour récupérer les noms des dirigeants d'entreprises françaises</li>
+    <li><strong>Hunter.io API</strong> — pour trouver les emails professionnels</li>
+    <li><strong>Anthropic API (Claude)</strong> — pour générer les pitchs IA</li>
+    <li><strong>Stripe API</strong> — pour les paiements</li>
+  </ul>
+
+  <h3>Comment ça marche concrètement</h3>
+  <p>Chaque API te donne une <strong>clé secrète</strong> (une longue chaîne de caractères) quand tu crées un compte. Quand ton backend veut appeler l'API, il envoie une requête HTTP avec sa clé en pièce jointe. L'API vérifie la clé, exécute la demande, et te renvoie les données.</p>
+
+  <p>Exemple — quand tu fais une recherche "restaurants à Lyon" :</p>
+  <ol style="list-style: decimal; padding-left: 24px; color: var(--text); font-size: 15px; line-height: 1.8;">
+    <li>Frontend → Backend : "cherche restaurants à Lyon"</li>
+    <li>Backend → Google Places API : "donne-moi tous les restaurants dans Lyon"</li>
+    <li>Google Places → Backend : liste de 60 restaurants avec leurs noms, adresses, téléphones</li>
+    <li>Backend → Pappers API : "trouve-moi les dirigeants de ces 60 boîtes"</li>
+    <li>Pappers → Backend : noms des gérants</li>
+    <li>Backend → Hunter.io : "trouve les emails de ces dirigeants"</li>
+    <li>Hunter → Backend : emails trouvés</li>
+    <li>Backend → Database : sauvegarde les 60 prospects</li>
+    <li>Backend → Frontend : "voilà les 60 prospects"</li>
+    <li>Frontend → User : affiche la liste à l'écran</li>
+  </ol>
+
+  <p>Tout ça en quelques secondes. C'est la magie d'un SaaS : tu enchaînes les services existants pour créer une expérience unique.</p>
+
+  <div class="box purple">
+    <div class="box-title">💰 Combien ça coûte</div>
+    <p>Chaque appel API a un coût. Google Places c'est ~5$ pour 1000 recherches. Hunter.io c'est ~50€/mois pour 500 emails. Claude c'est ~3$ par million de tokens. C'est pour ça que tu factures à l'utilisateur en "crédits" ou en abonnement : tu refactures les coûts API + ta marge.</p>
+  </div>
+</section>
+
+<!-- ============ CHAPITRE 8 ============ -->
+<section class="chapter" id="c8">
+  <div class="ch-num">— Chapitre 08 —</div>
+  <h2>Le scraping (récupérer des leads)</h2>
+
+  <p>Le <strong>scraping</strong> c'est l'art de récupérer automatiquement des données depuis Internet. Il y a 2 manières :</p>
+
+  <h3>Méthode 1 : Via une API officielle</h3>
+  <p>Quand un site (Google, Pappers, Hunter, etc.) <em>permet</em> aux développeurs de récupérer ses données via une API. C'est légal, propre, fiable. Mais ça coûte. C'est ce qu'Empire Leads utilise pour Google Maps, Pappers, Hunter.</p>
+
+  <h3>Méthode 2 : Le vrai scraping (parser des pages web)</h3>
+  <p>Quand un site n'offre pas d'API et que tu veux quand même ses données. Tu programmes un robot qui visite les pages comme un humain, lit le HTML, et extrait les infos. C'est plus "gris" légalement et techniquement plus fragile (si le site change son design, ton scraper casse).</p>
+  <p>Empire Leads utilise un peu de scraping fallback dans <span class="kw">services/emailFinder.js</span> : si Hunter.io trouve rien, le code visite directement le site de l'entreprise (page contact, page mentions légales) et cherche des emails dans le HTML avec des patterns regex.</p>
+
+  <div class="box">
+    <div class="box-title">⚖️ Légal ou pas ?</div>
+    <p>Récupérer des données <em>publiques</em> (un email affiché sur un site) c'est légal. Forcer une connexion, scraper des données privées, contourner des protections : c'est illégal. Empire Leads reste dans la zone légale parce qu'il utilise uniquement les APIs officielles + du scraping de pages publiques.</p>
+  </div>
+
+  <h3>Le cas spécial Google Maps</h3>
+  <p>Quand l'utilisateur cherche "plombier à Lyon", Empire Leads appelle l'API <strong>Google Places</strong>. Google renvoie une liste de fiches d'entreprises avec : nom, adresse, téléphone, site web, note et avis. Tout ce qu'il y a sur Google Maps en gros.</p>
+
+  <p>L'astuce d'Empire Leads : on combine Google Places avec un check supplémentaire <em>"a-t-il un site web ?"</em>. Si non, c'est un prospect en or pour une agence web. C'est le mode "Sans site" qui fait toute la valeur du SaaS.</p>
+</section>
+
+<!-- ============ CHAPITRE 9 ============ -->
+<section class="chapter" id="c9">
+  <div class="ch-num">— Chapitre 09 —</div>
+  <h2>L'IA (les pitchs auto)</h2>
+
+  <p>Quand l'utilisateur clique "Générer un pitch", voilà ce qui se passe :</p>
+
+  <ol style="list-style: decimal; padding-left: 24px; color: var(--text); font-size: 15px; line-height: 1.8;">
+    <li>Le backend récupère les infos du prospect (nom, niche, signaux : sans site, sans réseaux, etc.)</li>
+    <li>Il construit un <strong>prompt</strong> (= une instruction en langage naturel pour l'IA) du genre : "Tu es un commercial expert. Écris un pitch d'appel pour {nom de la boîte}, qui est {niche}. Cette boîte n'a pas de site web. Sois court, percutant, accrocheur."</li>
+    <li>Le backend envoie ce prompt à l'API d'<strong>Anthropic</strong> (Claude, l'IA d'Anthropic — la même qui te répond là maintenant)</li>
+    <li>Claude génère un texte de pitch personnalisé en quelques secondes</li>
+    <li>Le backend renvoie le texte au frontend, qui l'affiche</li>
+  </ol>
+
+  <p>C'est ça la "magie" de l'IA dans un SaaS aujourd'hui : tu prends une <strong>API d'IA générative</strong> (Anthropic, OpenAI, Google), tu lui donnes un contexte précis sur ce que tu veux, et elle te renvoie du texte de qualité en temps réel.</p>
+
+  <div class="box pink">
+    <div class="box-title">🎯 Le secret du bon pitch IA</div>
+    <p>C'est pas l'IA qui est magique, c'est le <em>prompt</em>. Un bon SaaS d'IA, c'est juste un SaaS qui a optimisé ses prompts à mort. Empire Leads adapte le prompt selon le type (appel/email/sms/dm), la niche, et les signaux du prospect. Plus le prompt est précis, plus la sortie est bonne.</p>
+  </div>
+
+  <p>Coût pour toi : quelques centimes par pitch. Tu peux facturer ça en "crédits" ou inclure dans l'abonnement.</p>
+</section>
+
+<!-- ============ CHAPITRE 10 ============ -->
+<section class="chapter" id="c10">
+  <div class="ch-num">— Chapitre 10 —</div>
+  <h2>Le bookmarklet Instagram (le hack)</h2>
+
+  <p>Le bookmarklet Instagram Finder, c'est un truc spécial. C'est un <strong>favori dans le navigateur</strong>, mais au lieu d'ouvrir un site, il <em>exécute du code JavaScript dans la page où tu es</em>.</p>
+
+  <h3>Pourquoi c'est nécessaire</h3>
+  <p>Instagram n'a pas d'API officielle gratuite pour récupérer les commentateurs/followers d'un profil. Mais quand tu navigues sur instagram.com, ton navigateur appelle des URLs internes (les "API privées" d'Instagram) pour charger les données. Le bookmarklet, en s'exécutant <em>directement dans la page Instagram</em>, peut utiliser ta session connectée pour appeler ces mêmes URLs.</p>
+
+  <p>Concrètement : tu cliques le favori, le code s'exécute dans la page Instagram, il appelle <span class="kw">https://www.instagram.com/api/v1/feed/user/USERID/</span> avec tes cookies de connexion, Instagram lui renvoie les posts, puis pour chaque post il appelle <span class="kw">/api/v1/media/POSTID/comments/</span>, récupère tous les commentateurs, dédoublonne, et affiche tout dans une overlay sur la page.</p>
+
+  <div class="box blue">
+    <div class="box-title">🤫 Pourquoi c'est brillant</div>
+    <p>Aucun mot de passe n'est volé. Aucune donnée ne passe par le serveur d'Empire Leads. Tout reste entre l'utilisateur, son navigateur et Instagram. Comme c'est l'utilisateur qui exécute lui-même le code dans <em>son propre</em> navigateur connecté, Instagram pense que c'est une activité normale (au début — jusqu'à ce qu'il détecte un volume anormal).</p>
+  </div>
+
+  <h3>Pourquoi le risque de ban</h3>
+  <p>Si tu fais 500 appels API en 30 secondes, Instagram comprend que c'est pas humain et te bloque temporairement (rate limit). C'est pour ça que le bookmarklet a un <em>anti-ban</em> : pauses entre les requêtes, throttling automatique, etc.</p>
+
+  <p>Et c'est pour ça qu'on a désactivé l'envoi automatique de DM via API : ça te ban garanti en 5 minutes.</p>
+</section>
+
+<!-- ============ CHAPITRE 11 ============ -->
+<section class="chapter" id="c11">
+  <div class="ch-num">— Chapitre 11 —</div>
+  <h2>Stripe et les paiements</h2>
+
+  <p><strong>Stripe</strong> c'est un service de paiement utilisé par 99% des SaaS modernes (et beaucoup de e-commerces). Tu connectes ton compte bancaire à Stripe, et Stripe gère pour toi : la collecte de la carte bleue, la sécurité, les abonnements récurrents, les remboursements, les factures.</p>
+
+  <p>Comment ça marche pour Empire Leads :</p>
+
+  <ol style="list-style: decimal; padding-left: 24px; color: var(--text); font-size: 15px; line-height: 1.8;">
+    <li>L'user clique "S'abonner au plan Pro" sur la page pricing</li>
+    <li>Le backend appelle l'API Stripe : "crée une session de checkout pour le plan Pro"</li>
+    <li>Stripe renvoie une URL spéciale (genre <span class="kw">checkout.stripe.com/abc123</span>)</li>
+    <li>Le user est redirigé vers cette URL hébergée par Stripe (pas par Empire Leads). Il rentre sa CB là.</li>
+    <li>Stripe prélève le paiement</li>
+    <li>Stripe envoie un <strong>webhook</strong> à Empire Leads : "le user X vient de payer, active son plan"</li>
+    <li>Empire Leads reçoit le webhook, met à jour le plan en base, l'user a accès aux features payantes</li>
+  </ol>
+
+  <h3>C'est quoi un webhook ?</h3>
+  <p>C'est l'inverse d'un appel API normal. Au lieu que <em>toi</em> tu demandes des infos à un service, c'est le service qui te <em>notifie</em> automatiquement quand un événement se produit. Stripe te notifie : "paiement réussi", "paiement échoué", "abonnement annulé", etc.</p>
+
+  <p>Côté Empire Leads, il y a un fichier <span class="kw">routes/stripeWebhook.js</span> qui écoute ces notifications. Important : on vérifie la <em>signature</em> de chaque webhook avec une clé secrète Stripe pour être sûr que c'est vraiment Stripe qui appelle (pas un hacker qui essaie de hacker pour activer un compte premium gratos).</p>
+
+  <div class="box green">
+    <div class="box-title">💳 Pourquoi pas gérer les paiements soi-même</div>
+    <p>Parce que c'est <em>extrêmement</em> compliqué et ultra réglementé (PCI DSS, RGPD, conformité bancaire, etc.). Stripe prend 1.4% + 0.25€ par transaction et fait absolument tout pour toi. Tous les SaaS sérieux passent par Stripe (ou son concurrent direct, Adyen / Paddle).</p>
+  </div>
+</section>
+
+<!-- ============ CHAPITRE 12 ============ -->
+<section class="chapter" id="c12">
+  <div class="ch-num">— Chapitre 12 —</div>
+  <h2>Vercel et le déploiement</h2>
+
+  <p>Une fois que ton code est écrit, comment ça arrive sur Internet pour que les gens puissent l'utiliser ?</p>
+
+  <p>C'est ce qu'on appelle le <strong>déploiement</strong>. Tu prends ton code (qui vit sur ton ordi à C:/i1/exemple-fix), et tu l'envoies sur un service qui va l'héberger et le rendre accessible 24/7 depuis n'importe où dans le monde.</p>
+
+  <h3>Vercel</h3>
+  <p>Vercel c'est un service d'hébergement spécialisé pour les apps web Node.js. Quand tu fais <span class="kw">npx vercel --prod --yes</span> depuis ton dossier, voilà ce qui se passe :</p>
+
+  <ol style="list-style: decimal; padding-left: 24px; color: var(--text); font-size: 15px; line-height: 1.8;">
+    <li>Vercel zippe tout ton dossier et l'upload sur ses serveurs</li>
+    <li>Vercel installe les dépendances Node.js (les bibliothèques utilisées par le projet)</li>
+    <li>Vercel déploie ton serveur sur leur infrastructure mondiale (CDN — Content Delivery Network). Ton code tourne sur des serveurs en Europe, en Amérique, en Asie, partout.</li>
+    <li>Vercel te donne une URL (<span class="kw">prospecthunter.vercel.app</span>) qui pointe vers ton serveur</li>
+    <li>Tout fonctionne en ~30 secondes</li>
+  </ol>
+
+  <p>L'avantage : tu n'as <em>aucun</em> serveur à gérer toi-même. Pas de Linux, pas de mises à jour de sécurité, pas de redémarrage. Vercel s'occupe de tout.</p>
+
+  <h3>Le DNS (le nom de domaine)</h3>
+  <p>Si tu veux que ton SaaS soit accessible sur un nom de domaine personnalisé (genre <span class="kw">empire-leads.fr</span> au lieu de <span class="kw">prospecthunter.vercel.app</span>), tu achètes le nom de domaine chez un registrar (OVH, Namecheap, Gandi), tu configures le DNS pour pointer vers Vercel, et hop : ton site est accessible sur ton domaine en 5-10 minutes.</p>
+
+  <div class="box">
+    <div class="box-title">🌐 Concept du DNS</div>
+    <p>Le DNS c'est l'<em>annuaire d'Internet</em>. Quand quelqu'un tape <span class="kw">empire-leads.fr</span>, son navigateur demande au DNS "c'est quelle adresse IP ce nom ?" Le DNS répond avec une IP genre <span class="kw">76.76.21.21</span>. Puis le navigateur va chercher le site à cette IP. C'est totalement invisible pour l'utilisateur, mais c'est la mécanique de base d'Internet.</p>
+  </div>
+</section>
+
+<!-- ============ CHAPITRE 13 ============ -->
+<section class="chapter" id="c13">
+  <div class="ch-num">— Chapitre 13 —</div>
+  <h2>Le multi-tenant (chacun sa data)</h2>
+
+  <p><strong>Multi-tenant</strong> = plusieurs locataires (= utilisateurs) qui partagent le même immeuble (= serveur + base) mais qui ont chacun leur propre appartement (= leur propre data isolée).</p>
+
+  <p>C'est la mécanique fondamentale d'un SaaS : <em>1 seul code, 1 seule base de données, mais chaque user voit seulement ses propres données</em>.</p>
+
+  <h3>Comment Empire Leads gère ça</h3>
+  <p>Toutes les tables de la base ont une colonne <span class="kw">user_id</span>. Quand un user crée un prospect, on enregistre <span class="kw">user_id = 42</span>. Quand le user demande la liste de ses prospects, le backend filtre :</p>
+  <div class="code-line">SELECT * FROM prospects WHERE user_id = 42</div>
+  <p>Comme ça, l'user 42 voit JAMAIS les prospects de l'user 17. Et inversement.</p>
+
+  <p>C'est aussi simple que ça. Et c'est la base de tous les SaaS B2B du monde.</p>
+
+  <div class="box purple">
+    <div class="box-title">🏢 L'analogie de l'immeuble</div>
+    <p>Imagine un immeuble Airbnb. Tous les locataires partagent le même bâtiment, le même ascenseur, la même connexion fibre. Mais chacun a la clé de SON appartement et ne peut pas entrer dans les autres. Le multi-tenant c'est exactement ça en version software : 1 seul backend, 1 seule database, mais chaque user a une clé qui lui donne accès uniquement à son périmètre.</p>
+  </div>
+
+  <h3>Et pour Prospecto / LBD ?</h3>
+  <p>Dans le cas des clones white-label (Prospecto, et LBD pour Luxurybrands.digital), on va plus loin : chaque client agence a sa <strong>propre base de données complètement séparée</strong> (Supabase séparé) ET son propre backend (projet Vercel séparé). C'est ce qu'on appelle du <em>multi-instance</em> au lieu du <em>multi-tenant</em>. C'est plus cher mais c'est plus rassurant pour les clients premium qui veulent leur propre univers.</p>
+</section>
+
+<!-- ============ CHAPITRE 14 ============ -->
+<section class="chapter" id="c14">
+  <div class="ch-num">— Chapitre 14 —</div>
+  <h2>La carte globale</h2>
+
+  <p>Maintenant tu as toutes les pièces. Voilà comment elles s'emboîtent :</p>
+
+  <div class="diagram">
+                    ┌──────────────────────────┐
+                    │     UTILISATEUR FINAL    │
+                    │  (Chrome / Safari / iOS) │
+                    └────────────┬─────────────┘
+                                 │
+                          HTTPS  │  (HTML/CSS/JS)
+                                 │
+                    ┌────────────▼─────────────┐
+                    │       FRONTEND           │
+                    │  index.html · app.js     │
+                    │  + Bookmarklet IG        │
+                    └────────────┬─────────────┘
+                                 │
+                          fetch  │  (JSON + JWT)
+                                 │
+                    ┌────────────▼─────────────┐
+                    │       BACKEND            │
+                    │   Node.js + Express      │
+                    │  routes/*.js · auth JWT  │
+                    └─┬──────┬──────┬───────┬──┘
+                      │      │      │       │
+              SQL  ───┘      │      │       └─── HTTPS
+                             │      │
+                    ┌────────▼──┐   │   ┌─────────────────┐
+                    │ DATABASE  │   │   │  APIs EXTERNES  │
+                    │PostgreSQL │   │   ├─────────────────┤
+                    │ (Supabase)│   │   │ Google Places   │
+                    └───────────┘   │   │ Pappers.fr      │
+                                    │   │ Hunter.io       │
+                                    │   │ Anthropic Claude│
+                                    │   │ Stripe          │
+                                    │   │ Instagram (priv)│
+                                    │   └─────────────────┘
+                                    │
+                    ┌───────────────▼─────────┐
+                    │    HÉBERGEMENT          │
+                    │       VERCEL            │
+                    │  (Europe + monde)       │
+                    └─────────────────────────┘
+  </div>
+
+  <p>C'est ça, Empire Leads. <em>Tout ça</em> a été construit pour résoudre <strong>UN seul problème</strong> : trouver des entreprises qui ont besoin d'un site web (ou de réseaux sociaux), les contacter intelligemment, et les transformer en clients. Tout le reste c'est de la plomberie technique pour servir cet objectif.</p>
+
+  <h3>Ce qui rend ton SaaS unique vs les concurrents</h3>
+  <ul>
+    <li><strong>Le filtre "sans site"</strong> qui cible les vraies opportunités d'agences web</li>
+    <li><strong>L'IA Claude</strong> intégrée pour la personnalisation</li>
+    <li><strong>Le bookmarklet Instagram</strong> qui scrap sans risque utilisateur</li>
+    <li><strong>Le pipeline CRM complet</strong> (cold call → closed) sans friction</li>
+    <li><strong>Le mode coach</strong> avec phrases motivantes pour le commercial</li>
+    <li><strong>Les extensions white-label</strong> pour vendre des plateformes brandées aux agences</li>
+  </ul>
+
+  <p>C'est la combinaison de ces 6 points qui fait qu'Empire Leads existe. Aucun concurrent ne fait exactement les 6.</p>
+
+  <div class="box">
+    <div class="box-title">🎯 Ton positionnement à apprendre par cœur</div>
+    <p>"Empire Leads est une plateforme de prospection B2B française qui combine scraping automatisé, IA générative, et un CRM intégré. On s'adresse aux indépendants et petites agences qui veulent trouver des clients dans leur ville sans payer 500€/mois pour un Apollo ou un Lemlist. On a notre propre stack tech, on possède notre infra, et on propose des plateformes white-label aux agences qui veulent leur outil maison."</p>
+  </div>
+</section>
+
+<footer>
+  📚 Manuel rédigé pour <strong>Imade</strong> · Empire Leads<br>
+  Tu peux relire cette page autant de fois que tu veux : <span class="kw">prospecthunter.vercel.app/comprendre</span><br>
+  Maintenant tu sais de quoi tu parles. À toi de closer.
+</footer>
+
+</div>
+</body>
+</html>

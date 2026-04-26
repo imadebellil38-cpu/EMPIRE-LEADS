@@ -53,6 +53,14 @@
       </div>
     </div>
 
+    <!-- ── BI Overview (MAU, conversion, acquisition) ── -->
+    <div class="card" id="bi-card" style="margin-bottom:18px">
+      <div class="card-title">📊 BI Overview — Activité, conversion, acquisition</div>
+      <div id="bi-body" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px">
+        <div style="color:var(--muted);grid-column:1/-1">Chargement…</div>
+      </div>
+    </div>
+
     <!-- ── Create Account ── -->
     <div class="card">
       <div class="card-title">+ Creer un compte</div>
@@ -75,18 +83,15 @@
           <div class="form-group">
             <label>Plan</label>
             <select id="new-plan">
-              <option value="free">Free (5 cr.)</option>
-              <option value="trial">Trial (20 cr.)</option>
-              <option value="starter">Starter (100 cr.)</option>
-              <option value="pro" selected>Pro (500 cr.)</option>
-              <option value="business">Business (2000 cr.)</option>
-              <option value="legend">Legend (3000 cr.)</option>
-              <option value="enterprise">Enterprise (500 cr.)</option>
+              <option value="free">Free (0 cr.)</option>
+              <option value="pro" selected>Pro (1000 cr.)</option>
+              <option value="business">Business (3000 cr.)</option>
+              <option value="legend">Legend (5000 cr.)</option>
             </select>
           </div>
           <div class="form-group">
             <label>Credits</label>
-            <input type="number" id="new-credits" value="500" min="0">
+            <input type="number" id="new-credits" value="1000" min="0">
           </div>
           <div class="form-group">
             <label>Theme URL</label>
@@ -105,6 +110,18 @@
         </div>
         <div id="create-msg" class="create-msg"></div>
       </div>
+    </div>
+
+    <!-- ── Actions danger ── -->
+    <div class="card" style="border:1.5px solid #ff4444">
+      <div class="card-title" style="color:#ff6666">⚠️ Actions globales</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+        <button onclick="bulkResetCredits()" style="padding:10px 20px;background:linear-gradient(135deg,#ff4444,#cc0000);border:none;color:#fff;border-radius:10px;font-weight:800;font-size:.9rem;cursor:pointer">
+          🔄 Remettre TOUS les crédits à 0 (plan Free)
+        </button>
+        <span style="color:#9090a8;font-size:.8rem">Tous les comptes non-admin passent à Free, 0 crédit. Irréversible.</span>
+      </div>
+      <div id="bulk-reset-msg" style="margin-top:8px;font-size:.85rem"></div>
     </div>
 
     <!-- ── User Management Table ── -->
@@ -190,13 +207,14 @@
   <script src="/admin.js"></script>
   <script>
   (function(){
-    var token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
+    var token = localStorage.getItem('ph_token') || localStorage.getItem('token') || sessionStorage.getItem('token') || '';
 
     // Charger les logs d'accès
     fetch('/api/admin/extensions-log', { headers: { Authorization: 'Bearer ' + token } })
       .then(function(r){ return r.json(); })
       .then(function(logs){
         var body = document.getElementById('ext-log-body');
+        if (!Array.isArray(logs)) { body.innerHTML = '<tr><td colspan="5" style="color:#ff4444">Erreur: ' + (logs.error || 'réponse invalide') + '</td></tr>'; return; }
         if (!logs.length) { body.innerHTML = '<tr><td colspan="5" style="color:#5a5a70;padding:12px">Aucun accès enregistré</td></tr>'; return; }
         body.innerHTML = logs.map(function(l){
           var d = new Date(l.created_at).toLocaleString('fr-FR');
@@ -210,6 +228,7 @@
       .then(function(r){ return r.json(); })
       .then(function(users){
         var container = document.getElementById('ext-keys-list');
+        if (!Array.isArray(users)) { container.textContent = 'Erreur: ' + (users.error || 'réponse invalide'); return; }
         container.innerHTML = users.map(function(u){
           return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">'
             + '<span style="flex:1;min-width:140px;color:#e0e0f0;font-size:13px">' + (u.email||'') + '</span>'

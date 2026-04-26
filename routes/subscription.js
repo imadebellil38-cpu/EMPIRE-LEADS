@@ -4,9 +4,10 @@ const db = require('../db');
 const router = Router();
 
 const PLANS = {
-  free:       { credits: 5,   price: 0  },
-  pro:        { credits: 100, price: 29 },
-  enterprise: { credits: 500, price: 79 },
+  free:     { credits: 5,    price: 0   },
+  pro:      { credits: 1000, price: 349 },
+  business: { credits: 3000, price: 549 },
+  legend:   { credits: 5000, price: 849 },
 };
 
 // GET /api/subscription/plans — list available plans

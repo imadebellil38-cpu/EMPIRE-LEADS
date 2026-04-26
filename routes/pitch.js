@@ -480,9 +480,9 @@ ${listP2}`;
     const totalFound = results.filter(r => r.owner_name).length;
     const creditsUsed = totalFound > 0 ? 3 : 0;
     if (creditsUsed > 0) {
-      // Atomic deduction with guard: never go below 0
+      // Atomic deduction: never go below 0
       await db.run(
-        'UPDATE users SET credits = GREATEST(credits - 3, 0) WHERE id = ? AND credits >= 3',
+        'UPDATE users SET credits = GREATEST(credits - 3, 0) WHERE id = ?',
         [req.user.id]
       );
     }

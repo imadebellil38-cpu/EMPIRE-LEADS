@@ -288,8 +288,13 @@ router.delete('/:id', async (req, res) => {
   if (isNaN(id) || id <= 0) return res.status(400).json({ error: 'ID invalide.' });
 
   try {
-    const prospect = await db.get('SELECT id FROM prospects WHERE id = ? AND user_id = ?', [id, req.user.id]);
+    const prospect = await db.get('SELECT id, phone, name, address FROM prospects WHERE id = ? AND user_id = ?', [id, req.user.id]);
     if (!prospect) return res.status(404).json({ error: 'Prospect introuvable.' });
+
+    // Save dedup keys so this prospect won't reappear in future searches
+    const nameKey = (prospect.name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+    const addrKey = (prospect.address || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '').slice(0, 40);
+    await db.run('INSERT INTO deleted_prospects (user_id, phone, name_key, addr_key) VALUES (?, ?, ?, ?)', [req.user.id, prospect.phone || null, nameKey || null, addrKey || null]);
 
     await db.run('DELETE FROM prospects WHERE id = ?', [id]);
     res.json({ ok: true });
@@ -319,7 +324,7 @@ router.put('/bulk/status', async (req, res) => {
 
 // PUT /api/prospects/:id/stage — move prospect to a new pipeline stage
 router.put('/:id/stage', async (req, res) => {
-  const { stage, objection, meeting_date, rappel, notes, deal_type, deal_date, deal_recurrence, deal_value } = req.body;
+  const { stage, objection, meeting_date, rappel, notes, deal_type, deal_date, deal_recurrence, deal_value, recall_type } = req.body;
 
   const id = parseInt(req.params.id, 10);
   if (isNaN(id) || id <= 0) return res.status(400).json({ error: 'ID invalide.' });
@@ -354,6 +359,14 @@ router.put('/:id/stage', async (req, res) => {
     }
     if (stage === 'to_recall' && rappel) {
       await db.run('UPDATE prospects SET rappel = ? WHERE id = ?', [String(rappel).trim().substring(0, 100), id]);
+    }
+    // Set or clear recall_type when moving to/from to_recall
+    if (stage === 'to_recall') {
+      const VALID_RECALL_TYPES = ['interested', 'no_time'];
+      const rt = VALID_RECALL_TYPES.includes(recall_type) ? recall_type : 'interested';
+      try { await db.run('UPDATE prospects SET recall_type = ? WHERE id = ?', [rt, id]); } catch (_) {}
+    } else {
+      try { await db.run('UPDATE prospects SET recall_type = NULL WHERE id = ?', [id]); } catch (_) {}
     }
     if ((stage === 'meeting_to_set' || stage === 'meeting_confirmed') && meeting_date) {
       await db.run('UPDATE prospects SET meeting_date = ? WHERE id = ?', [String(meeting_date).trim().substring(0, 50), id]);
@@ -391,6 +404,74 @@ router.post('/:id/find-email', async (req, res) => {
     return res.json({ ok: true, found: false, suggestions: result.suggestions, error: result.error });
   } catch (err) {
     return res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/prospects/:id/enrich — enrich with Pappers data (PRO feature)
+router.post('/:id/enrich', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id) || id <= 0) return res.status(400).json({ error: 'ID invalide.' });
+
+  try {
+    // Check PRO plan
+    const user = await db.get('SELECT plan FROM users WHERE id = ?', [req.user.id]);
+    if (!user || (user.plan !== 'pro' && user.plan !== 'admin')) {
+      return res.status(403).json({ error: 'Fonctionnalité PRO. Passez au plan PRO pour enrichir vos prospects.', upgrade: true });
+    }
+
+    const prospect = await db.get('SELECT id, name, city FROM prospects WHERE id = ? AND user_id = ?', [id, req.user.id]);
+    if (!prospect) return res.status(404).json({ error: 'Prospect introuvable.' });
+
+    const { enrichCompany, calcProspectScore } = require('../services/pappers');
+    const data = await enrichCompany(prospect.name, prospect.city);
+    if (!data) return res.json({ ok: true, found: false, message: 'Aucune entreprise trouvée sur Pappers.' });
+
+    // Build LinkedIn search URL — direct LinkedIn (pas Google)
+    const dirigeantName = `${data.dirigeant_prenom} ${data.dirigeant_nom}`.trim();
+    let linkedinUrl = '';
+    if (dirigeantName) {
+      linkedinUrl = `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(dirigeantName + ' ' + prospect.name)}&origin=GLOBAL_SEARCH_HEADER`;
+    } else {
+      linkedinUrl = `https://www.linkedin.com/search/results/companies/?keywords=${encodeURIComponent(prospect.name)}&origin=GLOBAL_SEARCH_HEADER`;
+    }
+
+    // Calculate score
+    const scoreData = { ...prospect, ...data, linkedin_url: linkedinUrl };
+    const score = calcProspectScore(scoreData);
+
+    // Update DB
+    await db.run(`UPDATE prospects SET
+      siren = ?, dirigeant_nom = ?, dirigeant_prenom = ?, dirigeant_role = ?,
+      effectif = ?, chiffre_affaires = ?, secteur_naf = ?, phone_pappers = ?,
+      linkedin_url = ?, score = ?, enriched_at = NOW(),
+      owner_name = COALESCE(NULLIF(owner_name, ''), ?)
+      WHERE id = ? AND user_id = ?`,
+      [data.siren, data.dirigeant_nom, data.dirigeant_prenom, data.dirigeant_role,
+       data.effectif, data.chiffre_affaires, data.secteur_naf, data.phone_pappers,
+       linkedinUrl, score, dirigeantName, id, req.user.id]);
+
+    // If Pappers found a website and prospect doesn't have one, update it
+    if (data.site_web) {
+      await db.run('UPDATE prospects SET website_url = COALESCE(NULLIF(website_url, \'\'), ?) WHERE id = ? AND user_id = ?',
+        [data.site_web, id, req.user.id]);
+    }
+
+    res.json({
+      ok: true, found: true,
+      data: { ...data, linkedin_url: linkedinUrl, score },
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/user/plan — get current user plan
+router.get('/user-plan', async (req, res) => {
+  try {
+    const user = await db.get('SELECT plan FROM users WHERE id = ?', [req.user.id]);
+    res.json({ plan: user?.plan || 'free' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -447,6 +528,27 @@ router.post('/:id/attempts', async (req, res) => {
     const r = await db.insert('INSERT INTO call_attempts (prospect_id, user_id, attempt_type, result, note, audio_data, audio_duration) VALUES (?,?,?,?,?,?,?)',
       [id, req.user.id, attempt_type, result, cleanNote, cleanAudio, cleanDuration]);
     res.json({ ok: true, id: r.lastInsertRowid });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PATCH /api/prospects/:id/attempts/:attemptId — update the note of an existing attempt
+router.patch('/:id/attempts/:attemptId', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const attemptId = parseInt(req.params.attemptId, 10);
+  if (isNaN(id) || id <= 0 || isNaN(attemptId) || attemptId <= 0) {
+    return res.status(400).json({ error: 'ID invalide.' });
+  }
+  try {
+    const prospect = await db.get('SELECT id FROM prospects WHERE id = ? AND user_id = ?', [id, req.user.id]);
+    if (!prospect) return res.status(404).json({ error: 'Prospect introuvable.' });
+    const attempt = await db.get('SELECT id FROM call_attempts WHERE id = ? AND prospect_id = ? AND user_id = ?', [attemptId, id, req.user.id]);
+    if (!attempt) return res.status(404).json({ error: 'Tentative introuvable.' });
+    const { note } = req.body;
+    const cleanNote = typeof note === 'string' ? note.trim().substring(0, 500) : '';
+    await db.run('UPDATE call_attempts SET note = ? WHERE id = ?', [cleanNote, attemptId]);
+    res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -517,6 +619,28 @@ router.delete('/bulk', async (req, res) => {
   const validIds = ids.filter(id => typeof id === 'number' && id > 0).slice(0, 500);
 
   try {
+    // Save dedup keys before deleting so these prospects won't reappear in future searches
+    const toDelete = await db.pool.query(
+      `SELECT phone, name, address FROM prospects WHERE id = ANY($1::int[]) AND user_id = $2`,
+      [validIds, req.user.id]
+    );
+    if (toDelete.rows.length > 0) {
+      const values = [];
+      const placeholders = [];
+      let idx = 1;
+      for (const p of toDelete.rows) {
+        const nameKey = (p.name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+        const addrKey = (p.address || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '').slice(0, 40);
+        placeholders.push(`($${idx}, $${idx+1}, $${idx+2}, $${idx+3})`);
+        values.push(req.user.id, p.phone || null, nameKey || null, addrKey || null);
+        idx += 4;
+      }
+      await db.pool.query(
+        `INSERT INTO deleted_prospects (user_id, phone, name_key, addr_key) VALUES ${placeholders.join(', ')}`,
+        values
+      );
+    }
+
     const r = await db.pool.query(
       `DELETE FROM prospects WHERE id = ANY($1::int[]) AND user_id = $2`,
       [validIds, req.user.id]

@@ -99,11 +99,12 @@ header {
 }
 .logo-text {
   font-size: 1.05rem; font-weight: 900; letter-spacing: 1px;
-  color: #fff;
+  color: var(--text1);
   font-family: 'Arial Black', 'Segoe UI Black', sans-serif;
   text-transform: uppercase;
   display: flex; flex-direction: column; line-height: 1; gap: 2px;
 }
+html[data-theme="dark"] .logo-text { color: #fff; }
 .logo-text em {
   font-style: normal;
   color: var(--accent);
@@ -814,8 +815,9 @@ main {
 }
 .geo-slider-row .slider-input { flex: 1; margin: 0; }
 .geo-km-val {
-  font-size: 1.05rem; font-weight: 900; color: #fff;
-  white-space: nowrap; min-width: 3.8rem; text-align: right;
+  font-size: 1.05rem; font-weight: 900; color: var(--primary, #00c853);
+  white-space: nowrap; min-width: 4.5rem; text-align: right;
+  background: var(--bg2, #f0f0f0); padding: 4px 10px; border-radius: 8px;
 }
 
 /* Big launch button */
@@ -1232,6 +1234,91 @@ main {
 }
 @media (hover: hover) { .act-btn-refuse:hover { background: var(--red); color: #fff; border-color: var(--red); } }
 
+/* === Section headers (used in À rappeler split view) === */
+.cards-section-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .9rem 1rem;
+  margin: .8rem 0 .35rem;
+  background: linear-gradient(90deg, rgba(255,107,0,.10), rgba(255,107,0,0));
+  border-left: 3px solid var(--orange, #FF6B00);
+  border-radius: 8px;
+  font-size: .88rem;
+  font-weight: 800;
+  color: var(--text, #e8e8f0);
+  letter-spacing: .02em;
+}
+.cards-section-count {
+  background: rgba(255,107,0,.18);
+  color: var(--orange, #FF6B00);
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 800;
+}
+.tbl-section-header td {
+  background: linear-gradient(90deg, rgba(255,107,0,.08), rgba(255,107,0,0)) !important;
+  border-left: 3px solid var(--orange, #FF6B00);
+  padding: .85rem 1rem !important;
+}
+.tbl-section-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: .9rem;
+  font-weight: 800;
+  color: var(--text, #e8e8f0);
+}
+.tbl-section-count {
+  background: rgba(255,107,0,.18);
+  color: var(--orange, #FF6B00);
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 800;
+}
+
+/* === Edit note button on attempts === */
+.attempt-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.attempt-edit-btn {
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.10);
+  color: var(--muted, #888aaa);
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .15s;
+}
+.attempt-edit-btn:hover {
+  background: rgba(255,107,0,.15);
+  border-color: rgba(255,107,0,.35);
+  color: var(--orange, #FF6B00);
+  transform: scale(1.05);
+}
+.attempt-info-top { margin-bottom: 4px; }
+.attempt-note-line {
+  font-size: .82rem;
+  color: var(--muted, #888aaa);
+  line-height: 1.35;
+  margin-top: 2px;
+}
+.attempt-note-line em { font-style: italic; }
+.attempt-note-empty em { opacity: .5; }
+
 .act-btn-restore {
   background: var(--border); border-color: var(--border2);
   color: var(--text2); font-size: .72rem;
@@ -1402,7 +1489,14 @@ tbody tr[data-stage="refused"]           { border-left: 3px solid var(--stage-re
   white-space: nowrap; vertical-align: middle;
   padding-left: 1rem !important; position: relative;
 }
-.td-phone .btn-fiche { display: block; margin-top: .4rem; }
+.td-phone .btn-fiche { display: block; margin-top: .4rem; text-decoration: none; }
+.btn-fiche-google {
+  background: #fff; color: #1a1a2e; border-color: #4ade80;
+}
+.btn-fiche-google:hover {
+  background: #e0ffe0; color: #1a1a2e;
+  border-color: #22c55e;
+}
 
 .phone-cell { display: flex; align-items: center; gap: .4rem; }
 .phone-text { font-size: .82rem; color: var(--text2); font-variant-numeric: tabular-nums; }
@@ -2547,6 +2641,13 @@ button.card-call-btn-mobile { cursor: pointer; font-family: inherit; }
 }
 @media (hover: hover) {
   .card-link-btn:hover { background: rgba(255,255,255,.12); color: var(--text); }
+}
+
+.card-fiche-btn {
+  background: #fff; color: #1a1a2e; border-color: #4ade80;
+}
+@media (hover: hover) {
+  .card-fiche-btn:hover { background: #e0ffe0 !important; color: #1a1a2e !important; }
 }
 
 /* ── DEAL MODAL ── */

@@ -498,21 +498,14 @@ td{padding:10px 14px;font-size:14px;vertical-align:middle}
 </div><!-- /container -->
 
 <script>
-// ── Load full bookmarklet code from server ──
-var FULL_BOOKMARKLET_CODE = '';
-
-fetch('/ig-finder.js')
-  .then(function(r){ return r.text(); })
-  .then(function(code){
-    FULL_BOOKMARKLET_CODE = 'javascript:' + encodeURIComponent(code);
-    // Set drag button href
-    var bm = document.getElementById('bm-link');
-    if(bm) bm.href = FULL_BOOKMARKLET_CODE;
-    // Fill the visible textarea so user can manually copy
-    var box = document.getElementById('igf-code-box');
-    if(box) box.value = FULL_BOOKMARKLET_CODE;
-  })
-  .catch(function(e){ console.error('Failed to load ig-finder.js', e); });
+// ── Bookmarklet injecté server-side (évite les soucis de CSP/CORS) ──
+var FULL_BOOKMARKLET_CODE = "__IG_FINDER_BOOKMARKLET__";
+(function(){
+  var bm = document.getElementById('bm-link');
+  if(bm) bm.href = FULL_BOOKMARKLET_CODE;
+  var box = document.getElementById('igf-code-box');
+  if(box) box.value = FULL_BOOKMARKLET_CODE;
+})();
 
 // ── Copy to clipboard ──
 function copyBookmarklet(){

@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Luxury Brands Digital — Intelligence Platform</title>
+<meta name="description" content="An intelligence platform for premium B2B prospection · Brand Experience × Digital Ecosystem" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@200;300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --black: #000000;
+  --black-2: #0a0a0a;
+  --black-3: #141414;
+  --grey-1: #1a1a1a;
+  --grey-2: #2a2a2a;
+  --grey-3: #4a4a4a;
+  --grey-4: #888888;
+  --grey-5: #aaaaaa;
+  --grey-6: #e0e0e0;
+  --white: #ffffff;
+  --off-white: #f4f4f4;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--black);
+  color: var(--white);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ============ HEADER ============ */
+.header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 26px 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.brand-mark {
+  width: 38px; height: 38px;
+  background:
+    repeating-linear-gradient(45deg, #fff 0 3px, #000 3px 6px),
+    repeating-linear-gradient(-45deg, #fff 0 3px, #000 3px 6px);
+  background-blend-mode: difference;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.brand-text {
+  font-family: 'Montserrat', sans-serif;
+  line-height: 1;
+}
+.brand-text .l1 {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--white);
+}
+.brand-text .l2 {
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 0.32em;
+  color: var(--grey-5);
+  margin-top: 4px;
+}
+nav.topnav {
+  display: flex;
+  align-items: center;
+  gap: 42px;
+}
+nav.topnav a {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  color: var(--grey-5);
+  text-decoration: none;
+  transition: color 0.2s;
+  text-transform: uppercase;
+}
+nav.topnav a:hover { color: var(--white); }
+nav.topnav a.active { color: var(--white); }
+.cta-btn {
+  padding: 13px 26px;
+  background: var(--white);
+  color: var(--black);
+  border: none;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.25s ease;
+}
+.cta-btn:hover {
+  background: var(--black);
+  color: var(--white);
+  box-shadow: inset 0 0 0 1px var(--white);
+}
+.cta-btn.outline {
+  background: transparent;
+  color: var(--white);
+  box-shadow: inset 0 0 0 1px var(--white);
+}
+.cta-btn.outline:hover {
+  background: var(--white);
+  color: var(--black);
+}
+
+/* ============ HERO ============ */
+.hero {
+  min-height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 140px 56px 80px;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at top left, rgba(255,255,255,0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(255,255,255,0.04) 0%, transparent 50%),
+    linear-gradient(180deg, #000 0%, #0a0a0a 100%);
+  z-index: 0;
+}
+.hero-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+}
+.hero-content {
+  position: relative;
+  z-index: 1;
+  max-width: 1280px;
+  width: 100%;
+  text-align: center;
+}
+.tagline {
+  display: inline-block;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.4em;
+  color: var(--grey-5);
+  text-transform: uppercase;
+  padding: 8px 20px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 999px;
+  margin-bottom: 38px;
+}
+.hero h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(48px, 9vw, 132px);
+  font-weight: 200;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+  color: var(--white);
+}
+.hero h1 .strong {
+  display: block;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.hero h1 .light {
+  display: block;
+  font-weight: 200;
+  font-size: 0.32em;
+  letter-spacing: 0.5em;
+  color: var(--grey-5);
+  margin-top: 22px;
+  text-transform: uppercase;
+}
+.hero-divider {
+  width: 60px;
+  height: 1px;
+  background: var(--white);
+  margin: 38px auto;
+}
+.hero-sub {
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(14px, 1.5vw, 17px);
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  color: var(--grey-5);
+  text-transform: uppercase;
+  max-width: 640px;
+  margin: 0 auto 46px;
+  line-height: 1.7;
+}
+.hero-sub strong {
+  color: var(--white);
+  font-weight: 500;
+}
+.hero-cta {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 80px;
+}
+.hero-cta .cta-btn { padding: 17px 38px; font-size: 12px; }
+
+/* Stats inline */
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 80px;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
+.h-stat {
+  text-align: center;
+}
+.h-stat .num {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 38px;
+  font-weight: 200;
+  color: var(--white);
+  letter-spacing: 0.02em;
+}
+.h-stat .lab {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  color: var(--grey-5);
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+
+/* Scroll indicator */
+.scroll-down {
+  position: absolute;
+  bottom: 36px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  color: var(--grey-5);
+  text-transform: uppercase;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.scroll-down::after {
+  content: '';
+  width: 1px;
+  height: 36px;
+  background: linear-gradient(180deg, var(--grey-5), transparent);
+  animation: scrollPulse 2s ease-in-out infinite;
+}
+@keyframes scrollPulse {
+  0%, 100% { transform: scaleY(1); opacity: 0.5; }
+  50%      { transform: scaleY(1.4); opacity: 1; }
+}
+
+/* ============ SECTION TITLES ============ */
+.section {
+  padding: 120px 56px;
+  position: relative;
+}
+.section-light { background: var(--off-white); color: var(--black); }
+.section-light .s-eyebrow { color: var(--grey-3); }
+.section-light .s-title { color: var(--black); }
+.section-light .s-desc { color: var(--grey-3); }
+.s-head {
+  max-width: 1280px;
+  margin: 0 auto 70px;
+  text-align: center;
+}
+.s-eyebrow {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.4em;
+  color: var(--grey-4);
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.s-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(34px, 5vw, 56px);
+  font-weight: 200;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--white);
+  margin-bottom: 22px;
+}
+.s-title strong {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.s-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--grey-5);
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+/* ============ FEATURES (3 col) ============ */
+.features {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.feat {
+  padding: 56px 44px;
+  border-right: 1px solid rgba(255,255,255,0.08);
+  position: relative;
+  transition: background 0.3s;
+}
+.feat:last-child { border-right: none; }
+.feat:hover { background: rgba(255,255,255,0.02); }
+.feat-num {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  color: var(--grey-4);
+  margin-bottom: 24px;
+  text-transform: uppercase;
+}
+.feat-icon {
+  width: 52px; height: 52px;
+  margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 2px;
+  font-size: 24px;
+  filter: grayscale(1) brightness(1.5);
+}
+.feat-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--white);
+  margin-bottom: 14px;
+  text-transform: uppercase;
+}
+.feat-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.7;
+  color: var(--grey-5);
+}
+.feat-list {
+  list-style: none;
+  margin-top: 22px;
+}
+.feat-list li {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: var(--grey-5);
+  padding: 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.feat-list li::before {
+  content: '';
+  width: 14px; height: 1px;
+  background: var(--white);
+  flex-shrink: 0;
+}
+
+/* ============ NUMBERS / STATS BAND ============ */
+.stats-band {
+  background: var(--white);
+  color: var(--black);
+  padding: 90px 56px;
+  border-top: 1px solid rgba(0,0,0,0.05);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.stats-grid {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: rgba(0,0,0,0.08);
+}
+.stat-cell {
+  background: var(--white);
+  padding: 36px 26px;
+  text-align: center;
+}
+.stat-cell .n {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 56px;
+  font-weight: 200;
+  line-height: 1;
+  color: var(--black);
+  letter-spacing: -0.02em;
+}
+.stat-cell .l {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  color: var(--grey-3);
+  text-transform: uppercase;
+  margin-top: 12px;
+}
+
+/* ============ PROCESS ============ */
+.process {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.process-step {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 50px;
+  padding: 44px 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  align-items: start;
+}
+.process-step:last-child { border-bottom: 1px solid rgba(255,255,255,0.08); }
+.process-num {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 56px;
+  font-weight: 200;
+  color: var(--white);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.process-info h3 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 14px;
+}
+.process-info p {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--grey-5);
+  max-width: 620px;
+}
+
+/* ============ DASHBOARD MOCKUP ============ */
+.preview-section {
+  padding: 120px 56px;
+  background: linear-gradient(180deg, #000 0%, #0a0a0a 100%);
+}
+.preview-frame {
+  max-width: 1280px;
+  margin: 60px auto 0;
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--black-2);
+  box-shadow: 0 60px 120px rgba(0,0,0,0.6);
+}
+.preview-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 20px;
+  background: var(--grey-1);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.preview-bar .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--grey-3); }
+.preview-bar .url {
+  flex: 1;
+  text-align: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 11px;
+  color: var(--grey-5);
+  letter-spacing: 0.1em;
+}
+.preview-body {
+  padding: 36px;
+  min-height: 360px;
+  background:
+    linear-gradient(180deg, #0c0c0c 0%, #050505 100%);
+}
+.dash-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 24px;
+}
+.dash-top .t {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--white);
+  text-transform: uppercase;
+}
+.dash-pills {
+  display: flex;
+  gap: 6px;
+}
+.dash-pills span {
+  padding: 6px 13px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 2px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--grey-5);
+  text-transform: uppercase;
+}
+.dash-pills span.on { background: var(--white); color: var(--black); border-color: var(--white); }
+.dash-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: rgba(255,255,255,0.08);
+  margin-bottom: 22px;
+}
+.dash-stats .ds {
+  background: var(--black-2);
+  padding: 22px 18px;
+}
+.dash-stats .ds .n {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 28px;
+  font-weight: 200;
+  color: var(--white);
+}
+.dash-stats .ds .l {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  color: var(--grey-5);
+  text-transform: uppercase;
+  margin-top: 5px;
+}
+.dash-rows .dr {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 18px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  align-items: center;
+}
+.dash-rows .dr:last-child { border-bottom: none; }
+.dash-rows .dr .name {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--white);
+  letter-spacing: 0.04em;
+}
+.dash-rows .dr .name span { color: var(--grey-5); font-weight: 400; margin-left: 8px; font-size: 11px; }
+.dash-rows .dr .meta {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  color: var(--grey-5);
+  letter-spacing: 0.08em;
+}
+.dash-rows .dr .status {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border: 1px solid;
+}
+.status.todo { color: var(--grey-5); border-color: rgba(255,255,255,0.18); }
+.status.contacted { color: var(--white); border-color: var(--white); }
+.status.rdv { color: var(--white); border-color: var(--white); background: var(--grey-2); }
+
+/* ============ CTA SECTION ============ */
+.cta-section {
+  padding: 130px 56px;
+  background: var(--black);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cta-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(255,255,255,0.04) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(255,255,255,0.04) 0%, transparent 50%);
+}
+.cta-content { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
+.cta-content h2 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(34px, 5vw, 60px);
+  font-weight: 200;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin-bottom: 26px;
+}
+.cta-content h2 strong { font-weight: 700; }
+.cta-content p {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  color: var(--grey-5);
+  text-transform: uppercase;
+  margin-bottom: 44px;
+}
+
+/* ============ FOOTER ============ */
+.footer {
+  background: var(--black);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 56px 56px 36px;
+}
+.footer-grid {
+  max-width: 1280px;
+  margin: 0 auto 40px;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 60px;
+}
+.footer-brand .brand-text .l1 { font-size: 16px; }
+.footer-brand p {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: var(--grey-5);
+  line-height: 1.7;
+  margin-top: 18px;
+  max-width: 320px;
+}
+.footer-col h4 {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--white);
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+.footer-col a {
+  display: block;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: var(--grey-5);
+  text-decoration: none;
+  padding: 4px 0;
+  transition: color 0.2s;
+}
+.footer-col a:hover { color: var(--white); }
+.footer-bot {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-top: 30px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  color: var(--grey-4);
+  text-transform: uppercase;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width: 980px) {
+  .header { padding: 18px 22px; }
+  nav.topnav { display: none; }
+  .hero { padding: 120px 22px 60px; }
+  .section { padding: 80px 22px; }
+  .features { grid-template-columns: 1fr; }
+  .feat { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .feat:last-child { border-bottom: none; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .dash-stats { grid-template-columns: repeat(2, 1fr); }
+  .footer-grid { grid-template-columns: 1fr; gap: 36px; }
+  .process-step { grid-template-columns: 1fr; gap: 16px; }
+  .preview-section { padding: 80px 22px; }
+  .preview-body { padding: 22px; }
+  .stats-band { padding: 60px 22px; }
+  .cta-section { padding: 90px 22px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="header">
+  <div class="brand">
+    <div class="brand-mark"></div>
+    <div class="brand-text">
+      <div class="l1">LUXURY BRANDS</div>
+      <div class="l2">DIGITAL · INTELLIGENCE</div>
+    </div>
+  </div>
+  <nav class="topnav">
+    <a href="#platform" class="active">Platform</a>
+    <a href="#features">Intelligence</a>
+    <a href="#process">Process</a>
+    <a href="#contact">Contact</a>
+  </nav>
+  <a href="/lbd/app" class="cta-btn">Access Platform →</a>
+</header>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-content">
+    <div class="tagline">Brand Experience × Digital Ecosystem</div>
+    <h1>
+      <span class="strong">INTELLIGENCE</span>
+      <span class="light">A Premium B2B Prospection Platform</span>
+    </h1>
+    <div class="hero-divider"></div>
+    <p class="hero-sub">
+      An <strong>exclusive intelligence platform</strong> built for Luxury Brands Digital.<br>
+      Curated leads, AI-driven outreach, and a complete pipeline for your highest-value clients.
+    </p>
+    <div class="hero-cta">
+      <a href="/lbd/app" class="cta-btn">Access the Platform →</a>
+      <a href="#features" class="cta-btn outline">Discover the Features</a>
+    </div>
+    <div class="hero-stats">
+      <div class="h-stat">
+        <div class="num">1 000+</div>
+        <div class="lab">Leads / month</div>
+      </div>
+      <div class="h-stat">
+        <div class="num">150+</div>
+        <div class="lab">Premium sectors</div>
+      </div>
+      <div class="h-stat">
+        <div class="num">FR · CH · MC</div>
+        <div class="lab">Coverage</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-down">SCROLL</div>
+</section>
+
+<!-- ===== FEATURES ===== -->
+<section class="section" id="features">
+  <div class="s-head">
+    <div class="s-eyebrow">— The Ecosystem —</div>
+    <h2 class="s-title">A unique platform for<br><strong>premium prospection</strong></h2>
+    <p class="s-desc">
+      Three integrated modules to transform any sector into a curated client portfolio.
+      Built around the Luxury Brands Digital signature method.
+    </p>
+  </div>
+  <div class="features">
+    <div class="feat">
+      <div class="feat-num">— 01 / Studio —</div>
+      <div class="feat-icon">◆</div>
+      <h3 class="feat-title">Intelligence</h3>
+      <p class="feat-desc">
+        Discover and qualify high-value B2B leads across innovation, luxury, and creative sectors.
+      </p>
+      <ul class="feat-list">
+        <li>Curated databases (FR · CH · MC)</li>
+        <li>NAF / sector / size filters</li>
+        <li>Company profiles + decision-makers</li>
+        <li>Verified emails &amp; phone numbers</li>
+      </ul>
+    </div>
+    <div class="feat">
+      <div class="feat-num">— 02 / Brand Experience —</div>
+      <div class="feat-icon">◇</div>
+      <h3 class="feat-title">Engagement</h3>
+      <p class="feat-desc">
+        Personalized AI outreach across email, SMS, and LinkedIn — written in your brand voice.
+      </p>
+      <ul class="feat-list">
+        <li>AI pitch generation</li>
+        <li>Multi-channel sequences</li>
+        <li>Voice notes &amp; call recorder</li>
+        <li>Templated personalization</li>
+      </ul>
+    </div>
+    <div class="feat">
+      <div class="feat-num">— 03 / Digital Ecosystem —</div>
+      <div class="feat-icon">◈</div>
+      <h3 class="feat-title">Conversion</h3>
+      <p class="feat-desc">
+        A complete pipeline from cold lead to signed deal — designed for premium accounts.
+      </p>
+      <ul class="feat-list">
+        <li>7-stage pipeline (Cold → Closed)</li>
+        <li>Meetings &amp; reminders</li>
+        <li>Quote builder + e-signature</li>
+        <li>Real-time analytics</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STATS BAND ===== -->
+<section class="stats-band">
+  <div class="stats-grid">
+    <div class="stat-cell">
+      <div class="n">1 000+</div>
+      <div class="l">Leads / Month</div>
+    </div>
+    <div class="stat-cell">
+      <div class="n">15</div>
+      <div class="l">Premium Sectors</div>
+    </div>
+    <div class="stat-cell">
+      <div class="n">3</div>
+      <div class="l">Countries Covered</div>
+    </div>
+    <div class="stat-cell">
+      <div class="n">100%</div>
+      <div class="l">Verified Sources</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PROCESS ===== -->
+<section class="section" id="process">
+  <div class="s-head">
+    <div class="s-eyebrow">— Method —</div>
+    <h2 class="s-title">A signature<br><strong>4-step process</strong></h2>
+    <p class="s-desc">
+      Agility, interactivity, transparency. The same values that define Luxury Brands Digital
+      now applied to your prospection workflow.
+    </p>
+  </div>
+  <div class="process">
+    <div class="process-step">
+      <div class="process-num">01</div>
+      <div class="process-info">
+        <h3>Define your portfolio</h3>
+        <p>Tell us your client profile — sectors, geographies, deal size, decision-maker level. We
+          design a custom acquisition map dedicated to your brand.</p>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="process-num">02</div>
+      <div class="process-info">
+        <h3>Receive curated leads</h3>
+        <p>Each month, the platform delivers 500 to 1 000 fresh, verified, high-fit leads
+          straight to your dashboard. Filter, sort, prioritize in real time.</p>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="process-num">03</div>
+      <div class="process-info">
+        <h3>Engage with elegance</h3>
+        <p>Generate personalized outreach in seconds — email, SMS, LinkedIn. Your tone, your
+          brand, your signature voice. AI does the heavy lifting, you keep the polish.</p>
+      </div>
+    </div>
+    <div class="process-step">
+      <div class="process-num">04</div>
+      <div class="process-info">
+        <h3>Close &amp; track</h3>
+        <p>From the first call to the signed quote — manage the entire client journey inside
+          one elegant pipeline. Real-time dashboards. Zero spreadsheet.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== DASHBOARD PREVIEW ===== -->
+<section class="preview-section" id="platform">
+  <div class="s-head">
+    <div class="s-eyebrow">— Platform Preview —</div>
+    <h2 class="s-title">Designed with the same<br><strong>creative vision</strong></h2>
+    <p class="s-desc">A glimpse at the dashboard you will receive — minimal, refined, and built for clarity.</p>
+  </div>
+  <div class="preview-frame">
+    <div class="preview-bar">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      <div class="url">platform.luxurybrands.digital / dashboard</div>
+    </div>
+    <div class="preview-body">
+      <div class="dash-top">
+        <div class="t">My Portfolio · 847 Leads</div>
+        <div class="dash-pills">
+          <span class="on">All</span>
+          <span>Innovation</span>
+          <span>Luxury</span>
+          <span>Hospitality</span>
+          <span>Yachting</span>
+        </div>
+      </div>
+      <div class="dash-stats">
+        <div class="ds"><div class="n">847</div><div class="l">Total Leads</div></div>
+        <div class="ds"><div class="n">142</div><div class="l">Contacted</div></div>
+        <div class="ds"><div class="n">38</div><div class="l">Meetings Booked</div></div>
+        <div class="ds"><div class="n">12</div><div class="l">Closed Deals</div></div>
+      </div>
+      <div class="dash-rows">
+        <div class="dr">
+          <div class="name">Maison Vendôme <span>· Genève · Watchmaking</span></div>
+          <div class="meta">CEO · 80 employees</div>
+          <div class="status contacted">Contacted</div>
+        </div>
+        <div class="dr">
+          <div class="name">Atelier Monaco <span>· Monaco · Yacht Design</span></div>
+          <div class="meta">Founder · 25 employees</div>
+          <div class="status rdv">RDV · Apr 18</div>
+        </div>
+        <div class="dr">
+          <div class="name">Château de l'Olivier <span>· Provence · Hospitality</span></div>
+          <div class="meta">Director · 60 employees</div>
+          <div class="status todo">To contact</div>
+        </div>
+        <div class="dr">
+          <div class="name">Galerie Néva <span>· Paris · Fine Art</span></div>
+          <div class="meta">Owner · 12 employees</div>
+          <div class="status contacted">Contacted</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="cta-section" id="access">
+  <div class="cta-content">
+    <h2>Ready to enter<br>your <strong>Intelligence Platform?</strong></h2>
+    <p>Exclusive access · Reserved for Luxury Brands Digital</p>
+    <a href="/lbd/app" class="cta-btn">Enter the Platform →</a>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <div class="brand-text">
+          <div class="l1">LUXURY BRANDS</div>
+          <div class="l2">DIGITAL · INTELLIGENCE</div>
+        </div>
+      </div>
+      <p>An intelligence platform built exclusively for Luxury Brands Digital — Brand Experience × Digital Ecosystem.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Platform</h4>
+      <a href="#features">Intelligence</a>
+      <a href="#features">Engagement</a>
+      <a href="#features">Conversion</a>
+    </div>
+    <div class="footer-col">
+      <h4>Resources</h4>
+      <a href="#process">Method</a>
+      <a href="#platform">Preview</a>
+      <a href="#access">Pricing</a>
+    </div>
+    <div class="footer-col">
+      <h4>Studio</h4>
+      <a href="https://www.luxurybrands.digital" target="_blank">luxurybrands.digital</a>
+      <a href="#contact">Contact</a>
+      <a href="#">Legal</a>
+    </div>
+  </div>
+  <div class="footer-bot">
+    <div>© 2026 LUXURY BRANDS DIGITAL · ALL RIGHTS RESERVED</div>
+    <div>BRAND EXPERIENCE × DIGITAL ECOSYSTEM</div>
+  </div>
+</footer>
+
+</body>
+</html>

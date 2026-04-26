@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RÉMI — CRM Pipeline Innovation FR+CH</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  /* Empire Leads dark palette — noir + vert */
+  --bg: #0A0A0A;
+  --bg2: #0f0f0f;
+  --bg3: #1A1A1A;
+  --card: #111111;
+  --card-hover: #1A1A1A;
+  --border: #262626;
+  --border-bright: #333333;
+  --text: #F5F5F5;
+  --text1: #FAFAFA;
+  --muted: #A3A3A3;
+  --accent: #22c55e;
+  --accent-hover: #4ade80;
+  --accent-light: rgba(34,197,94,.12);
+  --accent-soft: rgba(34,197,94,.08);
+  --accent-border: rgba(34,197,94,.35);
+  --red: #ef4444;
+  --gold: #eab308;
+  --blue: #3b82f6;
+  /* Stage colors (subtle, in the noir+vert vibe) */
+  --cold: #737373;
+  --warm: #eab308;
+  --hot: #f59e0b;
+  --meeting: #3b82f6;
+  --confirmed: #22c55e;
+  --closed: #16a34a;
+  --refused: #404040;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 24px 16px 60px;
+}
+.container { max-width: 1320px; margin: 0 auto; }
+
+/* ===== HEADER ===== */
+.hero {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 20px;
+}
+.hero-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  background: var(--accent-light);
+  border: 1px solid var(--accent-border);
+  color: var(--accent);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: 100px;
+  margin-bottom: 12px;
+}
+.hero h1 {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+  color: var(--text1);
+}
+.hero .subtitle {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+.hero .sectors { display: flex; gap: 6px; flex-wrap: wrap; }
+.sec-pill {
+  padding: 5px 11px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.sec-pill .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; background: var(--accent); }
+
+/* ===== PIPELINE TABS ===== */
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.tab {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  padding: 14px 10px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  transition: all .15s;
+  text-align: center;
+  position: relative;
+}
+.tab:hover { border-color: var(--border-bright); background: var(--card-hover); transform: translateY(-1px); }
+.tab .tab-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+.tab .tab-label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+.tab .tab-count {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 2px 10px;
+  background: var(--bg3);
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--text);
+}
+.tab.active { box-shadow: 0 8px 24px rgba(0,0,0,.4); transform: translateY(-2px); }
+.tab.active[data-tab="all"]       { border-color: var(--accent); background: rgba(0,208,132,.12); }
+.tab.active[data-tab="all"] .tab-count { background: var(--accent); color: #000; }
+.tab.active[data-tab="cold_call"] { border-color: var(--cold); background: rgba(136,153,187,.12); }
+.tab.active[data-tab="cold_call"] .tab-count { background: var(--cold); color: #000; }
+.tab.active[data-tab="to_recall"] { border-color: var(--warm); background: rgba(255,184,77,.12); }
+.tab.active[data-tab="to_recall"] .tab-count { background: var(--warm); color: #000; }
+.tab.active[data-tab="meeting"]   { border-color: var(--confirmed); background: rgba(168,85,247,.12); }
+.tab.active[data-tab="meeting"] .tab-count { background: var(--confirmed); color: #fff; }
+.tab.active[data-tab="closed"]    { border-color: var(--closed); background: rgba(0,200,150,.18); }
+.tab.active[data-tab="closed"] .tab-count { background: var(--closed); color: #000; }
+.tab.active[data-tab="refused"]   { border-color: var(--refused); background: rgba(85,85,101,.18); }
+.tab.active[data-tab="refused"] .tab-count { background: #888; color: #000; }
+
+/* ===== STATS BAR ===== */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.stat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 12px;
+  text-align: center;
+}
+.stat .num { font-size: 22px; font-weight: 900; letter-spacing: -0.02em; }
+.stat .lab { font-size: 9px; color: var(--muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.06em; margin-top: 3px; }
+.stat[data-k="fr"] .num { color: var(--blue); }
+.stat[data-k="ch"] .num { color: var(--red); }
+.stat[data-k="nosite"] .num { color: var(--orange); }
+.stat[data-k="meeting"] .num { color: var(--confirmed); }
+.stat[data-k="client"] .num { color: var(--closed); }
+.stat[data-k="ca"] .num { color: var(--gold); font-size: 18px; }
+
+/* ===== TOOLBAR ===== */
+.toolbar {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.toolbar .group { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+.toolbar .label { font-size: 10px; color: var(--muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.08em; margin-right: 4px; }
+.chip {
+  padding: 6px 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.chip:hover { background: var(--card-hover); color: var(--text); }
+.chip.active { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #000; border-color: var(--accent); }
+.search-input {
+  flex: 1;
+  min-width: 180px;
+  padding: 9px 13px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 12px;
+  border-radius: 10px;
+  font-family: inherit;
+  outline: none;
+}
+.search-input:focus { border-color: var(--accent); }
+.btn { padding: 9px 14px; border: none; font-size: 11px; font-weight: 800; border-radius: 10px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; font-family: inherit; transition: all .15s; }
+.btn-csv { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #000; }
+.btn-csv:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,208,132,.3); }
+.btn-reset { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+.btn-reset:hover { color: var(--red); border-color: var(--red); }
+
+/* ===== GRID ===== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 14px;
+}
+.card {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-left-width: 5px;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: all .2s;
+  position: relative;
+}
+.card:hover { border-color: var(--border-bright); background: var(--card-hover); transform: translateY(-2px); }
+.card[data-status="cold_call"]         { border-left-color: var(--cold); }
+.card[data-status="to_recall"]         { border-left-color: var(--warm); }
+.card[data-status="no_answer"]         { border-left-color: var(--hot); }
+.card[data-status="meeting_to_set"]    { border-left-color: var(--meeting); }
+.card[data-status="meeting_confirmed"] { border-left-color: var(--confirmed); box-shadow: 0 8px 24px rgba(168,85,247,.15); }
+.card[data-status="closed"]            { border-left-color: var(--closed); box-shadow: 0 8px 30px rgba(0,200,150,.22); background: linear-gradient(180deg, rgba(0,200,150,.06), var(--card)); }
+.card[data-status="refused"]           { border-left-color: var(--refused); opacity: .65; }
+
+.card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.card-name { font-size: 16px; font-weight: 800; color: var(--text); line-height: 1.3; letter-spacing: -0.01em; }
+.stage-tag {
+  padding: 4px 10px;
+  font-size: 10px;
+  font-weight: 800;
+  border-radius: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.stage-tag[data-s="cold_call"]         { background: rgba(136,153,187,.15); color: var(--cold); border: 1px solid rgba(136,153,187,.4); }
+.stage-tag[data-s="to_recall"]         { background: rgba(255,184,77,.15); color: var(--warm); border: 1px solid rgba(255,184,77,.4); }
+.stage-tag[data-s="no_answer"]         { background: rgba(255,107,107,.15); color: var(--hot); border: 1px solid rgba(255,107,107,.4); }
+.stage-tag[data-s="meeting_to_set"]    { background: rgba(77,166,255,.15); color: var(--meeting); border: 1px solid rgba(77,166,255,.4); }
+.stage-tag[data-s="meeting_confirmed"] { background: rgba(168,85,247,.18); color: var(--confirmed); border: 1px solid rgba(168,85,247,.5); }
+.stage-tag[data-s="closed"]            { background: rgba(0,200,150,.2); color: var(--closed); border: 1px solid rgba(0,200,150,.5); }
+.stage-tag[data-s="refused"]           { background: rgba(85,85,101,.2); color: #999; border: 1px solid #666; }
+
+.card-badges { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+.badge {
+  padding: 3px 9px;
+  font-size: 9px;
+  font-weight: 800;
+  border-radius: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.badge-secteur { background: rgba(255,255,255,.05); border: 1px solid var(--border); }
+.badge-secteur[data-s="biotech"] { color: #00d084; border-color: rgba(0,208,132,.4); }
+.badge-secteur[data-s="medtech"] { color: #ff6b00; border-color: rgba(255,107,0,.4); }
+.badge-secteur[data-s="agritech"] { color: #84cc16; border-color: rgba(132,204,22,.4); }
+.badge-secteur[data-s="deeptech"] { color: #8b5cf6; border-color: rgba(139,92,246,.4); }
+.badge-secteur[data-s="silvertech"] { color: #ffd700; border-color: rgba(255,215,0,.4); }
+.badge-pays { background: rgba(0,149,246,.1); color: #0095f6; border: 1px solid rgba(0,149,246,.3); }
+.badge-pays.ch { background: rgba(255,68,68,.1); color: #ff4444; border-color: rgba(255,68,68,.3); }
+.badge-nosite { background: rgba(255,107,0,.12); color: var(--orange); border: 1px solid rgba(255,107,0,.4); }
+.badge-meta {
+  padding: 4px 10px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 11px;
+  color: var(--text);
+  font-weight: 600;
+  margin-top: 6px;
+  display: inline-block;
+}
+.badge-meta.refused { background: rgba(255,68,68,.08); color: var(--red); border-color: rgba(255,68,68,.3); }
+.badge-meta.recall  { background: rgba(255,184,77,.1); color: var(--warm); border-color: rgba(255,184,77,.3); }
+.badge-meta.meeting { background: rgba(168,85,247,.12); color: var(--confirmed); border-color: rgba(168,85,247,.3); }
+.badge-meta.deal    { background: rgba(0,200,150,.12); color: var(--closed); border-color: rgba(0,200,150,.4); font-weight: 800; }
+
+.card-info { font-size: 12px; color: var(--muted); line-height: 1.55; }
+.card-info b { color: var(--text); font-weight: 700; }
+.card-info .row { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
+
+.card-notes {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  color: var(--text);
+  font-size: 12px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 44px;
+  width: 100%;
+  outline: none;
+  transition: border-color .15s;
+}
+.card-notes:focus { border-color: var(--accent); }
+.card-notes::placeholder { color: var(--muted); font-style: italic; }
+
+/* ===== CONTACT BUTTONS ===== */
+.contacts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+}
+.act {
+  padding: 9px 10px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.act:hover { background: var(--card-hover); border-color: var(--border-bright); }
+.act.linkedin { background: rgba(0,119,181,.12); color: #0a66c2; border-color: rgba(0,119,181,.3); }
+.act.linkedin:hover { background: rgba(0,119,181,.2); }
+.act.email { background: rgba(0,208,132,.1); color: var(--accent); border-color: rgba(0,208,132,.3); }
+.act.tel { background: rgba(255,215,0,.08); color: var(--gold); border-color: rgba(255,215,0,.3); }
+.act.site { background: rgba(255,107,0,.1); color: var(--orange); border-color: rgba(255,107,0,.3); }
+.act.disabled { opacity: .35; cursor: not-allowed; }
+
+/* ===== PIPELINE ACTION BUTTONS ===== */
+.pipeline-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+}
+.pact {
+  flex: 1;
+  min-width: 100px;
+  padding: 10px 8px;
+  background: var(--bg3);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: inherit;
+  text-align: center;
+}
+.pact:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(0,0,0,.3); }
+.pact-back { background: transparent; border-color: var(--muted); color: var(--muted); flex: 0 0 auto; min-width: auto; padding: 10px 12px; }
+.pact-back:hover { color: var(--text); border-color: var(--text); }
+.pact-interested { background: linear-gradient(135deg, var(--warm), #ff9f00); border-color: var(--warm); color: #000; }
+.pact-noreply    { background: rgba(255,107,107,.15); border-color: var(--hot); color: var(--hot); }
+.pact-meeting    { background: linear-gradient(135deg, var(--meeting), #2d7dd2); border-color: var(--meeting); color: #fff; }
+.pact-confirm    { background: linear-gradient(135deg, var(--confirmed), #7c3aed); border-color: var(--confirmed); color: #fff; }
+.pact-close      { background: linear-gradient(135deg, var(--closed), #00996e); border-color: var(--closed); color: #000; }
+.pact-refuse     { background: rgba(85,85,101,.2); border-color: #555; color: #aaa; }
+.pact-relance    { background: rgba(136,153,187,.12); border-color: var(--cold); color: var(--cold); }
+.pact-edit       { background: rgba(255,215,0,.1); border-color: var(--gold); color: var(--gold); }
+
+/* ===== MODALS ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.78);
+  backdrop-filter: blur(8px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg2);
+  border: 1.5px solid var(--border-bright);
+  border-radius: 20px;
+  padding: 24px;
+  max-width: 520px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 60px rgba(0,0,0,.6);
+}
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.modal-title { font-size: 19px; font-weight: 900; color: var(--text); }
+.modal-close {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  font-size: 18px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.modal-close:hover { border-color: var(--red); color: var(--red); }
+.modal-hint { font-size: 12px; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+.modal .prospect-head {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+.modal .prospect-head b { color: var(--text); font-size: 14px; }
+
+/* Objection chips */
+.obj-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.obj-chip {
+  padding: 9px 14px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+}
+.obj-chip:hover { border-color: var(--red); background: rgba(255,68,68,.1); }
+.obj-chip.active { background: var(--red); color: #fff; border-color: var(--red); }
+
+/* Inputs */
+.m-input {
+  width: 100%;
+  padding: 11px 14px;
+  background: var(--bg3);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  font-size: 13px;
+  border-radius: 10px;
+  font-family: inherit;
+  outline: none;
+}
+.m-input:focus { border-color: var(--accent); }
+.m-textarea { min-height: 80px; resize: vertical; }
+
+/* Date shortcuts */
+.date-shortcuts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.date-shortcut {
+  padding: 8px 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+}
+.date-shortcut:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Deal chips */
+.deal-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.deal-chip {
+  padding: 8px 13px;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all .15s;
+}
+.deal-chip:hover { border-color: var(--closed); color: var(--closed); }
+.deal-chip.active { background: var(--closed); color: #000; border-color: var(--closed); }
+
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+.btn-primary { padding: 11px 20px; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #000; border: none; border-radius: 10px; font-size: 13px; font-weight: 800; cursor: pointer; font-family: inherit; text-transform: uppercase; letter-spacing: 0.03em; }
+.btn-primary.refuse { background: linear-gradient(135deg, #ff4444, #cc0000); color: #fff; }
+.btn-primary.deal { background: linear-gradient(135deg, var(--closed), #00996e); }
+.btn-secondary { padding: 11px 18px; background: transparent; color: var(--text); border: 1.5px solid var(--border); border-radius: 10px; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.btn-secondary:hover { border-color: var(--muted); }
+
+.field-label { display: block; font-size: 10px; color: var(--muted); text-transform: uppercase; font-weight: 800; letter-spacing: 0.06em; margin-bottom: 5px; margin-top: 10px; }
+
+/* ===== TOAST ===== */
+.toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 8px; }
+.toast { background: var(--card); border: 1.5px solid var(--border-bright); color: var(--text); padding: 12px 18px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 12px 30px rgba(0,0,0,.5); animation: tin .2s ease; }
+.toast.success { border-color: var(--accent); color: var(--accent); }
+.toast.error { border-color: var(--red); color: var(--red); }
+@keyframes tin { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+.empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+  font-size: 14px;
+  background: var(--card);
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+}
+
+.footer { margin-top: 40px; padding: 24px; text-align: center; color: var(--muted); font-size: 12px; border-top: 1px solid var(--border); }
+.footer a { color: var(--accent); text-decoration: none; font-weight: 700; }
+
+/* ===== MOBILE ===== */
+@media (max-width: 900px) {
+  .tabs { grid-template-columns: repeat(3, 1fr); }
+  .stats { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 640px) {
+  .hero h1 { font-size: 26px; }
+  .tabs { grid-template-columns: repeat(2, 1fr); }
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .grid { grid-template-columns: 1fr; }
+  .toolbar { flex-direction: column; align-items: stretch; }
+}
+
+/* ===== DEMO BANNER ===== */
+.demo-banner {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  background: linear-gradient(135deg, rgba(34,197,94,.08), rgba(59,130,246,.06));
+  border: 1px solid var(--accent-border);
+  border-left: 4px solid var(--accent);
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-bottom: 20px;
+}
+.demo-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+.demo-body { flex: 1; }
+.demo-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+.demo-text {
+  font-size: 13.5px;
+  color: var(--text);
+  line-height: 1.6;
+}
+.demo-text strong { color: var(--text1); font-weight: 700; }
+@media (max-width: 640px) {
+  .demo-banner { flex-direction: column; gap: 10px; padding: 16px; }
+  .demo-icon { font-size: 24px; }
+  .demo-title { font-size: 13px; }
+  .demo-text { font-size: 12.5px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="hero">
+    <span class="hero-badge">⚡ CRM Pipeline — Empire Leads × Rémi</span>
+    <h1>100 Leads Innovation · FR + Suisse</h1>
+    <p class="subtitle">Biotech · Medtech · Agritech · Deeptech · Silvertech — Pipeline complet avec suivi des statuts, notes, rappels et deals</p>
+    <div class="sectors">
+      <span class="sec-pill" data-s="biotech"><span class="dot"></span>Biotech</span>
+      <span class="sec-pill" data-s="medtech"><span class="dot"></span>Medtech</span>
+      <span class="sec-pill" data-s="agritech"><span class="dot"></span>Agritech</span>
+      <span class="sec-pill" data-s="deeptech"><span class="dot"></span>Deeptech</span>
+      <span class="sec-pill" data-s="silvertech"><span class="dot"></span>Silvertech</span>
+    </div>
+  </div>
+
+  <!-- ===== DEMO BANNER ===== -->
+  <div class="demo-banner">
+    <div class="demo-icon">🔓</div>
+    <div class="demo-body">
+      <div class="demo-title">Mode démo — Accès progressif</div>
+      <div class="demo-text">
+        Cette page est un <strong>aperçu personnalisé</strong>. Vous n'avez pas encore accès à l'intégralité des fonctionnalités et des données — certaines options se débloqueront au fur et à mesure.
+        <br><br>
+        <strong>Le but est simple :</strong> parcourez les leads, testez la qualité des contacts déjà visibles, faites-vous votre propre avis sur la pertinence du ciblage, et <strong>on en reparle lors de notre prochain rendez-vous</strong>.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PIPELINE TABS ===== -->
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-tab="all">
+      <span class="tab-icon">📋</span>
+      <span class="tab-label">Tous</span>
+      <span class="tab-count" id="cnt-all">0</span>
+    </button>
+    <button class="tab" data-tab="cold_call">
+      <span class="tab-icon">📞</span>
+      <span class="tab-label">À appeler</span>
+      <span class="tab-count" id="cnt-cold_call">0</span>
+    </button>
+    <button class="tab" data-tab="to_recall">
+      <span class="tab-icon">🔁</span>
+      <span class="tab-label">À rappeler</span>
+      <span class="tab-count" id="cnt-to_recall">0</span>
+    </button>
+    <button class="tab" data-tab="meeting">
+      <span class="tab-icon">📅</span>
+      <span class="tab-label">Rendez-vous</span>
+      <span class="tab-count" id="cnt-meeting">0</span>
+    </button>
+    <button class="tab" data-tab="closed">
+      <span class="tab-icon">💰</span>
+      <span class="tab-label">Clients</span>
+      <span class="tab-count" id="cnt-closed">0</span>
+    </button>
+    <button class="tab" data-tab="refused">
+      <span class="tab-icon">🚫</span>
+      <span class="tab-label">Refus</span>
+      <span class="tab-count" id="cnt-refused">0</span>
+    </button>
+  </div>
+
+  <!-- ===== STATS ===== -->
+  <div class="stats">
+    <div class="stat"><div class="num" id="stat-total">0</div><div class="lab">Total visible</div></div>
+    <div class="stat" data-k="fr"><div class="num" id="stat-fr">0</div><div class="lab">🇫🇷 France</div></div>
+    <div class="stat" data-k="ch"><div class="num" id="stat-ch">0</div><div class="lab">🇨🇭 Suisse</div></div>
+    <div class="stat" data-k="nosite"><div class="num" id="stat-nosite">0</div><div class="lab">🎯 Sans site</div></div>
+    <div class="stat" data-k="meeting"><div class="num" id="stat-meeting">0</div><div class="lab">RDV total</div></div>
+    <div class="stat" data-k="ca"><div class="num" id="stat-ca">0 €</div><div class="lab">CA signé</div></div>
+  </div>
+
+  <!-- ===== TOOLBAR ===== -->
+  <div class="toolbar">
+    <div class="group">
+      <span class="label">Secteur</span>
+      <button class="chip active" data-filter="secteur" data-val="all">Tous</button>
+      <button class="chip" data-filter="secteur" data-val="biotech">Biotech</button>
+      <button class="chip" data-filter="secteur" data-val="medtech">Medtech</button>
+      <button class="chip" data-filter="secteur" data-val="agritech">Agritech</button>
+      <button class="chip" data-filter="secteur" data-val="deeptech">Deeptech</button>
+      <button class="chip" data-filter="secteur" data-val="silvertech">Silvertech</button>
+    </div>
+    <div class="group">
+      <span class="label">Pays</span>
+      <button class="chip active" data-filter="pays" data-val="all">Tous</button>
+      <button class="chip" data-filter="pays" data-val="fr">🇫🇷 FR</button>
+      <button class="chip" data-filter="pays" data-val="ch">🇨🇭 CH</button>
+    </div>
+    <div class="group">
+      <span class="label">Site</span>
+      <button class="chip active" data-filter="site" data-val="all">Tous</button>
+      <button class="chip" data-filter="site" data-val="yes">Avec site</button>
+      <button class="chip" data-filter="site" data-val="no">🎯 Sans site</button>
+    </div>
+    <input type="text" class="search-input" id="search" placeholder="🔍 Entreprise, ville, dirigeant...">
+    <button class="btn btn-csv" id="btn-csv">📥 Export CSV</button>
+    <button class="btn btn-reset" id="btn-reset" title="Reset complet du pipeline">♻ Reset</button>
+  </div>
+
+  <!-- ===== GRID ===== -->
+  <div class="grid" id="grid"></div>
+
+  <div class="footer">
+    Livré par <a href="https://prospecthunter.vercel.app">Empire Leads</a> ·
+    Sources : recherche-entreprises.api.gouv.fr (FR) + directories publics biotech/medtech (CH) ·
+    Pipeline sauvegardé dans votre navigateur (localStorage). Changez de device = recommencez à zéro.
+  </div>
+</div>
+
+<!-- ===== OBJECTION MODAL ===== -->
+<div class="modal-overlay" id="modal-objection" onclick="if(event.target===this)closeModal('objection')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">❌ Raison du refus</div>
+      <button type="button" class="modal-close" onclick="closeModal('objection')">✕</button>
+    </div>
+    <div class="prospect-head" id="obj-head"></div>
+    <p class="modal-hint">Sélectionne ou tape une objection :</p>
+    <div class="obj-chips" id="obj-chips">
+      <button type="button" class="obj-chip">Pas intéressé</button>
+      <button type="button" class="obj-chip">Trop cher</button>
+      <button type="button" class="obj-chip">On a déjà quelqu'un qui s'en occupe</button>
+      <button type="button" class="obj-chip">Déjà un site web</button>
+      <button type="button" class="obj-chip">Pas le temps</button>
+      <button type="button" class="obj-chip">Bouche à oreille ça suffit, on est très bien sans</button>
+      <button type="button" class="obj-chip">Croit pas au projet</button>
+    </div>
+    <input type="text" class="m-input" id="obj-custom" placeholder="Autre — tape une objection pro...">
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary" onclick="closeModal('objection')">Annuler</button>
+      <button type="button" class="btn-primary refuse" id="obj-confirm">✅ Confirmer le refus</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DEAL MODAL ===== -->
+<div class="modal-overlay" id="modal-deal" onclick="if(event.target===this)closeModal('deal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">💰 Deal signé !</div>
+      <button type="button" class="modal-close" onclick="closeModal('deal')">✕</button>
+    </div>
+    <div class="prospect-head" id="deal-head"></div>
+    <p class="modal-hint">Type de prestation :</p>
+    <div class="deal-chips" id="deal-type-chips">
+      <button type="button" class="deal-chip" data-v="site_vitrine">🌐 Site vitrine</button>
+      <button type="button" class="deal-chip" data-v="reseaux">📱 Réseaux sociaux</button>
+      <button type="button" class="deal-chip" data-v="seo">🔍 SEO</button>
+      <button type="button" class="deal-chip" data-v="pack">📦 Pack complet</button>
+      <button type="button" class="deal-chip" data-v="autre">✏️ Autre</button>
+    </div>
+    <label class="field-label">📅 Date de signature</label>
+    <input type="date" class="m-input" id="deal-date">
+    <label class="field-label">💶 Montant (€)</label>
+    <input type="number" class="m-input" id="deal-value" placeholder="0" min="0" step="50">
+    <label class="field-label">🔁 Facturation</label>
+    <div class="deal-chips" id="deal-rec-chips">
+      <button type="button" class="deal-chip" data-v="one_shot">1️⃣ One-shot</button>
+      <button type="button" class="deal-chip" data-v="mensuel">🔁 Mensuel</button>
+      <button type="button" class="deal-chip" data-v="trimestriel">📆 Trimestriel</button>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary" onclick="closeModal('deal')">Annuler</button>
+      <button type="button" class="btn-primary deal" id="deal-confirm">✅ Confirmer le deal</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STAGE MODAL (rappel / rdv) ===== -->
+<div class="modal-overlay" id="modal-stage" onclick="if(event.target===this)closeModal('stage')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="stage-title">📅 Poser un rendez-vous</div>
+      <button type="button" class="modal-close" onclick="closeModal('stage')">✕</button>
+    </div>
+    <div class="prospect-head" id="stage-head"></div>
+    <label class="field-label" id="stage-date-label">📅 Date</label>
+    <div class="date-shortcuts" id="stage-shortcuts">
+      <button type="button" class="date-shortcut" data-d="0">Aujourd'hui</button>
+      <button type="button" class="date-shortcut" data-d="1">Demain</button>
+      <button type="button" class="date-shortcut" data-d="2">Dans 2 jours</button>
+      <button type="button" class="date-shortcut" data-d="7">Semaine pro</button>
+    </div>
+    <input type="date" class="m-input" id="stage-date">
+    <div id="stage-time-wrap" style="display:none">
+      <label class="field-label">🕐 Heure</label>
+      <input type="time" class="m-input" id="stage-time" value="14:00">
+    </div>
+    <label class="field-label">📝 Notes</label>
+    <textarea class="m-input m-textarea" id="stage-notes" placeholder="Contexte, prochaines étapes..."></textarea>
+    <div class="modal-actions">
+      <button type="button" class="btn-secondary" onclick="closeModal('stage')">Annuler</button>
+      <button type="button" class="btn-primary" id="stage-confirm">✅ Valider</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toasts"></div>
+
+<script>
+const PROSPECTS = /*__PROSPECTS_DATA__*/;
+
+// ===== Storage =====
+const STORAGE_KEY = 'remi-innovation-data-v2';
+const DEFAULT_STAGE = 'cold_call';
+
+function keyOf(p) { return (p.siren || (p.name + '|' + p.city)).toLowerCase().trim(); }
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); }
+  catch(e) { return {}; }
+}
+function saveData(obj) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(obj)); } catch(e) { console.warn('localStorage full'); }
+}
+function getP(p) {
+  const m = loadData();
+  return m[keyOf(p)] || {};
+}
+function setP(p, patch) {
+  const m = loadData();
+  const k = keyOf(p);
+  m[k] = Object.assign({}, m[k] || {}, patch);
+  saveData(m);
+  // Mirror onto in-memory prospect
+  Object.assign(p, { _d: m[k] });
+}
+function getStage(p) {
+  const d = getP(p);
+  return d.stage || DEFAULT_STAGE;
+}
+function getDirigeant(p) {
+  const parts = [p.dirigeantPrenom, p.dirigeantNom].filter(Boolean);
+  return parts.join(' ') || '(dirigeant non renseigné)';
+}
+function escHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ===== Initialize in-memory from storage =====
+PROSPECTS.forEach(p => { p._d = getP(p); });
+
+// ===== Filters =====
+const STAGE_GROUPS = {
+  all:       null,
+  cold_call: ['cold_call'],
+  to_recall: ['to_recall', 'no_answer'],
+  meeting:   ['meeting_to_set', 'meeting_confirmed'],
+  closed:    ['closed'],
+  refused:   ['refused'],
+};
+const filters = { tab: 'all', secteur: 'all', pays: 'all', site: 'all', search: '' };
+
+function applyFilters() {
+  return PROSPECTS.filter(p => {
+    const stage = getStage(p);
+    if (filters.tab !== 'all') {
+      const allowed = STAGE_GROUPS[filters.tab] || [];
+      if (!allowed.includes(stage)) return false;
+    }
+    if (filters.secteur !== 'all' && p.secteur !== filters.secteur) return false;
+    if (filters.pays !== 'all' && p.country !== filters.pays) return false;
+    if (filters.site === 'yes' && !p.hasSite) return false;
+    if (filters.site === 'no' && p.hasSite) return false;
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      const hay = (p.name + ' ' + p.city + ' ' + p.dirigeantPrenom + ' ' + p.dirigeantNom + ' ' + p.secteur).toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+}
+
+// ===== Toast =====
+function toast(msg, type = 'info') {
+  const c = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
+}
+
+// ===== Card rendering =====
+function formatDate(iso) {
+  if (!iso) return '';
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+const DEAL_TYPE_LABELS = { site_vitrine:'🌐 Site vitrine', reseaux:'📱 Réseaux', seo:'🔍 SEO', pack:'📦 Pack', autre:'✏️ Autre' };
+const DEAL_REC_LABELS = { one_shot:'1️⃣ One-shot', mensuel:'🔁 Mensuel', trimestriel:'📆 Trimestriel' };
+const STAGE_LABELS = {
+  cold_call:         'À appeler',
+  to_recall:         'À rappeler',
+  no_answer:         'Pas de réponse',
+  meeting_to_set:    'RDV à poser',
+  meeting_confirmed: 'RDV confirmé',
+  closed:            'Client 💰',
+  refused:           'Refus',
+};
+
+function buildActionsHtml(p, stage) {
+  const k = keyOf(p);
+  const esc = (v) => escHtml(v);
+  if (stage === 'cold_call') {
+    return `
+      <button type="button" class="pact pact-interested" data-act="interested" data-k="${esc(k)}">✅ Intéressé</button>
+      <button type="button" class="pact pact-noreply" data-act="noreply" data-k="${esc(k)}">📵 Pas de réponse</button>
+      <button type="button" class="pact pact-refuse" data-act="refuse" data-k="${esc(k)}">🚫 Pas intéressé</button>`;
+  }
+  if (stage === 'to_recall') {
+    return `
+      <button type="button" class="pact pact-back" data-act="back-cold" data-k="${esc(k)}">◀</button>
+      <button type="button" class="pact pact-meeting" data-act="set-meeting" data-k="${esc(k)}">📅 Poser RDV</button>
+      <button type="button" class="pact pact-refuse" data-act="refuse" data-k="${esc(k)}">🚫 Refus</button>`;
+  }
+  if (stage === 'no_answer') {
+    return `
+      <button type="button" class="pact pact-back" data-act="back-cold" data-k="${esc(k)}">◀ Relance</button>
+      <button type="button" class="pact pact-interested" data-act="interested" data-k="${esc(k)}">✅ A répondu</button>
+      <button type="button" class="pact pact-refuse" data-act="refuse" data-k="${esc(k)}">🚫 Refus</button>`;
+  }
+  if (stage === 'meeting_to_set') {
+    return `
+      <button type="button" class="pact pact-back" data-act="back-to_recall" data-k="${esc(k)}">◀</button>
+      <button type="button" class="pact pact-confirm" data-act="confirm-meeting" data-k="${esc(k)}">✅ RDV confirmé</button>
+      <button type="button" class="pact pact-refuse" data-act="refuse" data-k="${esc(k)}">🚫 Annulé</button>`;
+  }
+  if (stage === 'meeting_confirmed') {
+    return `
+      <button type="button" class="pact pact-back" data-act="back-meeting_to_set" data-k="${esc(k)}">◀</button>
+      <button type="button" class="pact pact-close" data-act="close-deal" data-k="${esc(k)}">💰 Client closé</button>
+      <button type="button" class="pact pact-refuse" data-act="refuse" data-k="${esc(k)}">🚫 Perdu</button>`;
+  }
+  if (stage === 'closed') {
+    return `
+      <button type="button" class="pact pact-back" data-act="back-meeting_confirmed" data-k="${esc(k)}">◀</button>
+      <button type="button" class="pact pact-edit" data-act="edit-deal" data-k="${esc(k)}">✏️ Éditer deal</button>`;
+  }
+  if (stage === 'refused') {
+    return `
+      <button type="button" class="pact pact-relance" data-act="relance" data-k="${esc(k)}">◀ Relancer</button>
+      <button type="button" class="pact pact-edit" data-act="edit-refuse" data-k="${esc(k)}">✏️ Objection</button>`;
+  }
+  return '';
+}
+
+function buildMetaBadges(p) {
+  const d = p._d || {};
+  const badges = [];
+  if (d.stage === 'refused' && d.objection) badges.push(`<span class="badge-meta refused">❌ ${escHtml(d.objection)}</span>`);
+  if (d.stage === 'to_recall' && d.rappel) badges.push(`<span class="badge-meta recall">🔔 Rappel : ${formatDate(d.rappel)}</span>`);
+  if ((d.stage === 'meeting_to_set' || d.stage === 'meeting_confirmed') && d.meetingDate) {
+    badges.push(`<span class="badge-meta meeting">📅 RDV : ${formatDate(d.meetingDate)}${d.meetingTime ? ' · ' + d.meetingTime : ''}</span>`);
+  }
+  if (d.stage === 'closed' && (d.dealValue || d.dealType)) {
+    const parts = [];
+    if (d.dealValue) parts.push(d.dealValue + ' €');
+    if (d.dealType) parts.push(DEAL_TYPE_LABELS[d.dealType] || d.dealType);
+    if (d.dealRecurrence) parts.push(DEAL_REC_LABELS[d.dealRecurrence] || d.dealRecurrence);
+    badges.push(`<span class="badge-meta deal">💰 ${parts.join(' · ')}</span>`);
+  }
+  return badges.join(' ');
+}
+
+function renderCards() {
+  const list = applyFilters();
+  const grid = document.getElementById('grid');
+  if (!list.length) {
+    grid.innerHTML = '<div class="empty">🔍 Aucun lead ne correspond à ces filtres.<br><br>Essaie de changer d\'onglet ou de vider les filtres.</div>';
+    return;
+  }
+  grid.innerHTML = list.map(p => {
+    const k = keyOf(p);
+    const stage = getStage(p);
+    const d = p._d || {};
+    const dirigeant = (p.dirigeantPrenom || p.dirigeantNom)
+      ? `<div class="row">👤 <b>${escHtml(p.dirigeantPrenom)} ${escHtml(p.dirigeantNom)}</b>${p.dirigeantQualite ? ' · ' + escHtml(p.dirigeantQualite) : ''}</div>`
+      : '';
+    const cityStr = p.city ? `<div class="row">📍 ${escHtml(p.city)}${p.cp ? ' · ' + escHtml(p.cp) : ''}</div>` : '';
+    const sirenStr = p.siren ? `<div class="row">🔢 SIREN ${escHtml(p.siren)}</div>` : '';
+    const effStr = p.effectif ? `<div class="row">👥 ${escHtml(p.effectif)} salariés</div>` : '';
+
+    // Only show real URLs — gray out Google-search fallbacks (no fake buttons)
+    const isGoogleFallback = u => !u || u.indexOf('google.com/search') !== -1 || u.indexOf('google.fr/search') !== -1;
+    const linkedinBtn = isGoogleFallback(p.linkedin)
+      ? `<span class="act linkedin disabled">🔗 LinkedIn</span>`
+      : `<a class="act linkedin" href="${escHtml(p.linkedin)}" target="_blank" rel="noopener">🔗 LinkedIn</a>`;
+    const emailBtn = isGoogleFallback(p.emailUrl)
+      ? `<span class="act email disabled">✉️ Email</span>`
+      : `<a class="act email" href="${escHtml(p.emailUrl)}" target="_blank" rel="noopener">✉️ Email</a>`;
+    const siteBtn = p.hasSite
+      ? `<a class="act site" href="${escHtml(p.website)}" target="_blank" rel="noopener">🌐 Site</a>`
+      : `<span class="act site disabled">❌ Sans site</span>`;
+    const telBtn = p.phone
+      ? `<a class="act tel" href="tel:${escHtml(p.phone.replace(/\s/g,''))}">📞 ${escHtml(p.phone)}</a>`
+      : `<span class="act tel disabled">📞 Pas de tél</span>`;
+
+    const noSiteBadge = !p.hasSite ? '<span class="badge badge-nosite">🎯 PAS DE SITE</span>' : '';
+    const metaBadges = buildMetaBadges(p);
+    const notesVal = escHtml(d.notes || '');
+
+    return `<div class="card" data-status="${stage}" data-key="${escHtml(k)}">
+      <div class="card-head">
+        <div style="min-width:0;flex:1">
+          <div class="card-name">${escHtml(p.name)}</div>
+          <div class="card-badges">
+            <span class="badge badge-secteur" data-s="${escHtml(p.secteur)}">${escHtml(p.secteur)}</span>
+            <span class="badge badge-pays ${p.country === 'ch' ? 'ch' : ''}">${p.country === 'ch' ? '🇨🇭 Suisse' : '🇫🇷 France'}</span>
+            ${noSiteBadge}
+          </div>
+        </div>
+        <span class="stage-tag" data-s="${stage}">${escHtml(STAGE_LABELS[stage] || stage)}</span>
+      </div>
+      ${metaBadges ? '<div>' + metaBadges + '</div>' : ''}
+      <div class="card-info">
+        ${dirigeant}
+        ${cityStr}
+        ${sirenStr}
+        ${effStr}
+      </div>
+      <textarea class="card-notes" data-k="${escHtml(k)}" placeholder="📝 Notes : contexte appel, prochaines étapes, remarques...">${notesVal}</textarea>
+      <div class="contacts">
+        ${linkedinBtn}
+        ${emailBtn}
+        ${siteBtn}
+        ${telBtn}
+      </div>
+      <div class="pipeline-actions">
+        ${buildActionsHtml(p, stage)}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateStats() {
+  const visible = applyFilters();
+  document.getElementById('stat-total').textContent = visible.length;
+  document.getElementById('stat-fr').textContent = visible.filter(p => p.country === 'fr').length;
+  document.getElementById('stat-ch').textContent = visible.filter(p => p.country === 'ch').length;
+  document.getElementById('stat-nosite').textContent = visible.filter(p => !p.hasSite).length;
+
+  // Global pipeline counters (not filtered)
+  const byStage = {};
+  PROSPECTS.forEach(p => {
+    const s = getStage(p);
+    byStage[s] = (byStage[s] || 0) + 1;
+  });
+  const meetingTotal = (byStage.meeting_to_set || 0) + (byStage.meeting_confirmed || 0);
+  const toRecallTotal = (byStage.to_recall || 0) + (byStage.no_answer || 0);
+  document.getElementById('stat-meeting').textContent = meetingTotal;
+
+  // Tab counters
+  document.getElementById('cnt-all').textContent = PROSPECTS.length;
+  document.getElementById('cnt-cold_call').textContent = byStage.cold_call || 0;
+  document.getElementById('cnt-to_recall').textContent = toRecallTotal;
+  document.getElementById('cnt-meeting').textContent = meetingTotal;
+  document.getElementById('cnt-closed').textContent = byStage.closed || 0;
+  document.getElementById('cnt-refused').textContent = byStage.refused || 0;
+
+  // CA total
+  const ca = PROSPECTS.reduce((sum, p) => {
+    const d = getP(p);
+    if (d.stage === 'closed' && d.dealValue) return sum + Number(d.dealValue || 0);
+    return sum;
+  }, 0);
+  document.getElementById('stat-ca').textContent = ca.toLocaleString('fr-FR') + ' €';
+}
+
+function refresh() { updateStats(); renderCards(); }
+
+// ===== Tabs =====
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    filters.tab = tab.getAttribute('data-tab');
+    refresh();
+  });
+});
+
+// ===== Filter chips =====
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const f = chip.getAttribute('data-filter');
+    const v = chip.getAttribute('data-val');
+    document.querySelectorAll('.chip[data-filter="' + f + '"]').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    filters[f] = v;
+    refresh();
+  });
+});
+
+// ===== Search =====
+document.getElementById('search').addEventListener('input', e => { filters.search = e.target.value; refresh(); });
+
+// ===== Notes (event delegation) =====
+document.getElementById('grid').addEventListener('input', e => {
+  const ta = e.target.closest && e.target.closest('.card-notes');
+  if (!ta) return;
+  const k = ta.getAttribute('data-k');
+  const p = PROSPECTS.find(x => keyOf(x) === k);
+  if (!p) return;
+  // Debounced save via dataset timer
+  clearTimeout(ta._t);
+  ta._t = setTimeout(() => {
+    setP(p, { notes: ta.value });
+    toast('📝 Note sauvegardée', 'success');
+  }, 600);
+});
+
+// ===== Pipeline action buttons (event delegation) =====
+document.getElementById('grid').addEventListener('click', e => {
+  const btn = e.target.closest && e.target.closest('.pact');
+  if (!btn) return;
+  const act = btn.getAttribute('data-act');
+  const k = btn.getAttribute('data-k');
+  const p = PROSPECTS.find(x => keyOf(x) === k);
+  if (!p) return;
+  handleAction(p, act);
+});
+
+function moveStage(p, newStage, extraPatch) {
+  const patch = Object.assign({ stage: newStage }, extraPatch || {});
+  setP(p, patch);
+  refresh();
+  toast(`✓ → ${STAGE_LABELS[newStage] || newStage}`, 'success');
+}
+
+function handleAction(p, act) {
+  const d = p._d || {};
+  switch (act) {
+    case 'interested':
+      // Cold call → to_recall (opens rappel modal)
+      openStageModal(p, { kind: 'rappel', onConfirm: (data) => {
+        moveStage(p, 'to_recall', { rappel: data.date, notes: data.notes || d.notes });
+      }});
+      break;
+    case 'noreply':
+      moveStage(p, 'no_answer');
+      break;
+    case 'refuse':
+      openObjectionModal(p);
+      break;
+    case 'edit-refuse':
+      openObjectionModal(p);
+      break;
+    case 'back-cold':
+      moveStage(p, 'cold_call');
+      break;
+    case 'back-to_recall':
+      moveStage(p, 'to_recall');
+      break;
+    case 'back-meeting_to_set':
+      moveStage(p, 'meeting_to_set');
+      break;
+    case 'back-meeting_confirmed':
+      moveStage(p, 'meeting_confirmed');
+      break;
+    case 'set-meeting':
+      openStageModal(p, { kind: 'meeting', onConfirm: (data) => {
+        moveStage(p, 'meeting_to_set', { meetingDate: data.date, meetingTime: data.time, notes: data.notes || d.notes });
+      }});
+      break;
+    case 'confirm-meeting':
+      moveStage(p, 'meeting_confirmed');
+      break;
+    case 'close-deal':
+      openDealModal(p);
+      break;
+    case 'edit-deal':
+      openDealModal(p);
+      break;
+    case 'relance':
+      moveStage(p, 'cold_call', { objection: '' });
+      break;
+  }
+}
+
+// ===== MODAL: Objection =====
+let _objTarget = null;
+let _objValue = '';
+function openObjectionModal(p) {
+  _objTarget = p;
+  _objValue = (p._d && p._d.objection) || '';
+  document.getElementById('obj-head').innerHTML = `<b>${escHtml(p.name)}</b><br>${escHtml(getDirigeant(p))}`;
+  document.getElementById('obj-custom').value = '';
+  document.querySelectorAll('#obj-chips .obj-chip').forEach(c => {
+    c.classList.toggle('active', c.textContent.trim() === _objValue);
+  });
+  document.getElementById('modal-objection').classList.add('open');
+}
+document.querySelectorAll('#obj-chips .obj-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#obj-chips .obj-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    _objValue = chip.textContent.trim();
+    document.getElementById('obj-custom').value = '';
+  });
+});
+document.getElementById('obj-custom').addEventListener('input', (e) => {
+  document.querySelectorAll('#obj-chips .obj-chip').forEach(c => c.classList.remove('active'));
+  _objValue = e.target.value.trim();
+});
+document.getElementById('obj-confirm').addEventListener('click', () => {
+  if (!_objTarget) return;
+  const val = _objValue || 'Non précisé';
+  moveStage(_objTarget, 'refused', { objection: val });
+  closeModal('objection');
+});
+
+// ===== MODAL: Deal =====
+let _dealTarget = null;
+let _dealType = '';
+let _dealRec = '';
+function openDealModal(p) {
+  _dealTarget = p;
+  const d = p._d || {};
+  _dealType = d.dealType || '';
+  _dealRec = d.dealRecurrence || '';
+  document.getElementById('deal-head').innerHTML = `<b>${escHtml(p.name)}</b><br>${escHtml(getDirigeant(p))}`;
+  document.getElementById('deal-date').value = d.dealDate || new Date().toISOString().slice(0,10);
+  document.getElementById('deal-value').value = d.dealValue || '';
+  document.querySelectorAll('#deal-type-chips .deal-chip').forEach(c => c.classList.toggle('active', c.getAttribute('data-v') === _dealType));
+  document.querySelectorAll('#deal-rec-chips .deal-chip').forEach(c => c.classList.toggle('active', c.getAttribute('data-v') === _dealRec));
+  document.getElementById('modal-deal').classList.add('open');
+}
+document.querySelectorAll('#deal-type-chips .deal-chip').forEach(c => {
+  c.addEventListener('click', () => {
+    document.querySelectorAll('#deal-type-chips .deal-chip').forEach(x => x.classList.remove('active'));
+    c.classList.add('active');
+    _dealType = c.getAttribute('data-v');
+  });
+});
+document.querySelectorAll('#deal-rec-chips .deal-chip').forEach(c => {
+  c.addEventListener('click', () => {
+    document.querySelectorAll('#deal-rec-chips .deal-chip').forEach(x => x.classList.remove('active'));
+    c.classList.add('active');
+    _dealRec = c.getAttribute('data-v');
+  });
+});
+document.getElementById('deal-confirm').addEventListener('click', () => {
+  if (!_dealTarget) return;
+  const val = Number(document.getElementById('deal-value').value) || 0;
+  const date = document.getElementById('deal-date').value;
+  if (!_dealType) { toast('Choisis un type de prestation', 'error'); return; }
+  moveStage(_dealTarget, 'closed', {
+    dealType: _dealType,
+    dealRecurrence: _dealRec || 'one_shot',
+    dealValue: val,
+    dealDate: date,
+  });
+  closeModal('deal');
+});
+
+// ===== MODAL: Stage (rappel / rdv) =====
+let _stageTarget = null;
+let _stageKind = 'rappel';
+let _stageOnConfirm = null;
+function openStageModal(p, opts) {
+  _stageTarget = p;
+  _stageKind = opts.kind;
+  _stageOnConfirm = opts.onConfirm;
+  const d = p._d || {};
+  document.getElementById('stage-title').textContent = _stageKind === 'meeting' ? '📅 Poser un rendez-vous' : '🔔 Poser un rappel';
+  document.getElementById('stage-date-label').textContent = _stageKind === 'meeting' ? '📅 Date du RDV' : '📅 Date du rappel';
+  document.getElementById('stage-head').innerHTML = `<b>${escHtml(p.name)}</b><br>${escHtml(getDirigeant(p))}`;
+  const today = new Date();
+  const defaultDate = _stageKind === 'meeting'
+    ? (d.meetingDate || new Date(today.getTime() + 2 * 86400000).toISOString().slice(0,10))
+    : (d.rappel || new Date(today.getTime() + 1 * 86400000).toISOString().slice(0,10));
+  document.getElementById('stage-date').value = defaultDate;
+  document.getElementById('stage-time').value = d.meetingTime || '14:00';
+  document.getElementById('stage-time-wrap').style.display = _stageKind === 'meeting' ? 'block' : 'none';
+  document.getElementById('stage-notes').value = d.notes || '';
+  document.getElementById('modal-stage').classList.add('open');
+}
+document.querySelectorAll('#stage-shortcuts .date-shortcut').forEach(b => {
+  b.addEventListener('click', () => {
+    const days = parseInt(b.getAttribute('data-d')) || 0;
+    const dt = new Date();
+    dt.setDate(dt.getDate() + days);
+    document.getElementById('stage-date').value = dt.toISOString().slice(0,10);
+  });
+});
+document.getElementById('stage-confirm').addEventListener('click', () => {
+  if (!_stageTarget || !_stageOnConfirm) return;
+  const date = document.getElementById('stage-date').value;
+  const time = document.getElementById('stage-time').value;
+  const notes = document.getElementById('stage-notes').value.trim();
+  if (!date) { toast('Choisis une date', 'error'); return; }
+  _stageOnConfirm({ date, time, notes });
+  closeModal('stage');
+});
+
+// ===== Modal close =====
+function closeModal(name) {
+  document.getElementById('modal-' + name).classList.remove('open');
+  if (name === 'objection') { _objTarget = null; _objValue = ''; }
+  if (name === 'deal') { _dealTarget = null; }
+  if (name === 'stage') { _stageTarget = null; _stageOnConfirm = null; }
+}
+// Escape to close
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    ['objection', 'deal', 'stage'].forEach(closeModal);
+  }
+});
+
+// ===== CSV Export =====
+document.getElementById('btn-csv').addEventListener('click', () => {
+  const list = applyFilters();
+  const headers = ['Entreprise','Secteur','Pays','Ville','CP','SIREN','Dirigeant','Qualité','Site','Téléphone','LinkedIn (recherche)','Email (recherche)','Stage','Objection','Date rappel','Date RDV','Heure RDV','Deal type','Deal montant','Deal récurrence','Notes'];
+  const rows = list.map(p => {
+    const d = p._d || {};
+    return [
+      p.name, p.secteur, p.country, p.city, p.cp, p.siren,
+      (p.dirigeantPrenom + ' ' + p.dirigeantNom).trim(),
+      p.dirigeantQualite, p.website, p.phone, p.linkedin, p.emailUrl,
+      STAGE_LABELS[d.stage || 'cold_call'] || '',
+      d.objection || '', d.rappel || '',
+      d.meetingDate || '', d.meetingTime || '',
+      d.dealType || '', d.dealValue || '', d.dealRecurrence || '',
+      (d.notes || '').replace(/\r?\n/g, ' | '),
+    ].map(v => `"${String(v || '').replace(/"/g, '""')}"`).join(',');
+  });
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'remi-innovation-leads-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('📥 CSV téléchargé', 'success');
+});
+
+// ===== Reset =====
+document.getElementById('btn-reset').addEventListener('click', () => {
+  if (!confirm('⚠️ Effacer TOUT le pipeline et repartir à zéro ?\n\nTous les statuts, notes, rappels et deals seront perdus.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  PROSPECTS.forEach(p => { p._d = {}; });
+  refresh();
+  toast('♻ Pipeline remis à zéro', 'success');
+});
+
+refresh();
+</script>
+</body>
+</html>

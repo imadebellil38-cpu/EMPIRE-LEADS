@@ -231,6 +231,90 @@ select.plan-select:focus { border-color: var(--accent); }
 /* ── Actions cell ── */
 .actions-cell { display: flex; gap: .4rem; flex-wrap: wrap; }
 
+/* ── "Voir" button ── */
+.btn-blue { background: rgba(59,130,246,.1); border-color: rgba(59,130,246,.3); color: #3b82f6; }
+.btn-blue:hover { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+
+/* ── User Detail Panel (modal) ── */
+#user-detail-panel { position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center; }
+.udp-overlay { position: absolute; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(4px); }
+.udp-content {
+  position: relative; z-index: 1;
+  width: 92vw; max-width: 1000px; max-height: 85vh;
+  background: var(--card); border: 1px solid var(--border2);
+  border-radius: 20px; overflow: hidden;
+  display: flex; flex-direction: column;
+  box-shadow: 0 24px 80px rgba(0,0,0,.6);
+}
+.udp-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);
+}
+.udp-header h2 { font-size: 1rem; font-weight: 700; color: var(--text); }
+.udp-close {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--border2);
+  color: var(--muted); font-size: 1.3rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.udp-close:hover { color: var(--red); border-color: var(--red-border); background: var(--red-soft); }
+.udp-tabs {
+  display: flex; gap: 0; border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.udp-tab {
+  flex: 1; padding: .85rem 1rem; font-size: .78rem; font-weight: 700;
+  color: var(--muted); background: none; border: none;
+  cursor: pointer; text-transform: uppercase; letter-spacing: .06em;
+  transition: all .15s; border-bottom: 2px solid transparent;
+}
+.udp-tab:hover { color: var(--text); }
+.udp-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+#udp-body { flex: 1; overflow-y: auto; padding: 0; }
+.udp-loading { padding: 2rem; text-align: center; color: var(--muted); }
+.udp-empty { padding: 2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+.udp-count {
+  padding: .75rem 1.5rem; font-size: .72rem; font-weight: 700;
+  color: var(--accent); text-transform: uppercase; letter-spacing: .04em;
+  border-bottom: 1px solid var(--border); background: var(--surface);
+}
+.udp-table { width: 100%; border-collapse: collapse; }
+.udp-table th { position: sticky; top: 0; z-index: 1; }
+.udp-stage {
+  display: inline-block; padding: 2px 8px; border-radius: 999px;
+  font-size: .65rem; font-weight: 700; text-transform: uppercase;
+  background: var(--surface2); color: var(--muted); border: 1px solid var(--border2);
+}
+.stage-recall { background: var(--amber2); color: var(--amber); border-color: rgba(245,158,11,.25); }
+.stage-meeting { background: rgba(59,130,246,.1); color: #3b82f6; border-color: rgba(59,130,246,.25); }
+.stage-signed { background: var(--accent-soft); color: var(--accent); border-color: var(--accent-border); }
+.udp-action {
+  display: inline-block; padding: 2px 8px; border-radius: 999px;
+  font-size: .65rem; font-weight: 700; text-transform: uppercase;
+  background: var(--cyan-soft); color: var(--cyan); border: 1px solid rgba(6,182,212,.25);
+}
+.stage-refused { background: var(--red-soft); color: var(--red); border-color: var(--red-border); }
+
+/* ── Filter bar ── */
+.udp-filters {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.udp-fbtn {
+  padding: 5px 12px; border-radius: 999px; font-size: .7rem; font-weight: 700;
+  background: var(--surface2); color: var(--muted); border: 1px solid var(--border2);
+  cursor: pointer; font-family: inherit; transition: all .15s;
+}
+.udp-fbtn:hover { color: var(--text); border-color: var(--accent-border); }
+.udp-fbtn.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent-border); }
+.udp-fbtn-export {
+  margin-left: auto; background: rgba(239,68,68,.08); color: #ef4444;
+  border-color: rgba(239,68,68,.25);
+}
+.udp-fbtn-export:hover { background: #ef4444; color: #fff; border-color: #ef4444; }
+
 /* ── Responsive ── */
 @media (max-width: 1000px) {
   .stats { grid-template-columns: repeat(3, 1fr); }

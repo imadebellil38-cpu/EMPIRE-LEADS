@@ -101,4 +101,74 @@ function isEmailConfigured() {
   return !!transporter;
 }
 
-module.exports = { sendResetEmail, sendProspectEmail, isEmailConfigured };
+/**
+ * Send welcome email after registration
+ */
+async function sendWelcomeEmail(to, displayName) {
+  if (!transporter) { console.log('[EMAIL] SMTP non config — welcome email skip pour', to); return false; }
+  const name = displayName || to.split('@')[0];
+  try {
+    await transporter.sendMail({
+      from: SMTP_FROM,
+      to,
+      subject: 'Bienvenue sur Empire Leads ! 🚀',
+      html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a14;color:#e0e0f0;padding:32px;border-radius:12px">
+        <div style="text-align:center;margin-bottom:24px">
+          <div style="font-size:48px;margin-bottom:8px">👑</div>
+          <h1 style="font-size:24px;color:#22c55e;margin:0">Bienvenue ${name} !</h1>
+        </div>
+        <p style="font-size:15px;line-height:1.6;color:#c0c0d0">Ton compte Empire Leads est actif. Tu peux maintenant :</p>
+        <ul style="font-size:14px;line-height:2;color:#c0c0d0;padding-left:20px">
+          <li>Explorer le dashboard et le pipeline CRM</li>
+          <li>Decouvrir les fonctionnalites de prospection</li>
+          <li>Passer a un plan Pro pour debloquer les leads</li>
+        </ul>
+        <div style="text-align:center;margin:24px 0">
+          <a href="https://prospecthunter.vercel.app/app" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-weight:800;font-size:15px;text-decoration:none;border-radius:10px">Acceder a mon compte</a>
+        </div>
+        <p style="font-size:12px;color:#666;text-align:center;margin-top:24px">Empire Leads — Prospection B2B automatisee</p>
+      </div>`,
+    });
+    console.log('[EMAIL] Welcome email sent to', to);
+    return true;
+  } catch (err) { console.error('[EMAIL] Welcome email error:', err.message); return false; }
+}
+
+/**
+ * Send payment confirmation email after Stripe checkout
+ */
+async function sendPaymentConfirmEmail(to, planName, credits) {
+  if (!transporter) { console.log('[EMAIL] SMTP non config — payment email skip pour', to); return false; }
+  try {
+    await transporter.sendMail({
+      from: SMTP_FROM,
+      to,
+      subject: `Paiement confirme — Plan ${planName} active ! ✅`,
+      html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#0a0a14;color:#e0e0f0;padding:32px;border-radius:12px">
+        <div style="text-align:center;margin-bottom:24px">
+          <div style="font-size:48px;margin-bottom:8px">✅</div>
+          <h1 style="font-size:24px;color:#22c55e;margin:0">Paiement confirme !</h1>
+        </div>
+        <div style="background:#111128;border:1px solid #1f1f2c;border-radius:12px;padding:20px;margin-bottom:20px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+            <span style="color:#888">Plan</span>
+            <span style="font-weight:800;color:#22c55e;text-transform:capitalize">${planName}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between">
+            <span style="color:#888">Credits ajoutes</span>
+            <span style="font-weight:800">${credits.toLocaleString('fr-FR')} leads</span>
+          </div>
+        </div>
+        <p style="font-size:14px;color:#c0c0d0;line-height:1.6">Tes credits sont disponibles immediatement. Tu peux lancer tes premieres recherches de prospects.</p>
+        <div style="text-align:center;margin:24px 0">
+          <a href="https://prospecthunter.vercel.app/app" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;font-weight:800;font-size:15px;text-decoration:none;border-radius:10px">Lancer une recherche</a>
+        </div>
+        <p style="font-size:11px;color:#666;text-align:center;margin-top:24px">Ta facture Stripe est disponible dans ton espace client Stripe.<br>Empire Leads — Prospection B2B automatisee</p>
+      </div>`,
+    });
+    console.log('[EMAIL] Payment confirmation sent to', to);
+    return true;
+  } catch (err) { console.error('[EMAIL] Payment email error:', err.message); return false; }
+}
+
+module.exports = { sendResetEmail, sendProspectEmail, isEmailConfigured, sendWelcomeEmail, sendPaymentConfirmEmail };

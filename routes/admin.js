@@ -9,8 +9,85 @@ const router = Router();
 // All admin routes require admin
 router.use(requireAdmin);
 
-const VALID_PLANS = { free: 5, starter: 100, pro: 500, business: 2000, legend: 3000, trial: 20, enterprise: 500 };
-const PLAN_PRICES = { free: 0, starter: 40, pro: 100, business: 300, legend: 445, trial: 0, enterprise: 100 };
+const VALID_PLANS = { free: 0, pro: 1000, business: 3000, legend: 5000 };
+const PLAN_PRICES = { free: 0, trial: 0, pro: 349, business: 549, legend: 849 };
+
+// GET /api/admin/bi-overview — BI dashboard (MAU, conversion, acquisition sources)
+router.get('/bi-overview', async (req, res) => {
+  try {
+    const now = Date.now();
+    const d7 = new Date(now - 7 * 86400000).toISOString();
+    const d30 = new Date(now - 30 * 86400000).toISOString();
+    const d90 = new Date(now - 90 * 86400000).toISOString();
+
+    // Totaux
+    const totalUsers = (await db.get('SELECT COUNT(*) as c FROM users')).c || 0;
+    const totalPaid = (await db.get("SELECT COUNT(*) as c FROM users WHERE plan IN ('pro','business','legend','starter','enterprise')")).c || 0;
+    const totalFree = (await db.get("SELECT COUNT(*) as c FROM users WHERE plan IN ('free','trial') OR plan IS NULL")).c || 0;
+    const totalDisabled = (await db.get('SELECT COUNT(*) as c FROM users WHERE is_disabled = 1')).c || 0;
+
+    // Active users (basé sur last_activity_at)
+    const active7d = (await db.get('SELECT COUNT(*) as c FROM users WHERE last_activity_at >= ?', [d7])).c || 0;
+    const active30d = (await db.get('SELECT COUNT(*) as c FROM users WHERE last_activity_at >= ?', [d30])).c || 0;
+    const inactive30d = Math.max(0, totalUsers - active30d);
+
+    // Signups récents
+    const signups7d = (await db.get('SELECT COUNT(*) as c FROM users WHERE created_at >= ?', [d7])).c || 0;
+    const signups30d = (await db.get('SELECT COUNT(*) as c FROM users WHERE created_at >= ?', [d30])).c || 0;
+    const signups90d = (await db.get('SELECT COUNT(*) as c FROM users WHERE created_at >= ?', [d90])).c || 0;
+
+    // Breakdown signup source
+    const bySource = await db.all("SELECT COALESCE(signup_source, 'direct') as source, COUNT(*) as count FROM users GROUP BY COALESCE(signup_source, 'direct')");
+
+    // Breakdown par plan
+    const byPlan = await db.all("SELECT COALESCE(plan, 'free') as plan, COUNT(*) as count FROM users GROUP BY COALESCE(plan, 'free')");
+
+    // Conversion trial → paid (users créés il y a 30-60j qui ont un plan payant)
+    const trialCutoff = new Date(now - 60 * 86400000).toISOString();
+    const trialStart = new Date(now - 60 * 86400000).toISOString();
+    const trialEnd = new Date(now - 7 * 86400000).toISOString();
+    const eligibleTrials = (await db.get('SELECT COUNT(*) as c FROM users WHERE created_at BETWEEN ? AND ?', [trialStart, trialEnd])).c || 0;
+    const convertedTrials = (await db.get("SELECT COUNT(*) as c FROM users WHERE created_at BETWEEN ? AND ? AND plan IN ('pro','business','legend','starter','enterprise')", [trialStart, trialEnd])).c || 0;
+    const trialConvRate = eligibleTrials > 0 ? Math.round((convertedTrials / eligibleTrials) * 1000) / 10 : 0;
+
+    // MRR estimation (basique — sommation par plan)
+    const PLAN_PRICE = { free: 0, trial: 0, starter: 79, pro: 349, business: 549, legend: 849, enterprise: 1500 };
+    let mrr = 0;
+    for (const row of byPlan) {
+      mrr += (PLAN_PRICE[row.plan] || 0) * (row.count || 0);
+    }
+
+    // Activité produit 7d
+    const searches7d = (await db.get('SELECT COUNT(*) as c FROM searches WHERE created_at >= ?', [d7])).c || 0;
+    const prospects7d = (await db.get('SELECT COUNT(*) as c FROM prospects WHERE created_at >= ?', [d7])).c || 0;
+
+    // Top referrers (users qui ont amené le plus de filleuls)
+    const topReferrers = await db.all(`
+      SELECT ref.email, ref.display_name, COUNT(u.id) as invited_count
+      FROM users u
+      JOIN users ref ON u.referred_by = ref.id
+      GROUP BY ref.id, ref.email, ref.display_name
+      ORDER BY invited_count DESC
+      LIMIT 5
+    `);
+
+    res.json({
+      totals: { users: totalUsers, paid: totalPaid, free: totalFree, disabled: totalDisabled },
+      active: { d7: active7d, d30: active30d, inactive30d },
+      signups: { d7: signups7d, d30: signups30d, d90: signups90d },
+      bySource,
+      byPlan,
+      trialConversion: { eligible: eligibleTrials, converted: convertedTrials, rate_pct: trialConvRate },
+      mrr_estimate_eur: mrr,
+      arr_estimate_eur: mrr * 12,
+      activity7d: { searches: searches7d, prospects_added: prospects7d },
+      topReferrers,
+    });
+  } catch (err) {
+    console.error('[bi-overview]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // GET /api/admin/users — list all users
 router.get('/users', async (req, res) => {
@@ -303,6 +380,63 @@ router.put('/users/:id/extension-key', async (req, res) => {
     if (key === undefined) return res.status(400).json({ error: 'key requis' });
     await db.run('UPDATE users SET extension_key = $1 WHERE id = $2', [String(key).trim(), req.params.id]);
     res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/admin/users/:id/prospects — voir tous les prospects d'un user
+router.get('/users/:id/prospects', async (req, res) => {
+  const userId = parseInt(req.params.id);
+  if (!userId) return res.status(400).json({ error: 'ID invalide' });
+  try {
+    const prospects = await db.all(`
+      SELECT id, name, phone, niche, city, pipeline_stage, status, rappel, meeting_date, website_url, created_at
+      FROM prospects WHERE user_id = ? ORDER BY created_at DESC
+    `, [userId]);
+    res.json(prospects);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/admin/users/:id/searches — voir toutes les recherches d'un user
+router.get('/users/:id/searches', async (req, res) => {
+  const userId = parseInt(req.params.id);
+  if (!userId) return res.status(400).json({ error: 'ID invalide' });
+  try {
+    const searches = await db.all(`
+      SELECT id, niche, country, city, results_count, created_at
+      FROM searches WHERE user_id = ? ORDER BY created_at DESC LIMIT 200
+    `, [userId]);
+    res.json(searches);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/admin/users/:id/activity — voir toute l'activité d'un user
+router.get('/users/:id/activity', async (req, res) => {
+  const userId = parseInt(req.params.id);
+  if (!userId) return res.status(400).json({ error: 'ID invalide' });
+  try {
+    const activity = await db.all(`
+      SELECT id, action, details, created_at
+      FROM activity_log WHERE user_id = ? ORDER BY created_at DESC LIMIT 200
+    `, [userId]);
+    res.json(activity);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/admin/bulk-reset — reset all non-admin users to free plan, 0 credits
+router.post('/bulk-reset', async (req, res) => {
+  try {
+    const result = await db.run(
+      `UPDATE users SET plan = 'free', credits = 0 WHERE is_admin = 0 OR is_admin IS NULL`
+    );
+    res.json({ ok: true, updated: result.changes });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

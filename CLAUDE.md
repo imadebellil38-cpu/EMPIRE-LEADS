@@ -2,6 +2,29 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 🚨 Debugging — Checklist PRIORITAIRE (toujours faire ça en premier)
+
+### Si quelque chose ne marche pas sur Vercel :
+1. **Tester le backend directement** : `curl -s -X POST https://prospecthunter.vercel.app/api/login -H "Content-Type: application/json" -d '{"email":"...","password":"..."}'`
+2. **Vérifier les headers HTTP** : `curl -s -D - https://prospecthunter.vercel.app/login | grep -iE "content-security|x-frame|error"` → Le CSP peut bloquer TOUT le JS silencieusement
+3. **Vérifier les variables d'env Vercel** : `npx vercel env ls` → Sans DATABASE_URL ou JWT_SECRET, le serveur crash immédiatement (404)
+4. **Vérifier que `module.exports = app`** est bien dans server.js — Vercel serverless en a besoin
+5. **SSL Supabase** : db.js doit avoir `rejectUnauthorized: false` pour les connexions non-localhost
+
+### CSP (Content Security Policy) — PIÈGE FRÉQUENT
+Le helmet middleware bloque le JS inline par défaut. La config dans server.js DOIT avoir :
+```js
+scriptSrc: ["'self'", "'unsafe-inline'"],
+scriptSrcAttr: ["'unsafe-inline'"],
+```
+Sans ça, tous les `onclick="..."` et `<script>` inline sont silencieusement bloqués → boutons qui ne font rien.
+
+### Déploiement
+```bash
+cd C:\i1\exemple-fix
+npx vercel --prod --yes   # toujours depuis ce dossier !
+```
+
 ## Présentation
 
 **Empire Leads** — SaaS de prospection commerciale B2B.

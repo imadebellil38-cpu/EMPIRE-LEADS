@@ -55,12 +55,13 @@ app.use((req, res, next) => {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://accounts.google.com"],
         scriptSrcAttr: ["'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://accounts.google.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        frameSrc: ["'self'", "https://accounts.google.com"],
         imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'", "https://api.anthropic.com", "https://maps.googleapis.com"],
+        connectSrc: ["'self'", "https://api.anthropic.com", "https://maps.googleapis.com", "https://accounts.google.com", "https://oauth2.googleapis.com"],
       },
     },
     crossOriginEmbedderPolicy: false,
@@ -77,6 +78,9 @@ app.use(cors({
 
 // ── Compression (gzip) ──
 app.use(compression());
+
+// ── Stripe Webhook (MUST be before express.json — needs raw body for signature verification) ──
+app.use('/api/stripe/webhook', require('./routes/stripeWebhook'));
 
 // ── Body parser ──
 app.use(express.json({ limit: '5mb' }));
@@ -128,7 +132,32 @@ app.get('/app', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, 'public', 'login.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 app.get('/pricing', (req, res) => res.sendFile(path.join(__dirname, 'public', 'pricing.html')));
-app.get('/instagram-finder', (req, res) => res.sendFile(path.join(__dirname, 'public', 'instagram-finder.html')));
+app.get('/instagram-finder', (req, res) => {
+  const fs = require('fs');
+  try {
+    const html = fs.readFileSync(path.join(__dirname, 'public', 'instagram-finder.html'), 'utf8');
+    const jsCode = fs.readFileSync(path.join(__dirname, 'public', 'ig-finder.js'), 'utf8');
+    const bookmarklet = 'javascript:' + encodeURIComponent(jsCode);
+    // Replace the placeholder token with the bookmarklet URL. Use JSON.stringify to safely escape quotes.
+    res.type('html').send(html.replace('"__IG_FINDER_BOOKMARKLET__"', JSON.stringify(bookmarklet)));
+  } catch (e) {
+    res.sendFile(path.join(__dirname, 'public', 'instagram-finder.html'));
+  }
+});
+app.get('/leads-chauds', (req, res) => res.sendFile(path.join(__dirname, 'public', 'leads-chauds.html')));
+app.get('/formation-thomas', (req, res) => res.sendFile(path.join(__dirname, 'public', 'formation-thomas.html')));
+app.get('/remi-innovation', (req, res) => res.sendFile(path.join(__dirname, 'public', 'remi-innovation.html')));
+app.get('/lbd', (req, res) => res.sendFile(path.join(__dirname, 'public', 'lbd.html')));
+app.get('/luxurybrands', (req, res) => res.sendFile(path.join(__dirname, 'public', 'lbd.html')));
+app.get('/lbd/app', (req, res) => res.sendFile(path.join(__dirname, 'public', 'lbd-app.html')));
+app.get('/lbd-app', (req, res) => res.sendFile(path.join(__dirname, 'public', 'lbd-app.html')));
+app.get('/comprendre', (req, res) => res.sendFile(path.join(__dirname, 'public', 'comprendre.html')));
+// ─── SEO landing pages ───
+app.get('/logiciel-prospection-b2b', (req, res) => res.sendFile(path.join(__dirname, 'public', 'logiciel-prospection-b2b.html')));
+app.get('/trouver-entreprises-sans-site-web', (req, res) => res.sendFile(path.join(__dirname, 'public', 'trouver-entreprises-sans-site-web.html')));
+app.get('/agences-web-prospection', (req, res) => res.sendFile(path.join(__dirname, 'public', 'agences-web-prospection.html')));
+app.get('/freelances-prospection-commerciale', (req, res) => res.sendFile(path.join(__dirname, 'public', 'freelances-prospection-commerciale.html')));
+app.get('/vs-cognism', (req, res) => res.sendFile(path.join(__dirname, 'public', 'vs-cognism.html')));
 
 // Verify extension key (used by extension-locked.html)
 app.post('/api/verify-extension-key', requireAuth, async (req, res) => {
@@ -212,6 +241,9 @@ app.use('/api/admin', requireAuth, requireAdminFromDB, require('./routes/admin')
 app.use('/api/subscription', requireAuth, require('./routes/subscription'));
 app.use('/api/referral', requireAuth, require('./routes/referral'));
 app.use('/api/quotes', require('./routes/quotes')); // sign/* are public, others need auth inline
+app.use('/api/stripe', requireAuth, require('./routes/stripe').router);
+app.use('/api/scrape', requireAuth, require('./routes/scraper'));
+// webhook already mounted above (before JSON parser)
 
 // ── Sign page (public) ──
 app.get('/sign/:token', (req, res) => res.sendFile(path.join(__dirname, 'public', 'sign.html')));

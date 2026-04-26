@@ -1,15 +1,28 @@
 'use strict';
 const express = require('express');
 const db = require('../db');
+const { sendPaymentConfirmEmail } = require('../services/email');
 
 const router = express.Router();
 
-const PLAN_CREDITS = { free: 5, pro: 100, enterprise: 500 };
+const PLAN_CREDITS = { free: 5, starter: 200, pro: 1000, business: 3000, legend: 5000 };
 
 function getPlanFromPriceId(priceId) {
+  if (priceId === process.env.STRIPE_PRICE_STARTER) return 'starter';
   if (priceId === process.env.STRIPE_PRICE_PRO) return 'pro';
-  if (priceId === process.env.STRIPE_PRICE_ENTERPRISE) return 'enterprise';
+  if (priceId === process.env.STRIPE_PRICE_BUSINESS) return 'business';
+  if (priceId === process.env.STRIPE_PRICE_LEGEND) return 'legend';
   return null;
+}
+
+// Mark user as converted (free/trial → paid) the FIRST time they upgrade
+async function markTrialConverted(userId) {
+  try {
+    await db.run(
+      'UPDATE users SET trial_converted_at = ? WHERE id = ? AND trial_converted_at IS NULL',
+      [new Date().toISOString(), userId]
+    );
+  } catch (_) {}
 }
 
 router.post('/', express.raw({ type: 'application/json' }), async (req, res) => {
@@ -42,9 +55,20 @@ router.post('/', express.raw({ type: 'application/json' }), async (req, res) => 
         const userId = parseInt(session.metadata?.user_id);
         const pack = session.metadata?.pack;
         const credits = parseInt(session.metadata?.credits);
-        if (userId && pack && credits > 0) {
-          await db.run('UPDATE users SET credits = credits + ? WHERE id = ?', [credits, userId]);
-          console.log(`[STRIPE] User ${userId} bought pack "${pack}" (+${credits} credits)`);
+        if (userId && pack) {
+          // Mettre à jour le plan ET les crédits en une fois (avant on faisait que les crédits)
+          if (PLAN_CREDITS[pack] !== undefined) {
+            await db.run('UPDATE users SET plan = ?, credits = ? WHERE id = ?',
+              [pack, PLAN_CREDITS[pack], userId]);
+          } else if (credits > 0) {
+            await db.run('UPDATE users SET credits = credits + ? WHERE id = ?', [credits, userId]);
+          }
+          // Tag trial→paid conversion pour BI
+          await markTrialConverted(userId);
+          console.log(`[STRIPE] User ${userId} bought pack "${pack}" (plan=${pack}, credits=${PLAN_CREDITS[pack] || credits})`);
+          // Send payment confirmation email (non-blocking)
+          const user = await db.get('SELECT email FROM users WHERE id = ?', [userId]);
+          if (user) sendPaymentConfirmEmail(user.email, pack, PLAN_CREDITS[pack] || credits).catch(() => {});
         }
         break;
       }
@@ -52,13 +76,17 @@ router.post('/', express.raw({ type: 'application/json' }), async (req, res) => 
       case 'customer.subscription.updated': {
         const sub = event.data.object;
         const customerId = sub.customer;
-        const user = await db.get('SELECT id FROM users WHERE stripe_customer_id = ?', [customerId]);
+        const user = await db.get('SELECT id, plan FROM users WHERE stripe_customer_id = ?', [customerId]);
         if (user) {
           const priceId = sub.items?.data?.[0]?.price?.id;
           const plan = getPlanFromPriceId(priceId);
           if (plan) {
             await db.run('UPDATE users SET plan = ?, credits = ?, stripe_subscription_id = ? WHERE id = ?',
               [plan, PLAN_CREDITS[plan], sub.id, user.id]);
+            // Si le user passait de free/trial à un plan payant, c'est une conversion
+            if (user.plan === 'free' || user.plan === 'trial' || !user.plan) {
+              await markTrialConverted(user.id);
+            }
             console.log(`[STRIPE] Subscription updated: user ${user.id} → ${plan}`);
           }
         }

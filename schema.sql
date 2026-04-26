@@ -111,6 +111,16 @@ CREATE TABLE IF NOT EXISTS quotes (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS deleted_prospects (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  phone TEXT,
+  name_key TEXT,
+  addr_key TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_deleted_prospects_user ON deleted_prospects(user_id);
 CREATE INDEX IF NOT EXISTS idx_prospects_user ON prospects(user_id);
 CREATE INDEX IF NOT EXISTS idx_prospects_phone ON prospects(user_id, phone);
 CREATE INDEX IF NOT EXISTS idx_searches_user ON searches(user_id);
